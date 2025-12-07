@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../../data/models/gacha_item.dart';
+import '../../data/database/database.dart';
 import '../widgets/gacha_card.dart';
 import '../widgets/magic_circle_dialog.dart';
 import 'gacha_studio_screen.dart';
@@ -26,13 +27,23 @@ class _GachaHomeScreenState extends State<GachaHomeScreen> {
 
   void _addDemoItems() {
     // 本来は画像ピッカーで追加する
+    final now = DateTime.now();
     for (int i = 0; i < 5; i++) {
+      final isSSR = math.Random().nextBool();
       _boxItems.add(
         GachaItem(
-          id: DateTime.now().toString() + i.toString(),
-          imageUrl: 'https://picsum.photos/seed/${math.Random().nextInt(1000)}/400/600',
+          id: 0, // 一時的なID（実際のDB保存時は自動生成）
+          imagePath: 'https://picsum.photos/seed/${math.Random().nextInt(1000)}/400/600',
           title: '推しの日常ショット #$i',
-          isSSR: math.Random().nextBool(), // ランダムでSSR化
+          rarity: isSSR ? Rarity.ssr : Rarity.n,
+          isUnlocked: false,
+          strBonus: 0,
+          intBonus: 0,
+          luckBonus: 0,
+          chaBonus: 0,
+          bondLevel: 0,
+          createdAt: now,
+          unlockedAt: null,
         ),
       );
     }
@@ -83,7 +94,7 @@ class _GachaHomeScreenState extends State<GachaHomeScreen> {
             // リスト内の該当アイテムをアンロック状態にする
             final index = _boxItems.indexWhere((i) => i.id == winner.id);
             if (index != -1) {
-              _boxItems[index].isUnlocked = true;
+              _boxItems[index] = _boxItems[index].copyWithUnlocked(isUnlocked: true);
             }
           });
         },
@@ -191,4 +202,3 @@ class _GachaHomeScreenState extends State<GachaHomeScreen> {
     );
   }
 }
-

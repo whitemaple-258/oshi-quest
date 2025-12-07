@@ -65,8 +65,11 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.all(16),
-      child: SizedBox(
-        height: 500,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+          maxWidth: 400,
+        ),
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -105,9 +108,10 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
             if (_showResult)
               ScaleTransition(
                 scale: CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     const Text(
                       "UNSEALED!",
                       style: TextStyle(
@@ -142,7 +146,45 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(widget.item.imageUrl, fit: BoxFit.cover),
+                        child: Image.network(
+                          widget.item.imageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            // エラー時はプレースホルダーを表示
+                            return Container(
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey,
+                                      size: 64,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      '画像を読み込めませんでした',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -155,7 +197,8 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
                       ),
                       child: const Text("閉じる"),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
           ],
@@ -164,4 +207,5 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
     );
   }
 }
+
 

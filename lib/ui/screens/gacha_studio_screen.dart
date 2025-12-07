@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../../data/models/gacha_item.dart';
+import '../../data/database/database.dart';
 
 class GachaStudioScreen extends StatelessWidget {
   final List<GachaItem> boxItems;
   final Function(List<GachaItem>) onItemsUpdated;
 
-  const GachaStudioScreen({
-    super.key,
-    required this.boxItems,
-    required this.onItemsUpdated,
-  });
+  const GachaStudioScreen({super.key, required this.boxItems, required this.onItemsUpdated});
 
   void _addDemoItems(BuildContext context) {
     // 本来は画像ピッカーで追加する
     final newItems = <GachaItem>[];
+    final now = DateTime.now();
     for (int i = 0; i < 5; i++) {
+      final isSSR = math.Random().nextBool();
       newItems.add(
         GachaItem(
-          id: DateTime.now().toString() + i.toString(),
-          imageUrl: 'https://picsum.photos/seed/${math.Random().nextInt(1000)}/400/600',
+          id: 0, // 一時的なID（実際のDB保存時は自動生成）
+          imagePath: 'https://picsum.photos/seed/${math.Random().nextInt(1000)}/400/600',
           title: '推しの日常ショット #$i',
-          isSSR: math.Random().nextBool(), // ランダムでSSR化
+          rarity: isSSR ? Rarity.ssr : Rarity.n,
+          isUnlocked: false,
+          strBonus: 0,
+          intBonus: 0,
+          luckBonus: 0,
+          chaBonus: 0,
+          bondLevel: 0,
+          createdAt: now,
+          unlockedAt: null,
         ),
       );
     }
     onItemsUpdated([...boxItems, ...newItems]);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('ダミー画像を追加しました')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ダミー画像を追加しました')));
   }
 
   @override
@@ -46,14 +51,8 @@ class GachaStudioScreen extends StatelessWidget {
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "My Sealed Box",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "登録済み画像: 封印中...",
-                style: TextStyle(fontSize: 12, color: Colors.white70),
-              ),
+              Text("My Sealed Box", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("登録済み画像: 封印中...", style: TextStyle(fontSize: 12, color: Colors.white70)),
             ],
           ),
           const Spacer(),
@@ -68,4 +67,3 @@ class GachaStudioScreen extends StatelessWidget {
     );
   }
 }
-

@@ -43,3 +43,26 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android related
+**/android/local.properties
+**/android/key.properties
+**/android/keystore.jks
+**/android/app/google-services.json
+
+# iOS related
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GoogleService-Info.plist
+
+#MacOS related
+.DS_Store
+
+# ----------------------------------------
+# SECRETS & ENVIRONMENT VARIABLES (CRITICAL)
+# ----------------------------------------
+# 具体的な値が入ったファイルは絶対にコミットしない
+.env        <-- ここに入っています
+.env.*
+!.env.template
+!.env.example

@@ -1,0 +1,6183 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'app_database.dart';
+
+// ignore_for_file: type=lint
+class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlayersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _levelMeta = const VerificationMeta('level');
+  @override
+  late final GeneratedColumn<int> level = GeneratedColumn<int>(
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _experienceMeta = const VerificationMeta(
+    'experience',
+  );
+  @override
+  late final GeneratedColumn<int> experience = GeneratedColumn<int>(
+    'experience',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _strMeta = const VerificationMeta('str');
+  @override
+  late final GeneratedColumn<int> str = GeneratedColumn<int>(
+    'str',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _intStatMeta = const VerificationMeta(
+    'intStat',
+  );
+  @override
+  late final GeneratedColumn<int> intStat = GeneratedColumn<int>(
+    'int',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _luckMeta = const VerificationMeta('luck');
+  @override
+  late final GeneratedColumn<int> luck = GeneratedColumn<int>(
+    'luck',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _chaMeta = const VerificationMeta('cha');
+  @override
+  late final GeneratedColumn<int> cha = GeneratedColumn<int>(
+    'cha',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _willGemsMeta = const VerificationMeta(
+    'willGems',
+  );
+  @override
+  late final GeneratedColumn<int> willGems = GeneratedColumn<int>(
+    'will_gems',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(500),
+  );
+  static const VerificationMeta _currentDebuffMeta = const VerificationMeta(
+    'currentDebuff',
+  );
+  @override
+  late final GeneratedColumn<String> currentDebuff = GeneratedColumn<String>(
+    'current_debuff',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _debuffExpiresAtMeta = const VerificationMeta(
+    'debuffExpiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> debuffExpiresAt =
+      GeneratedColumn<DateTime>(
+        'debuff_expires_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    level,
+    experience,
+    str,
+    intStat,
+    luck,
+    cha,
+    willGems,
+    currentDebuff,
+    debuffExpiresAt,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'players';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Player> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('level')) {
+      context.handle(
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
+    }
+    if (data.containsKey('experience')) {
+      context.handle(
+        _experienceMeta,
+        experience.isAcceptableOrUnknown(data['experience']!, _experienceMeta),
+      );
+    }
+    if (data.containsKey('str')) {
+      context.handle(
+        _strMeta,
+        str.isAcceptableOrUnknown(data['str']!, _strMeta),
+      );
+    }
+    if (data.containsKey('int')) {
+      context.handle(
+        _intStatMeta,
+        intStat.isAcceptableOrUnknown(data['int']!, _intStatMeta),
+      );
+    }
+    if (data.containsKey('luck')) {
+      context.handle(
+        _luckMeta,
+        luck.isAcceptableOrUnknown(data['luck']!, _luckMeta),
+      );
+    }
+    if (data.containsKey('cha')) {
+      context.handle(
+        _chaMeta,
+        cha.isAcceptableOrUnknown(data['cha']!, _chaMeta),
+      );
+    }
+    if (data.containsKey('will_gems')) {
+      context.handle(
+        _willGemsMeta,
+        willGems.isAcceptableOrUnknown(data['will_gems']!, _willGemsMeta),
+      );
+    }
+    if (data.containsKey('current_debuff')) {
+      context.handle(
+        _currentDebuffMeta,
+        currentDebuff.isAcceptableOrUnknown(
+          data['current_debuff']!,
+          _currentDebuffMeta,
+        ),
+      );
+    }
+    if (data.containsKey('debuff_expires_at')) {
+      context.handle(
+        _debuffExpiresAtMeta,
+        debuffExpiresAt.isAcceptableOrUnknown(
+          data['debuff_expires_at']!,
+          _debuffExpiresAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Player map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Player(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}level'],
+      )!,
+      experience: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}experience'],
+      )!,
+      str: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}str'],
+      )!,
+      intStat: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}int'],
+      )!,
+      luck: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}luck'],
+      )!,
+      cha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cha'],
+      )!,
+      willGems: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}will_gems'],
+      )!,
+      currentDebuff: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}current_debuff'],
+      ),
+      debuffExpiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}debuff_expires_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PlayersTable createAlias(String alias) {
+    return $PlayersTable(attachedDatabase, alias);
+  }
+}
+
+class Player extends DataClass implements Insertable<Player> {
+  final int id;
+  final int level;
+  final int experience;
+  final int str;
+  final int intStat;
+  final int luck;
+  final int cha;
+  final int willGems;
+  final String? currentDebuff;
+  final DateTime? debuffExpiresAt;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Player({
+    required this.id,
+    required this.level,
+    required this.experience,
+    required this.str,
+    required this.intStat,
+    required this.luck,
+    required this.cha,
+    required this.willGems,
+    this.currentDebuff,
+    this.debuffExpiresAt,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['level'] = Variable<int>(level);
+    map['experience'] = Variable<int>(experience);
+    map['str'] = Variable<int>(str);
+    map['int'] = Variable<int>(intStat);
+    map['luck'] = Variable<int>(luck);
+    map['cha'] = Variable<int>(cha);
+    map['will_gems'] = Variable<int>(willGems);
+    if (!nullToAbsent || currentDebuff != null) {
+      map['current_debuff'] = Variable<String>(currentDebuff);
+    }
+    if (!nullToAbsent || debuffExpiresAt != null) {
+      map['debuff_expires_at'] = Variable<DateTime>(debuffExpiresAt);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PlayersCompanion toCompanion(bool nullToAbsent) {
+    return PlayersCompanion(
+      id: Value(id),
+      level: Value(level),
+      experience: Value(experience),
+      str: Value(str),
+      intStat: Value(intStat),
+      luck: Value(luck),
+      cha: Value(cha),
+      willGems: Value(willGems),
+      currentDebuff: currentDebuff == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currentDebuff),
+      debuffExpiresAt: debuffExpiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(debuffExpiresAt),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Player.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Player(
+      id: serializer.fromJson<int>(json['id']),
+      level: serializer.fromJson<int>(json['level']),
+      experience: serializer.fromJson<int>(json['experience']),
+      str: serializer.fromJson<int>(json['str']),
+      intStat: serializer.fromJson<int>(json['intStat']),
+      luck: serializer.fromJson<int>(json['luck']),
+      cha: serializer.fromJson<int>(json['cha']),
+      willGems: serializer.fromJson<int>(json['willGems']),
+      currentDebuff: serializer.fromJson<String?>(json['currentDebuff']),
+      debuffExpiresAt: serializer.fromJson<DateTime?>(json['debuffExpiresAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'level': serializer.toJson<int>(level),
+      'experience': serializer.toJson<int>(experience),
+      'str': serializer.toJson<int>(str),
+      'intStat': serializer.toJson<int>(intStat),
+      'luck': serializer.toJson<int>(luck),
+      'cha': serializer.toJson<int>(cha),
+      'willGems': serializer.toJson<int>(willGems),
+      'currentDebuff': serializer.toJson<String?>(currentDebuff),
+      'debuffExpiresAt': serializer.toJson<DateTime?>(debuffExpiresAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Player copyWith({
+    int? id,
+    int? level,
+    int? experience,
+    int? str,
+    int? intStat,
+    int? luck,
+    int? cha,
+    int? willGems,
+    Value<String?> currentDebuff = const Value.absent(),
+    Value<DateTime?> debuffExpiresAt = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => Player(
+    id: id ?? this.id,
+    level: level ?? this.level,
+    experience: experience ?? this.experience,
+    str: str ?? this.str,
+    intStat: intStat ?? this.intStat,
+    luck: luck ?? this.luck,
+    cha: cha ?? this.cha,
+    willGems: willGems ?? this.willGems,
+    currentDebuff: currentDebuff.present
+        ? currentDebuff.value
+        : this.currentDebuff,
+    debuffExpiresAt: debuffExpiresAt.present
+        ? debuffExpiresAt.value
+        : this.debuffExpiresAt,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Player copyWithCompanion(PlayersCompanion data) {
+    return Player(
+      id: data.id.present ? data.id.value : this.id,
+      level: data.level.present ? data.level.value : this.level,
+      experience: data.experience.present
+          ? data.experience.value
+          : this.experience,
+      str: data.str.present ? data.str.value : this.str,
+      intStat: data.intStat.present ? data.intStat.value : this.intStat,
+      luck: data.luck.present ? data.luck.value : this.luck,
+      cha: data.cha.present ? data.cha.value : this.cha,
+      willGems: data.willGems.present ? data.willGems.value : this.willGems,
+      currentDebuff: data.currentDebuff.present
+          ? data.currentDebuff.value
+          : this.currentDebuff,
+      debuffExpiresAt: data.debuffExpiresAt.present
+          ? data.debuffExpiresAt.value
+          : this.debuffExpiresAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Player(')
+          ..write('id: $id, ')
+          ..write('level: $level, ')
+          ..write('experience: $experience, ')
+          ..write('str: $str, ')
+          ..write('intStat: $intStat, ')
+          ..write('luck: $luck, ')
+          ..write('cha: $cha, ')
+          ..write('willGems: $willGems, ')
+          ..write('currentDebuff: $currentDebuff, ')
+          ..write('debuffExpiresAt: $debuffExpiresAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    level,
+    experience,
+    str,
+    intStat,
+    luck,
+    cha,
+    willGems,
+    currentDebuff,
+    debuffExpiresAt,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Player &&
+          other.id == this.id &&
+          other.level == this.level &&
+          other.experience == this.experience &&
+          other.str == this.str &&
+          other.intStat == this.intStat &&
+          other.luck == this.luck &&
+          other.cha == this.cha &&
+          other.willGems == this.willGems &&
+          other.currentDebuff == this.currentDebuff &&
+          other.debuffExpiresAt == this.debuffExpiresAt &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PlayersCompanion extends UpdateCompanion<Player> {
+  final Value<int> id;
+  final Value<int> level;
+  final Value<int> experience;
+  final Value<int> str;
+  final Value<int> intStat;
+  final Value<int> luck;
+  final Value<int> cha;
+  final Value<int> willGems;
+  final Value<String?> currentDebuff;
+  final Value<DateTime?> debuffExpiresAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const PlayersCompanion({
+    this.id = const Value.absent(),
+    this.level = const Value.absent(),
+    this.experience = const Value.absent(),
+    this.str = const Value.absent(),
+    this.intStat = const Value.absent(),
+    this.luck = const Value.absent(),
+    this.cha = const Value.absent(),
+    this.willGems = const Value.absent(),
+    this.currentDebuff = const Value.absent(),
+    this.debuffExpiresAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  PlayersCompanion.insert({
+    this.id = const Value.absent(),
+    this.level = const Value.absent(),
+    this.experience = const Value.absent(),
+    this.str = const Value.absent(),
+    this.intStat = const Value.absent(),
+    this.luck = const Value.absent(),
+    this.cha = const Value.absent(),
+    this.willGems = const Value.absent(),
+    this.currentDebuff = const Value.absent(),
+    this.debuffExpiresAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  static Insertable<Player> custom({
+    Expression<int>? id,
+    Expression<int>? level,
+    Expression<int>? experience,
+    Expression<int>? str,
+    Expression<int>? intStat,
+    Expression<int>? luck,
+    Expression<int>? cha,
+    Expression<int>? willGems,
+    Expression<String>? currentDebuff,
+    Expression<DateTime>? debuffExpiresAt,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (level != null) 'level': level,
+      if (experience != null) 'experience': experience,
+      if (str != null) 'str': str,
+      if (intStat != null) 'int': intStat,
+      if (luck != null) 'luck': luck,
+      if (cha != null) 'cha': cha,
+      if (willGems != null) 'will_gems': willGems,
+      if (currentDebuff != null) 'current_debuff': currentDebuff,
+      if (debuffExpiresAt != null) 'debuff_expires_at': debuffExpiresAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  PlayersCompanion copyWith({
+    Value<int>? id,
+    Value<int>? level,
+    Value<int>? experience,
+    Value<int>? str,
+    Value<int>? intStat,
+    Value<int>? luck,
+    Value<int>? cha,
+    Value<int>? willGems,
+    Value<String?>? currentDebuff,
+    Value<DateTime?>? debuffExpiresAt,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return PlayersCompanion(
+      id: id ?? this.id,
+      level: level ?? this.level,
+      experience: experience ?? this.experience,
+      str: str ?? this.str,
+      intStat: intStat ?? this.intStat,
+      luck: luck ?? this.luck,
+      cha: cha ?? this.cha,
+      willGems: willGems ?? this.willGems,
+      currentDebuff: currentDebuff ?? this.currentDebuff,
+      debuffExpiresAt: debuffExpiresAt ?? this.debuffExpiresAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (level.present) {
+      map['level'] = Variable<int>(level.value);
+    }
+    if (experience.present) {
+      map['experience'] = Variable<int>(experience.value);
+    }
+    if (str.present) {
+      map['str'] = Variable<int>(str.value);
+    }
+    if (intStat.present) {
+      map['int'] = Variable<int>(intStat.value);
+    }
+    if (luck.present) {
+      map['luck'] = Variable<int>(luck.value);
+    }
+    if (cha.present) {
+      map['cha'] = Variable<int>(cha.value);
+    }
+    if (willGems.present) {
+      map['will_gems'] = Variable<int>(willGems.value);
+    }
+    if (currentDebuff.present) {
+      map['current_debuff'] = Variable<String>(currentDebuff.value);
+    }
+    if (debuffExpiresAt.present) {
+      map['debuff_expires_at'] = Variable<DateTime>(debuffExpiresAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlayersCompanion(')
+          ..write('id: $id, ')
+          ..write('level: $level, ')
+          ..write('experience: $experience, ')
+          ..write('str: $str, ')
+          ..write('intStat: $intStat, ')
+          ..write('luck: $luck, ')
+          ..write('cha: $cha, ')
+          ..write('willGems: $willGems, ')
+          ..write('currentDebuff: $currentDebuff, ')
+          ..write('debuffExpiresAt: $debuffExpiresAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $GachaItemsTable extends GachaItems
+    with TableInfo<$GachaItemsTable, GachaItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GachaItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rarityMeta = const VerificationMeta('rarity');
+  @override
+  late final GeneratedColumn<String> rarity = GeneratedColumn<String>(
+    'rarity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('N'),
+  );
+  static const VerificationMeta _isUnlockedMeta = const VerificationMeta(
+    'isUnlocked',
+  );
+  @override
+  late final GeneratedColumn<bool> isUnlocked = GeneratedColumn<bool>(
+    'is_unlocked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_unlocked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _strBonusMeta = const VerificationMeta(
+    'strBonus',
+  );
+  @override
+  late final GeneratedColumn<int> strBonus = GeneratedColumn<int>(
+    'str_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _intBonusMeta = const VerificationMeta(
+    'intBonus',
+  );
+  @override
+  late final GeneratedColumn<int> intBonus = GeneratedColumn<int>(
+    'int_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _luckBonusMeta = const VerificationMeta(
+    'luckBonus',
+  );
+  @override
+  late final GeneratedColumn<int> luckBonus = GeneratedColumn<int>(
+    'luck_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _chaBonusMeta = const VerificationMeta(
+    'chaBonus',
+  );
+  @override
+  late final GeneratedColumn<int> chaBonus = GeneratedColumn<int>(
+    'cha_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _bondLevelMeta = const VerificationMeta(
+    'bondLevel',
+  );
+  @override
+  late final GeneratedColumn<int> bondLevel = GeneratedColumn<int>(
+    'bond_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _unlockedAtMeta = const VerificationMeta(
+    'unlockedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> unlockedAt = GeneratedColumn<DateTime>(
+    'unlocked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    imagePath,
+    title,
+    rarity,
+    isUnlocked,
+    strBonus,
+    intBonus,
+    luckBonus,
+    chaBonus,
+    bondLevel,
+    createdAt,
+    unlockedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'gacha_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GachaItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imagePathMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('rarity')) {
+      context.handle(
+        _rarityMeta,
+        rarity.isAcceptableOrUnknown(data['rarity']!, _rarityMeta),
+      );
+    }
+    if (data.containsKey('is_unlocked')) {
+      context.handle(
+        _isUnlockedMeta,
+        isUnlocked.isAcceptableOrUnknown(data['is_unlocked']!, _isUnlockedMeta),
+      );
+    }
+    if (data.containsKey('str_bonus')) {
+      context.handle(
+        _strBonusMeta,
+        strBonus.isAcceptableOrUnknown(data['str_bonus']!, _strBonusMeta),
+      );
+    }
+    if (data.containsKey('int_bonus')) {
+      context.handle(
+        _intBonusMeta,
+        intBonus.isAcceptableOrUnknown(data['int_bonus']!, _intBonusMeta),
+      );
+    }
+    if (data.containsKey('luck_bonus')) {
+      context.handle(
+        _luckBonusMeta,
+        luckBonus.isAcceptableOrUnknown(data['luck_bonus']!, _luckBonusMeta),
+      );
+    }
+    if (data.containsKey('cha_bonus')) {
+      context.handle(
+        _chaBonusMeta,
+        chaBonus.isAcceptableOrUnknown(data['cha_bonus']!, _chaBonusMeta),
+      );
+    }
+    if (data.containsKey('bond_level')) {
+      context.handle(
+        _bondLevelMeta,
+        bondLevel.isAcceptableOrUnknown(data['bond_level']!, _bondLevelMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('unlocked_at')) {
+      context.handle(
+        _unlockedAtMeta,
+        unlockedAt.isAcceptableOrUnknown(data['unlocked_at']!, _unlockedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  GachaItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GachaItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      rarity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rarity'],
+      )!,
+      isUnlocked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_unlocked'],
+      )!,
+      strBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}str_bonus'],
+      )!,
+      intBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}int_bonus'],
+      )!,
+      luckBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}luck_bonus'],
+      )!,
+      chaBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cha_bonus'],
+      )!,
+      bondLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}bond_level'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      unlockedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}unlocked_at'],
+      ),
+    );
+  }
+
+  @override
+  $GachaItemsTable createAlias(String alias) {
+    return $GachaItemsTable(attachedDatabase, alias);
+  }
+}
+
+class GachaItem extends DataClass implements Insertable<GachaItem> {
+  final int id;
+  final String imagePath;
+  final String title;
+  final String rarity;
+  final bool isUnlocked;
+  final int strBonus;
+  final int intBonus;
+  final int luckBonus;
+  final int chaBonus;
+  final int bondLevel;
+  final DateTime createdAt;
+  final DateTime? unlockedAt;
+  const GachaItem({
+    required this.id,
+    required this.imagePath,
+    required this.title,
+    required this.rarity,
+    required this.isUnlocked,
+    required this.strBonus,
+    required this.intBonus,
+    required this.luckBonus,
+    required this.chaBonus,
+    required this.bondLevel,
+    required this.createdAt,
+    this.unlockedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['image_path'] = Variable<String>(imagePath);
+    map['title'] = Variable<String>(title);
+    map['rarity'] = Variable<String>(rarity);
+    map['is_unlocked'] = Variable<bool>(isUnlocked);
+    map['str_bonus'] = Variable<int>(strBonus);
+    map['int_bonus'] = Variable<int>(intBonus);
+    map['luck_bonus'] = Variable<int>(luckBonus);
+    map['cha_bonus'] = Variable<int>(chaBonus);
+    map['bond_level'] = Variable<int>(bondLevel);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || unlockedAt != null) {
+      map['unlocked_at'] = Variable<DateTime>(unlockedAt);
+    }
+    return map;
+  }
+
+  GachaItemsCompanion toCompanion(bool nullToAbsent) {
+    return GachaItemsCompanion(
+      id: Value(id),
+      imagePath: Value(imagePath),
+      title: Value(title),
+      rarity: Value(rarity),
+      isUnlocked: Value(isUnlocked),
+      strBonus: Value(strBonus),
+      intBonus: Value(intBonus),
+      luckBonus: Value(luckBonus),
+      chaBonus: Value(chaBonus),
+      bondLevel: Value(bondLevel),
+      createdAt: Value(createdAt),
+      unlockedAt: unlockedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unlockedAt),
+    );
+  }
+
+  factory GachaItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GachaItem(
+      id: serializer.fromJson<int>(json['id']),
+      imagePath: serializer.fromJson<String>(json['imagePath']),
+      title: serializer.fromJson<String>(json['title']),
+      rarity: serializer.fromJson<String>(json['rarity']),
+      isUnlocked: serializer.fromJson<bool>(json['isUnlocked']),
+      strBonus: serializer.fromJson<int>(json['strBonus']),
+      intBonus: serializer.fromJson<int>(json['intBonus']),
+      luckBonus: serializer.fromJson<int>(json['luckBonus']),
+      chaBonus: serializer.fromJson<int>(json['chaBonus']),
+      bondLevel: serializer.fromJson<int>(json['bondLevel']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      unlockedAt: serializer.fromJson<DateTime?>(json['unlockedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'imagePath': serializer.toJson<String>(imagePath),
+      'title': serializer.toJson<String>(title),
+      'rarity': serializer.toJson<String>(rarity),
+      'isUnlocked': serializer.toJson<bool>(isUnlocked),
+      'strBonus': serializer.toJson<int>(strBonus),
+      'intBonus': serializer.toJson<int>(intBonus),
+      'luckBonus': serializer.toJson<int>(luckBonus),
+      'chaBonus': serializer.toJson<int>(chaBonus),
+      'bondLevel': serializer.toJson<int>(bondLevel),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'unlockedAt': serializer.toJson<DateTime?>(unlockedAt),
+    };
+  }
+
+  GachaItem copyWith({
+    int? id,
+    String? imagePath,
+    String? title,
+    String? rarity,
+    bool? isUnlocked,
+    int? strBonus,
+    int? intBonus,
+    int? luckBonus,
+    int? chaBonus,
+    int? bondLevel,
+    DateTime? createdAt,
+    Value<DateTime?> unlockedAt = const Value.absent(),
+  }) => GachaItem(
+    id: id ?? this.id,
+    imagePath: imagePath ?? this.imagePath,
+    title: title ?? this.title,
+    rarity: rarity ?? this.rarity,
+    isUnlocked: isUnlocked ?? this.isUnlocked,
+    strBonus: strBonus ?? this.strBonus,
+    intBonus: intBonus ?? this.intBonus,
+    luckBonus: luckBonus ?? this.luckBonus,
+    chaBonus: chaBonus ?? this.chaBonus,
+    bondLevel: bondLevel ?? this.bondLevel,
+    createdAt: createdAt ?? this.createdAt,
+    unlockedAt: unlockedAt.present ? unlockedAt.value : this.unlockedAt,
+  );
+  GachaItem copyWithCompanion(GachaItemsCompanion data) {
+    return GachaItem(
+      id: data.id.present ? data.id.value : this.id,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      title: data.title.present ? data.title.value : this.title,
+      rarity: data.rarity.present ? data.rarity.value : this.rarity,
+      isUnlocked: data.isUnlocked.present
+          ? data.isUnlocked.value
+          : this.isUnlocked,
+      strBonus: data.strBonus.present ? data.strBonus.value : this.strBonus,
+      intBonus: data.intBonus.present ? data.intBonus.value : this.intBonus,
+      luckBonus: data.luckBonus.present ? data.luckBonus.value : this.luckBonus,
+      chaBonus: data.chaBonus.present ? data.chaBonus.value : this.chaBonus,
+      bondLevel: data.bondLevel.present ? data.bondLevel.value : this.bondLevel,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      unlockedAt: data.unlockedAt.present
+          ? data.unlockedAt.value
+          : this.unlockedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GachaItem(')
+          ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('title: $title, ')
+          ..write('rarity: $rarity, ')
+          ..write('isUnlocked: $isUnlocked, ')
+          ..write('strBonus: $strBonus, ')
+          ..write('intBonus: $intBonus, ')
+          ..write('luckBonus: $luckBonus, ')
+          ..write('chaBonus: $chaBonus, ')
+          ..write('bondLevel: $bondLevel, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('unlockedAt: $unlockedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    imagePath,
+    title,
+    rarity,
+    isUnlocked,
+    strBonus,
+    intBonus,
+    luckBonus,
+    chaBonus,
+    bondLevel,
+    createdAt,
+    unlockedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GachaItem &&
+          other.id == this.id &&
+          other.imagePath == this.imagePath &&
+          other.title == this.title &&
+          other.rarity == this.rarity &&
+          other.isUnlocked == this.isUnlocked &&
+          other.strBonus == this.strBonus &&
+          other.intBonus == this.intBonus &&
+          other.luckBonus == this.luckBonus &&
+          other.chaBonus == this.chaBonus &&
+          other.bondLevel == this.bondLevel &&
+          other.createdAt == this.createdAt &&
+          other.unlockedAt == this.unlockedAt);
+}
+
+class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
+  final Value<int> id;
+  final Value<String> imagePath;
+  final Value<String> title;
+  final Value<String> rarity;
+  final Value<bool> isUnlocked;
+  final Value<int> strBonus;
+  final Value<int> intBonus;
+  final Value<int> luckBonus;
+  final Value<int> chaBonus;
+  final Value<int> bondLevel;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> unlockedAt;
+  const GachaItemsCompanion({
+    this.id = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.title = const Value.absent(),
+    this.rarity = const Value.absent(),
+    this.isUnlocked = const Value.absent(),
+    this.strBonus = const Value.absent(),
+    this.intBonus = const Value.absent(),
+    this.luckBonus = const Value.absent(),
+    this.chaBonus = const Value.absent(),
+    this.bondLevel = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.unlockedAt = const Value.absent(),
+  });
+  GachaItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String imagePath,
+    required String title,
+    this.rarity = const Value.absent(),
+    this.isUnlocked = const Value.absent(),
+    this.strBonus = const Value.absent(),
+    this.intBonus = const Value.absent(),
+    this.luckBonus = const Value.absent(),
+    this.chaBonus = const Value.absent(),
+    this.bondLevel = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.unlockedAt = const Value.absent(),
+  }) : imagePath = Value(imagePath),
+       title = Value(title);
+  static Insertable<GachaItem> custom({
+    Expression<int>? id,
+    Expression<String>? imagePath,
+    Expression<String>? title,
+    Expression<String>? rarity,
+    Expression<bool>? isUnlocked,
+    Expression<int>? strBonus,
+    Expression<int>? intBonus,
+    Expression<int>? luckBonus,
+    Expression<int>? chaBonus,
+    Expression<int>? bondLevel,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? unlockedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (imagePath != null) 'image_path': imagePath,
+      if (title != null) 'title': title,
+      if (rarity != null) 'rarity': rarity,
+      if (isUnlocked != null) 'is_unlocked': isUnlocked,
+      if (strBonus != null) 'str_bonus': strBonus,
+      if (intBonus != null) 'int_bonus': intBonus,
+      if (luckBonus != null) 'luck_bonus': luckBonus,
+      if (chaBonus != null) 'cha_bonus': chaBonus,
+      if (bondLevel != null) 'bond_level': bondLevel,
+      if (createdAt != null) 'created_at': createdAt,
+      if (unlockedAt != null) 'unlocked_at': unlockedAt,
+    });
+  }
+
+  GachaItemsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? imagePath,
+    Value<String>? title,
+    Value<String>? rarity,
+    Value<bool>? isUnlocked,
+    Value<int>? strBonus,
+    Value<int>? intBonus,
+    Value<int>? luckBonus,
+    Value<int>? chaBonus,
+    Value<int>? bondLevel,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? unlockedAt,
+  }) {
+    return GachaItemsCompanion(
+      id: id ?? this.id,
+      imagePath: imagePath ?? this.imagePath,
+      title: title ?? this.title,
+      rarity: rarity ?? this.rarity,
+      isUnlocked: isUnlocked ?? this.isUnlocked,
+      strBonus: strBonus ?? this.strBonus,
+      intBonus: intBonus ?? this.intBonus,
+      luckBonus: luckBonus ?? this.luckBonus,
+      chaBonus: chaBonus ?? this.chaBonus,
+      bondLevel: bondLevel ?? this.bondLevel,
+      createdAt: createdAt ?? this.createdAt,
+      unlockedAt: unlockedAt ?? this.unlockedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (rarity.present) {
+      map['rarity'] = Variable<String>(rarity.value);
+    }
+    if (isUnlocked.present) {
+      map['is_unlocked'] = Variable<bool>(isUnlocked.value);
+    }
+    if (strBonus.present) {
+      map['str_bonus'] = Variable<int>(strBonus.value);
+    }
+    if (intBonus.present) {
+      map['int_bonus'] = Variable<int>(intBonus.value);
+    }
+    if (luckBonus.present) {
+      map['luck_bonus'] = Variable<int>(luckBonus.value);
+    }
+    if (chaBonus.present) {
+      map['cha_bonus'] = Variable<int>(chaBonus.value);
+    }
+    if (bondLevel.present) {
+      map['bond_level'] = Variable<int>(bondLevel.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (unlockedAt.present) {
+      map['unlocked_at'] = Variable<DateTime>(unlockedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GachaItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('title: $title, ')
+          ..write('rarity: $rarity, ')
+          ..write('isUnlocked: $isUnlocked, ')
+          ..write('strBonus: $strBonus, ')
+          ..write('intBonus: $intBonus, ')
+          ..write('luckBonus: $luckBonus, ')
+          ..write('chaBonus: $chaBonus, ')
+          ..write('bondLevel: $bondLevel, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('unlockedAt: $unlockedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $HabitsTable extends Habits with TableInfo<$HabitsTable, Habit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HabitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taskTypeMeta = const VerificationMeta(
+    'taskType',
+  );
+  @override
+  late final GeneratedColumn<String> taskType = GeneratedColumn<String>(
+    'task_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
+  @override
+  late final GeneratedColumn<String> difficulty = GeneratedColumn<String>(
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('normal'),
+  );
+  static const VerificationMeta _rewardGemsMeta = const VerificationMeta(
+    'rewardGems',
+  );
+  @override
+  late final GeneratedColumn<int> rewardGems = GeneratedColumn<int>(
+    'reward_gems',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(100),
+  );
+  static const VerificationMeta _rewardXpMeta = const VerificationMeta(
+    'rewardXp',
+  );
+  @override
+  late final GeneratedColumn<int> rewardXp = GeneratedColumn<int>(
+    'reward_xp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
+    'due_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    taskType,
+    difficulty,
+    rewardGems,
+    rewardXp,
+    isCompleted,
+    completedAt,
+    dueDate,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'habits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Habit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('task_type')) {
+      context.handle(
+        _taskTypeMeta,
+        taskType.isAcceptableOrUnknown(data['task_type']!, _taskTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskTypeMeta);
+    }
+    if (data.containsKey('difficulty')) {
+      context.handle(
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
+    }
+    if (data.containsKey('reward_gems')) {
+      context.handle(
+        _rewardGemsMeta,
+        rewardGems.isAcceptableOrUnknown(data['reward_gems']!, _rewardGemsMeta),
+      );
+    }
+    if (data.containsKey('reward_xp')) {
+      context.handle(
+        _rewardXpMeta,
+        rewardXp.isAcceptableOrUnknown(data['reward_xp']!, _rewardXpMeta),
+      );
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+        _isCompletedMeta,
+        isCompleted.isAcceptableOrUnknown(
+          data['is_completed']!,
+          _isCompletedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completed_at')) {
+      context.handle(
+        _completedAtMeta,
+        completedAt.isAcceptableOrUnknown(
+          data['completed_at']!,
+          _completedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Habit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Habit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      taskType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_type'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      rewardGems: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reward_gems'],
+      )!,
+      rewardXp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reward_xp'],
+      )!,
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_date'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HabitsTable createAlias(String alias) {
+    return $HabitsTable(attachedDatabase, alias);
+  }
+}
+
+class Habit extends DataClass implements Insertable<Habit> {
+  final int id;
+  final String name;
+  final String taskType;
+  final String difficulty;
+  final int rewardGems;
+  final int rewardXp;
+  final bool isCompleted;
+  final DateTime? completedAt;
+  final DateTime? dueDate;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Habit({
+    required this.id,
+    required this.name,
+    required this.taskType,
+    required this.difficulty,
+    required this.rewardGems,
+    required this.rewardXp,
+    required this.isCompleted,
+    this.completedAt,
+    this.dueDate,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['task_type'] = Variable<String>(taskType);
+    map['difficulty'] = Variable<String>(difficulty);
+    map['reward_gems'] = Variable<int>(rewardGems);
+    map['reward_xp'] = Variable<int>(rewardXp);
+    map['is_completed'] = Variable<bool>(isCompleted);
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  HabitsCompanion toCompanion(bool nullToAbsent) {
+    return HabitsCompanion(
+      id: Value(id),
+      name: Value(name),
+      taskType: Value(taskType),
+      difficulty: Value(difficulty),
+      rewardGems: Value(rewardGems),
+      rewardXp: Value(rewardXp),
+      isCompleted: Value(isCompleted),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Habit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Habit(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      taskType: serializer.fromJson<String>(json['taskType']),
+      difficulty: serializer.fromJson<String>(json['difficulty']),
+      rewardGems: serializer.fromJson<int>(json['rewardGems']),
+      rewardXp: serializer.fromJson<int>(json['rewardXp']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'taskType': serializer.toJson<String>(taskType),
+      'difficulty': serializer.toJson<String>(difficulty),
+      'rewardGems': serializer.toJson<int>(rewardGems),
+      'rewardXp': serializer.toJson<int>(rewardXp),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Habit copyWith({
+    int? id,
+    String? name,
+    String? taskType,
+    String? difficulty,
+    int? rewardGems,
+    int? rewardXp,
+    bool? isCompleted,
+    Value<DateTime?> completedAt = const Value.absent(),
+    Value<DateTime?> dueDate = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => Habit(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    taskType: taskType ?? this.taskType,
+    difficulty: difficulty ?? this.difficulty,
+    rewardGems: rewardGems ?? this.rewardGems,
+    rewardXp: rewardXp ?? this.rewardXp,
+    isCompleted: isCompleted ?? this.isCompleted,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Habit copyWithCompanion(HabitsCompanion data) {
+    return Habit(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      taskType: data.taskType.present ? data.taskType.value : this.taskType,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      rewardGems: data.rewardGems.present
+          ? data.rewardGems.value
+          : this.rewardGems,
+      rewardXp: data.rewardXp.present ? data.rewardXp.value : this.rewardXp,
+      isCompleted: data.isCompleted.present
+          ? data.isCompleted.value
+          : this.isCompleted,
+      completedAt: data.completedAt.present
+          ? data.completedAt.value
+          : this.completedAt,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Habit(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('taskType: $taskType, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('rewardGems: $rewardGems, ')
+          ..write('rewardXp: $rewardXp, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    taskType,
+    difficulty,
+    rewardGems,
+    rewardXp,
+    isCompleted,
+    completedAt,
+    dueDate,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Habit &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.taskType == this.taskType &&
+          other.difficulty == this.difficulty &&
+          other.rewardGems == this.rewardGems &&
+          other.rewardXp == this.rewardXp &&
+          other.isCompleted == this.isCompleted &&
+          other.completedAt == this.completedAt &&
+          other.dueDate == this.dueDate &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class HabitsCompanion extends UpdateCompanion<Habit> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> taskType;
+  final Value<String> difficulty;
+  final Value<int> rewardGems;
+  final Value<int> rewardXp;
+  final Value<bool> isCompleted;
+  final Value<DateTime?> completedAt;
+  final Value<DateTime?> dueDate;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const HabitsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.taskType = const Value.absent(),
+    this.difficulty = const Value.absent(),
+    this.rewardGems = const Value.absent(),
+    this.rewardXp = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  HabitsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String taskType,
+    this.difficulty = const Value.absent(),
+    this.rewardGems = const Value.absent(),
+    this.rewardXp = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.completedAt = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name),
+       taskType = Value(taskType);
+  static Insertable<Habit> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? taskType,
+    Expression<String>? difficulty,
+    Expression<int>? rewardGems,
+    Expression<int>? rewardXp,
+    Expression<bool>? isCompleted,
+    Expression<DateTime>? completedAt,
+    Expression<DateTime>? dueDate,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (taskType != null) 'task_type': taskType,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (rewardGems != null) 'reward_gems': rewardGems,
+      if (rewardXp != null) 'reward_xp': rewardXp,
+      if (isCompleted != null) 'is_completed': isCompleted,
+      if (completedAt != null) 'completed_at': completedAt,
+      if (dueDate != null) 'due_date': dueDate,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  HabitsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? taskType,
+    Value<String>? difficulty,
+    Value<int>? rewardGems,
+    Value<int>? rewardXp,
+    Value<bool>? isCompleted,
+    Value<DateTime?>? completedAt,
+    Value<DateTime?>? dueDate,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return HabitsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      taskType: taskType ?? this.taskType,
+      difficulty: difficulty ?? this.difficulty,
+      rewardGems: rewardGems ?? this.rewardGems,
+      rewardXp: rewardXp ?? this.rewardXp,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
+      dueDate: dueDate ?? this.dueDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (taskType.present) {
+      map['task_type'] = Variable<String>(taskType.value);
+    }
+    if (difficulty.present) {
+      map['difficulty'] = Variable<String>(difficulty.value);
+    }
+    if (rewardGems.present) {
+      map['reward_gems'] = Variable<int>(rewardGems.value);
+    }
+    if (rewardXp.present) {
+      map['reward_xp'] = Variable<int>(rewardXp.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    }
+    if (dueDate.present) {
+      map['due_date'] = Variable<DateTime>(dueDate.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HabitsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('taskType: $taskType, ')
+          ..write('difficulty: $difficulty, ')
+          ..write('rewardGems: $rewardGems, ')
+          ..write('rewardXp: $rewardXp, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('completedAt: $completedAt, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TitlesTable extends Titles with TableInfo<$TitlesTable, Title> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TitlesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _passiveSkillMeta = const VerificationMeta(
+    'passiveSkill',
+  );
+  @override
+  late final GeneratedColumn<String> passiveSkill = GeneratedColumn<String>(
+    'passive_skill',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unlockConditionTypeMeta =
+      const VerificationMeta('unlockConditionType');
+  @override
+  late final GeneratedColumn<String> unlockConditionType =
+      GeneratedColumn<String>(
+        'unlock_condition_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _unlockConditionValueMeta =
+      const VerificationMeta('unlockConditionValue');
+  @override
+  late final GeneratedColumn<String> unlockConditionValue =
+      GeneratedColumn<String>(
+        'unlock_condition_value',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _isUnlockedMeta = const VerificationMeta(
+    'isUnlocked',
+  );
+  @override
+  late final GeneratedColumn<bool> isUnlocked = GeneratedColumn<bool>(
+    'is_unlocked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_unlocked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _unlockedAtMeta = const VerificationMeta(
+    'unlockedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> unlockedAt = GeneratedColumn<DateTime>(
+    'unlocked_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    description,
+    passiveSkill,
+    unlockConditionType,
+    unlockConditionValue,
+    isUnlocked,
+    unlockedAt,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'titles';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Title> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('passive_skill')) {
+      context.handle(
+        _passiveSkillMeta,
+        passiveSkill.isAcceptableOrUnknown(
+          data['passive_skill']!,
+          _passiveSkillMeta,
+        ),
+      );
+    }
+    if (data.containsKey('unlock_condition_type')) {
+      context.handle(
+        _unlockConditionTypeMeta,
+        unlockConditionType.isAcceptableOrUnknown(
+          data['unlock_condition_type']!,
+          _unlockConditionTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_unlockConditionTypeMeta);
+    }
+    if (data.containsKey('unlock_condition_value')) {
+      context.handle(
+        _unlockConditionValueMeta,
+        unlockConditionValue.isAcceptableOrUnknown(
+          data['unlock_condition_value']!,
+          _unlockConditionValueMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_unlockConditionValueMeta);
+    }
+    if (data.containsKey('is_unlocked')) {
+      context.handle(
+        _isUnlockedMeta,
+        isUnlocked.isAcceptableOrUnknown(data['is_unlocked']!, _isUnlockedMeta),
+      );
+    }
+    if (data.containsKey('unlocked_at')) {
+      context.handle(
+        _unlockedAtMeta,
+        unlockedAt.isAcceptableOrUnknown(data['unlocked_at']!, _unlockedAtMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Title map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Title(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      passiveSkill: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}passive_skill'],
+      ),
+      unlockConditionType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unlock_condition_type'],
+      )!,
+      unlockConditionValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unlock_condition_value'],
+      )!,
+      isUnlocked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_unlocked'],
+      )!,
+      unlockedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}unlocked_at'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TitlesTable createAlias(String alias) {
+    return $TitlesTable(attachedDatabase, alias);
+  }
+}
+
+class Title extends DataClass implements Insertable<Title> {
+  final int id;
+  final String name;
+  final String? description;
+  final String? passiveSkill;
+  final String unlockConditionType;
+  final String unlockConditionValue;
+  final bool isUnlocked;
+  final DateTime? unlockedAt;
+  final DateTime createdAt;
+  const Title({
+    required this.id,
+    required this.name,
+    this.description,
+    this.passiveSkill,
+    required this.unlockConditionType,
+    required this.unlockConditionValue,
+    required this.isUnlocked,
+    this.unlockedAt,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || passiveSkill != null) {
+      map['passive_skill'] = Variable<String>(passiveSkill);
+    }
+    map['unlock_condition_type'] = Variable<String>(unlockConditionType);
+    map['unlock_condition_value'] = Variable<String>(unlockConditionValue);
+    map['is_unlocked'] = Variable<bool>(isUnlocked);
+    if (!nullToAbsent || unlockedAt != null) {
+      map['unlocked_at'] = Variable<DateTime>(unlockedAt);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  TitlesCompanion toCompanion(bool nullToAbsent) {
+    return TitlesCompanion(
+      id: Value(id),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      passiveSkill: passiveSkill == null && nullToAbsent
+          ? const Value.absent()
+          : Value(passiveSkill),
+      unlockConditionType: Value(unlockConditionType),
+      unlockConditionValue: Value(unlockConditionValue),
+      isUnlocked: Value(isUnlocked),
+      unlockedAt: unlockedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unlockedAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Title.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Title(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      passiveSkill: serializer.fromJson<String?>(json['passiveSkill']),
+      unlockConditionType: serializer.fromJson<String>(
+        json['unlockConditionType'],
+      ),
+      unlockConditionValue: serializer.fromJson<String>(
+        json['unlockConditionValue'],
+      ),
+      isUnlocked: serializer.fromJson<bool>(json['isUnlocked']),
+      unlockedAt: serializer.fromJson<DateTime?>(json['unlockedAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'passiveSkill': serializer.toJson<String?>(passiveSkill),
+      'unlockConditionType': serializer.toJson<String>(unlockConditionType),
+      'unlockConditionValue': serializer.toJson<String>(unlockConditionValue),
+      'isUnlocked': serializer.toJson<bool>(isUnlocked),
+      'unlockedAt': serializer.toJson<DateTime?>(unlockedAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Title copyWith({
+    int? id,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    Value<String?> passiveSkill = const Value.absent(),
+    String? unlockConditionType,
+    String? unlockConditionValue,
+    bool? isUnlocked,
+    Value<DateTime?> unlockedAt = const Value.absent(),
+    DateTime? createdAt,
+  }) => Title(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    passiveSkill: passiveSkill.present ? passiveSkill.value : this.passiveSkill,
+    unlockConditionType: unlockConditionType ?? this.unlockConditionType,
+    unlockConditionValue: unlockConditionValue ?? this.unlockConditionValue,
+    isUnlocked: isUnlocked ?? this.isUnlocked,
+    unlockedAt: unlockedAt.present ? unlockedAt.value : this.unlockedAt,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Title copyWithCompanion(TitlesCompanion data) {
+    return Title(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      passiveSkill: data.passiveSkill.present
+          ? data.passiveSkill.value
+          : this.passiveSkill,
+      unlockConditionType: data.unlockConditionType.present
+          ? data.unlockConditionType.value
+          : this.unlockConditionType,
+      unlockConditionValue: data.unlockConditionValue.present
+          ? data.unlockConditionValue.value
+          : this.unlockConditionValue,
+      isUnlocked: data.isUnlocked.present
+          ? data.isUnlocked.value
+          : this.isUnlocked,
+      unlockedAt: data.unlockedAt.present
+          ? data.unlockedAt.value
+          : this.unlockedAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Title(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('passiveSkill: $passiveSkill, ')
+          ..write('unlockConditionType: $unlockConditionType, ')
+          ..write('unlockConditionValue: $unlockConditionValue, ')
+          ..write('isUnlocked: $isUnlocked, ')
+          ..write('unlockedAt: $unlockedAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    description,
+    passiveSkill,
+    unlockConditionType,
+    unlockConditionValue,
+    isUnlocked,
+    unlockedAt,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Title &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.passiveSkill == this.passiveSkill &&
+          other.unlockConditionType == this.unlockConditionType &&
+          other.unlockConditionValue == this.unlockConditionValue &&
+          other.isUnlocked == this.isUnlocked &&
+          other.unlockedAt == this.unlockedAt &&
+          other.createdAt == this.createdAt);
+}
+
+class TitlesCompanion extends UpdateCompanion<Title> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<String?> passiveSkill;
+  final Value<String> unlockConditionType;
+  final Value<String> unlockConditionValue;
+  final Value<bool> isUnlocked;
+  final Value<DateTime?> unlockedAt;
+  final Value<DateTime> createdAt;
+  const TitlesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.passiveSkill = const Value.absent(),
+    this.unlockConditionType = const Value.absent(),
+    this.unlockConditionValue = const Value.absent(),
+    this.isUnlocked = const Value.absent(),
+    this.unlockedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  TitlesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.description = const Value.absent(),
+    this.passiveSkill = const Value.absent(),
+    required String unlockConditionType,
+    required String unlockConditionValue,
+    this.isUnlocked = const Value.absent(),
+    this.unlockedAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name),
+       unlockConditionType = Value(unlockConditionType),
+       unlockConditionValue = Value(unlockConditionValue);
+  static Insertable<Title> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? passiveSkill,
+    Expression<String>? unlockConditionType,
+    Expression<String>? unlockConditionValue,
+    Expression<bool>? isUnlocked,
+    Expression<DateTime>? unlockedAt,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (passiveSkill != null) 'passive_skill': passiveSkill,
+      if (unlockConditionType != null)
+        'unlock_condition_type': unlockConditionType,
+      if (unlockConditionValue != null)
+        'unlock_condition_value': unlockConditionValue,
+      if (isUnlocked != null) 'is_unlocked': isUnlocked,
+      if (unlockedAt != null) 'unlocked_at': unlockedAt,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  TitlesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String?>? passiveSkill,
+    Value<String>? unlockConditionType,
+    Value<String>? unlockConditionValue,
+    Value<bool>? isUnlocked,
+    Value<DateTime?>? unlockedAt,
+    Value<DateTime>? createdAt,
+  }) {
+    return TitlesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      passiveSkill: passiveSkill ?? this.passiveSkill,
+      unlockConditionType: unlockConditionType ?? this.unlockConditionType,
+      unlockConditionValue: unlockConditionValue ?? this.unlockConditionValue,
+      isUnlocked: isUnlocked ?? this.isUnlocked,
+      unlockedAt: unlockedAt ?? this.unlockedAt,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (passiveSkill.present) {
+      map['passive_skill'] = Variable<String>(passiveSkill.value);
+    }
+    if (unlockConditionType.present) {
+      map['unlock_condition_type'] = Variable<String>(
+        unlockConditionType.value,
+      );
+    }
+    if (unlockConditionValue.present) {
+      map['unlock_condition_value'] = Variable<String>(
+        unlockConditionValue.value,
+      );
+    }
+    if (isUnlocked.present) {
+      map['is_unlocked'] = Variable<bool>(isUnlocked.value);
+    }
+    if (unlockedAt.present) {
+      map['unlocked_at'] = Variable<DateTime>(unlockedAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TitlesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('passiveSkill: $passiveSkill, ')
+          ..write('unlockConditionType: $unlockConditionType, ')
+          ..write('unlockConditionValue: $unlockConditionValue, ')
+          ..write('isUnlocked: $isUnlocked, ')
+          ..write('unlockedAt: $unlockedAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PartyDecksTable extends PartyDecks
+    with TableInfo<$PartyDecksTable, PartyDeck> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PartyDecksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    isActive,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'party_decks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PartyDeck> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PartyDeck map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PartyDeck(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PartyDecksTable createAlias(String alias) {
+    return $PartyDecksTable(attachedDatabase, alias);
+  }
+}
+
+class PartyDeck extends DataClass implements Insertable<PartyDeck> {
+  final int id;
+  final String name;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const PartyDeck({
+    required this.id,
+    required this.name,
+    required this.isActive,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['is_active'] = Variable<bool>(isActive);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PartyDecksCompanion toCompanion(bool nullToAbsent) {
+    return PartyDecksCompanion(
+      id: Value(id),
+      name: Value(name),
+      isActive: Value(isActive),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PartyDeck.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PartyDeck(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'isActive': serializer.toJson<bool>(isActive),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PartyDeck copyWith({
+    int? id,
+    String? name,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => PartyDeck(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    isActive: isActive ?? this.isActive,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PartyDeck copyWithCompanion(PartyDecksCompanion data) {
+    return PartyDeck(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PartyDeck(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isActive: $isActive, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, isActive, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PartyDeck &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.isActive == this.isActive &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<bool> isActive;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const PartyDecksCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  PartyDecksCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.isActive = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<PartyDeck> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<bool>? isActive,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (isActive != null) 'is_active': isActive,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  PartyDecksCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<bool>? isActive,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return PartyDecksCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PartyDecksCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('isActive: $isActive, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PartyMembersTable extends PartyMembers
+    with TableInfo<$PartyMembersTable, PartyMember> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PartyMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
+  @override
+  late final GeneratedColumn<int> deckId = GeneratedColumn<int>(
+    'deck_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES party_decks (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _gachaItemIdMeta = const VerificationMeta(
+    'gachaItemId',
+  );
+  @override
+  late final GeneratedColumn<int> gachaItemId = GeneratedColumn<int>(
+    'gacha_item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES gacha_items (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _slotPositionMeta = const VerificationMeta(
+    'slotPosition',
+  );
+  @override
+  late final GeneratedColumn<int> slotPosition = GeneratedColumn<int>(
+    'slot_position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    deckId,
+    gachaItemId,
+    slotPosition,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'party_members';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PartyMember> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('deck_id')) {
+      context.handle(
+        _deckIdMeta,
+        deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deckIdMeta);
+    }
+    if (data.containsKey('gacha_item_id')) {
+      context.handle(
+        _gachaItemIdMeta,
+        gachaItemId.isAcceptableOrUnknown(
+          data['gacha_item_id']!,
+          _gachaItemIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_gachaItemIdMeta);
+    }
+    if (data.containsKey('slot_position')) {
+      context.handle(
+        _slotPositionMeta,
+        slotPosition.isAcceptableOrUnknown(
+          data['slot_position']!,
+          _slotPositionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_slotPositionMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PartyMember map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PartyMember(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      deckId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deck_id'],
+      )!,
+      gachaItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}gacha_item_id'],
+      )!,
+      slotPosition: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}slot_position'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PartyMembersTable createAlias(String alias) {
+    return $PartyMembersTable(attachedDatabase, alias);
+  }
+}
+
+class PartyMember extends DataClass implements Insertable<PartyMember> {
+  final int id;
+  final int deckId;
+  final int gachaItemId;
+  final int slotPosition;
+  final DateTime createdAt;
+  const PartyMember({
+    required this.id,
+    required this.deckId,
+    required this.gachaItemId,
+    required this.slotPosition,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['deck_id'] = Variable<int>(deckId);
+    map['gacha_item_id'] = Variable<int>(gachaItemId);
+    map['slot_position'] = Variable<int>(slotPosition);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  PartyMembersCompanion toCompanion(bool nullToAbsent) {
+    return PartyMembersCompanion(
+      id: Value(id),
+      deckId: Value(deckId),
+      gachaItemId: Value(gachaItemId),
+      slotPosition: Value(slotPosition),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PartyMember.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PartyMember(
+      id: serializer.fromJson<int>(json['id']),
+      deckId: serializer.fromJson<int>(json['deckId']),
+      gachaItemId: serializer.fromJson<int>(json['gachaItemId']),
+      slotPosition: serializer.fromJson<int>(json['slotPosition']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'deckId': serializer.toJson<int>(deckId),
+      'gachaItemId': serializer.toJson<int>(gachaItemId),
+      'slotPosition': serializer.toJson<int>(slotPosition),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PartyMember copyWith({
+    int? id,
+    int? deckId,
+    int? gachaItemId,
+    int? slotPosition,
+    DateTime? createdAt,
+  }) => PartyMember(
+    id: id ?? this.id,
+    deckId: deckId ?? this.deckId,
+    gachaItemId: gachaItemId ?? this.gachaItemId,
+    slotPosition: slotPosition ?? this.slotPosition,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  PartyMember copyWithCompanion(PartyMembersCompanion data) {
+    return PartyMember(
+      id: data.id.present ? data.id.value : this.id,
+      deckId: data.deckId.present ? data.deckId.value : this.deckId,
+      gachaItemId: data.gachaItemId.present
+          ? data.gachaItemId.value
+          : this.gachaItemId,
+      slotPosition: data.slotPosition.present
+          ? data.slotPosition.value
+          : this.slotPosition,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PartyMember(')
+          ..write('id: $id, ')
+          ..write('deckId: $deckId, ')
+          ..write('gachaItemId: $gachaItemId, ')
+          ..write('slotPosition: $slotPosition, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, deckId, gachaItemId, slotPosition, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PartyMember &&
+          other.id == this.id &&
+          other.deckId == this.deckId &&
+          other.gachaItemId == this.gachaItemId &&
+          other.slotPosition == this.slotPosition &&
+          other.createdAt == this.createdAt);
+}
+
+class PartyMembersCompanion extends UpdateCompanion<PartyMember> {
+  final Value<int> id;
+  final Value<int> deckId;
+  final Value<int> gachaItemId;
+  final Value<int> slotPosition;
+  final Value<DateTime> createdAt;
+  const PartyMembersCompanion({
+    this.id = const Value.absent(),
+    this.deckId = const Value.absent(),
+    this.gachaItemId = const Value.absent(),
+    this.slotPosition = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  PartyMembersCompanion.insert({
+    this.id = const Value.absent(),
+    required int deckId,
+    required int gachaItemId,
+    required int slotPosition,
+    this.createdAt = const Value.absent(),
+  }) : deckId = Value(deckId),
+       gachaItemId = Value(gachaItemId),
+       slotPosition = Value(slotPosition);
+  static Insertable<PartyMember> custom({
+    Expression<int>? id,
+    Expression<int>? deckId,
+    Expression<int>? gachaItemId,
+    Expression<int>? slotPosition,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deckId != null) 'deck_id': deckId,
+      if (gachaItemId != null) 'gacha_item_id': gachaItemId,
+      if (slotPosition != null) 'slot_position': slotPosition,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  PartyMembersCompanion copyWith({
+    Value<int>? id,
+    Value<int>? deckId,
+    Value<int>? gachaItemId,
+    Value<int>? slotPosition,
+    Value<DateTime>? createdAt,
+  }) {
+    return PartyMembersCompanion(
+      id: id ?? this.id,
+      deckId: deckId ?? this.deckId,
+      gachaItemId: gachaItemId ?? this.gachaItemId,
+      slotPosition: slotPosition ?? this.slotPosition,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (deckId.present) {
+      map['deck_id'] = Variable<int>(deckId.value);
+    }
+    if (gachaItemId.present) {
+      map['gacha_item_id'] = Variable<int>(gachaItemId.value);
+    }
+    if (slotPosition.present) {
+      map['slot_position'] = Variable<int>(slotPosition.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PartyMembersCompanion(')
+          ..write('id: $id, ')
+          ..write('deckId: $deckId, ')
+          ..write('gachaItemId: $gachaItemId, ')
+          ..write('slotPosition: $slotPosition, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $UserSettingsTable extends UserSettings
+    with TableInfo<$UserSettingsTable, UserSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _isProMeta = const VerificationMeta('isPro');
+  @override
+  late final GeneratedColumn<bool> isPro = GeneratedColumn<bool>(
+    'is_pro',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pro" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _maxHabitsMeta = const VerificationMeta(
+    'maxHabits',
+  );
+  @override
+  late final GeneratedColumn<int> maxHabits = GeneratedColumn<int>(
+    'max_habits',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(3),
+  );
+  static const VerificationMeta _maxGachaItemsMeta = const VerificationMeta(
+    'maxGachaItems',
+  );
+  @override
+  late final GeneratedColumn<int> maxGachaItems = GeneratedColumn<int>(
+    'max_gacha_items',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(50),
+  );
+  static const VerificationMeta _maxDecksMeta = const VerificationMeta(
+    'maxDecks',
+  );
+  @override
+  late final GeneratedColumn<int> maxDecks = GeneratedColumn<int>(
+    'max_decks',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _themeColorMeta = const VerificationMeta(
+    'themeColor',
+  );
+  @override
+  late final GeneratedColumn<String> themeColor = GeneratedColumn<String>(
+    'theme_color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    isPro,
+    maxHabits,
+    maxGachaItems,
+    maxDecks,
+    themeColor,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('is_pro')) {
+      context.handle(
+        _isProMeta,
+        isPro.isAcceptableOrUnknown(data['is_pro']!, _isProMeta),
+      );
+    }
+    if (data.containsKey('max_habits')) {
+      context.handle(
+        _maxHabitsMeta,
+        maxHabits.isAcceptableOrUnknown(data['max_habits']!, _maxHabitsMeta),
+      );
+    }
+    if (data.containsKey('max_gacha_items')) {
+      context.handle(
+        _maxGachaItemsMeta,
+        maxGachaItems.isAcceptableOrUnknown(
+          data['max_gacha_items']!,
+          _maxGachaItemsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('max_decks')) {
+      context.handle(
+        _maxDecksMeta,
+        maxDecks.isAcceptableOrUnknown(data['max_decks']!, _maxDecksMeta),
+      );
+    }
+    if (data.containsKey('theme_color')) {
+      context.handle(
+        _themeColorMeta,
+        themeColor.isAcceptableOrUnknown(data['theme_color']!, _themeColorMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      isPro: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_pro'],
+      )!,
+      maxHabits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_habits'],
+      )!,
+      maxGachaItems: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_gacha_items'],
+      )!,
+      maxDecks: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_decks'],
+      )!,
+      themeColor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}theme_color'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $UserSettingsTable createAlias(String alias) {
+    return $UserSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class UserSetting extends DataClass implements Insertable<UserSetting> {
+  final int id;
+  final bool isPro;
+  final int maxHabits;
+  final int maxGachaItems;
+  final int maxDecks;
+  final String? themeColor;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const UserSetting({
+    required this.id,
+    required this.isPro,
+    required this.maxHabits,
+    required this.maxGachaItems,
+    required this.maxDecks,
+    this.themeColor,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['is_pro'] = Variable<bool>(isPro);
+    map['max_habits'] = Variable<int>(maxHabits);
+    map['max_gacha_items'] = Variable<int>(maxGachaItems);
+    map['max_decks'] = Variable<int>(maxDecks);
+    if (!nullToAbsent || themeColor != null) {
+      map['theme_color'] = Variable<String>(themeColor);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  UserSettingsCompanion toCompanion(bool nullToAbsent) {
+    return UserSettingsCompanion(
+      id: Value(id),
+      isPro: Value(isPro),
+      maxHabits: Value(maxHabits),
+      maxGachaItems: Value(maxGachaItems),
+      maxDecks: Value(maxDecks),
+      themeColor: themeColor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(themeColor),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory UserSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserSetting(
+      id: serializer.fromJson<int>(json['id']),
+      isPro: serializer.fromJson<bool>(json['isPro']),
+      maxHabits: serializer.fromJson<int>(json['maxHabits']),
+      maxGachaItems: serializer.fromJson<int>(json['maxGachaItems']),
+      maxDecks: serializer.fromJson<int>(json['maxDecks']),
+      themeColor: serializer.fromJson<String?>(json['themeColor']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'isPro': serializer.toJson<bool>(isPro),
+      'maxHabits': serializer.toJson<int>(maxHabits),
+      'maxGachaItems': serializer.toJson<int>(maxGachaItems),
+      'maxDecks': serializer.toJson<int>(maxDecks),
+      'themeColor': serializer.toJson<String?>(themeColor),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  UserSetting copyWith({
+    int? id,
+    bool? isPro,
+    int? maxHabits,
+    int? maxGachaItems,
+    int? maxDecks,
+    Value<String?> themeColor = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => UserSetting(
+    id: id ?? this.id,
+    isPro: isPro ?? this.isPro,
+    maxHabits: maxHabits ?? this.maxHabits,
+    maxGachaItems: maxGachaItems ?? this.maxGachaItems,
+    maxDecks: maxDecks ?? this.maxDecks,
+    themeColor: themeColor.present ? themeColor.value : this.themeColor,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  UserSetting copyWithCompanion(UserSettingsCompanion data) {
+    return UserSetting(
+      id: data.id.present ? data.id.value : this.id,
+      isPro: data.isPro.present ? data.isPro.value : this.isPro,
+      maxHabits: data.maxHabits.present ? data.maxHabits.value : this.maxHabits,
+      maxGachaItems: data.maxGachaItems.present
+          ? data.maxGachaItems.value
+          : this.maxGachaItems,
+      maxDecks: data.maxDecks.present ? data.maxDecks.value : this.maxDecks,
+      themeColor: data.themeColor.present
+          ? data.themeColor.value
+          : this.themeColor,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserSetting(')
+          ..write('id: $id, ')
+          ..write('isPro: $isPro, ')
+          ..write('maxHabits: $maxHabits, ')
+          ..write('maxGachaItems: $maxGachaItems, ')
+          ..write('maxDecks: $maxDecks, ')
+          ..write('themeColor: $themeColor, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    isPro,
+    maxHabits,
+    maxGachaItems,
+    maxDecks,
+    themeColor,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserSetting &&
+          other.id == this.id &&
+          other.isPro == this.isPro &&
+          other.maxHabits == this.maxHabits &&
+          other.maxGachaItems == this.maxGachaItems &&
+          other.maxDecks == this.maxDecks &&
+          other.themeColor == this.themeColor &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
+  final Value<int> id;
+  final Value<bool> isPro;
+  final Value<int> maxHabits;
+  final Value<int> maxGachaItems;
+  final Value<int> maxDecks;
+  final Value<String?> themeColor;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const UserSettingsCompanion({
+    this.id = const Value.absent(),
+    this.isPro = const Value.absent(),
+    this.maxHabits = const Value.absent(),
+    this.maxGachaItems = const Value.absent(),
+    this.maxDecks = const Value.absent(),
+    this.themeColor = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  UserSettingsCompanion.insert({
+    this.id = const Value.absent(),
+    this.isPro = const Value.absent(),
+    this.maxHabits = const Value.absent(),
+    this.maxGachaItems = const Value.absent(),
+    this.maxDecks = const Value.absent(),
+    this.themeColor = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  static Insertable<UserSetting> custom({
+    Expression<int>? id,
+    Expression<bool>? isPro,
+    Expression<int>? maxHabits,
+    Expression<int>? maxGachaItems,
+    Expression<int>? maxDecks,
+    Expression<String>? themeColor,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (isPro != null) 'is_pro': isPro,
+      if (maxHabits != null) 'max_habits': maxHabits,
+      if (maxGachaItems != null) 'max_gacha_items': maxGachaItems,
+      if (maxDecks != null) 'max_decks': maxDecks,
+      if (themeColor != null) 'theme_color': themeColor,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  UserSettingsCompanion copyWith({
+    Value<int>? id,
+    Value<bool>? isPro,
+    Value<int>? maxHabits,
+    Value<int>? maxGachaItems,
+    Value<int>? maxDecks,
+    Value<String?>? themeColor,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return UserSettingsCompanion(
+      id: id ?? this.id,
+      isPro: isPro ?? this.isPro,
+      maxHabits: maxHabits ?? this.maxHabits,
+      maxGachaItems: maxGachaItems ?? this.maxGachaItems,
+      maxDecks: maxDecks ?? this.maxDecks,
+      themeColor: themeColor ?? this.themeColor,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (isPro.present) {
+      map['is_pro'] = Variable<bool>(isPro.value);
+    }
+    if (maxHabits.present) {
+      map['max_habits'] = Variable<int>(maxHabits.value);
+    }
+    if (maxGachaItems.present) {
+      map['max_gacha_items'] = Variable<int>(maxGachaItems.value);
+    }
+    if (maxDecks.present) {
+      map['max_decks'] = Variable<int>(maxDecks.value);
+    }
+    if (themeColor.present) {
+      map['theme_color'] = Variable<String>(themeColor.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('isPro: $isPro, ')
+          ..write('maxHabits: $maxHabits, ')
+          ..write('maxGachaItems: $maxGachaItems, ')
+          ..write('maxDecks: $maxDecks, ')
+          ..write('themeColor: $themeColor, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+abstract class _$AppDatabase extends GeneratedDatabase {
+  _$AppDatabase(QueryExecutor e) : super(e);
+  $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $PlayersTable players = $PlayersTable(this);
+  late final $GachaItemsTable gachaItems = $GachaItemsTable(this);
+  late final $HabitsTable habits = $HabitsTable(this);
+  late final $TitlesTable titles = $TitlesTable(this);
+  late final $PartyDecksTable partyDecks = $PartyDecksTable(this);
+  late final $PartyMembersTable partyMembers = $PartyMembersTable(this);
+  late final $UserSettingsTable userSettings = $UserSettingsTable(this);
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    players,
+    gachaItems,
+    habits,
+    titles,
+    partyDecks,
+    partyMembers,
+    userSettings,
+  ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'party_decks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('party_members', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'gacha_items',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('party_members', kind: UpdateKind.delete)],
+    ),
+  ]);
+}
+
+typedef $$PlayersTableCreateCompanionBuilder =
+    PlayersCompanion Function({
+      Value<int> id,
+      Value<int> level,
+      Value<int> experience,
+      Value<int> str,
+      Value<int> intStat,
+      Value<int> luck,
+      Value<int> cha,
+      Value<int> willGems,
+      Value<String?> currentDebuff,
+      Value<DateTime?> debuffExpiresAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$PlayersTableUpdateCompanionBuilder =
+    PlayersCompanion Function({
+      Value<int> id,
+      Value<int> level,
+      Value<int> experience,
+      Value<int> str,
+      Value<int> intStat,
+      Value<int> luck,
+      Value<int> cha,
+      Value<int> willGems,
+      Value<String?> currentDebuff,
+      Value<DateTime?> debuffExpiresAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$PlayersTableFilterComposer
+    extends Composer<_$AppDatabase, $PlayersTable> {
+  $$PlayersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get experience => $composableBuilder(
+    column: $table.experience,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get str => $composableBuilder(
+    column: $table.str,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get intStat => $composableBuilder(
+    column: $table.intStat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get luck => $composableBuilder(
+    column: $table.luck,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get cha => $composableBuilder(
+    column: $table.cha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get willGems => $composableBuilder(
+    column: $table.willGems,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currentDebuff => $composableBuilder(
+    column: $table.currentDebuff,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get debuffExpiresAt => $composableBuilder(
+    column: $table.debuffExpiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PlayersTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlayersTable> {
+  $$PlayersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get level => $composableBuilder(
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get experience => $composableBuilder(
+    column: $table.experience,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get str => $composableBuilder(
+    column: $table.str,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get intStat => $composableBuilder(
+    column: $table.intStat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get luck => $composableBuilder(
+    column: $table.luck,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get cha => $composableBuilder(
+    column: $table.cha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get willGems => $composableBuilder(
+    column: $table.willGems,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currentDebuff => $composableBuilder(
+    column: $table.currentDebuff,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get debuffExpiresAt => $composableBuilder(
+    column: $table.debuffExpiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PlayersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlayersTable> {
+  $$PlayersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get level =>
+      $composableBuilder(column: $table.level, builder: (column) => column);
+
+  GeneratedColumn<int> get experience => $composableBuilder(
+    column: $table.experience,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get str =>
+      $composableBuilder(column: $table.str, builder: (column) => column);
+
+  GeneratedColumn<int> get intStat =>
+      $composableBuilder(column: $table.intStat, builder: (column) => column);
+
+  GeneratedColumn<int> get luck =>
+      $composableBuilder(column: $table.luck, builder: (column) => column);
+
+  GeneratedColumn<int> get cha =>
+      $composableBuilder(column: $table.cha, builder: (column) => column);
+
+  GeneratedColumn<int> get willGems =>
+      $composableBuilder(column: $table.willGems, builder: (column) => column);
+
+  GeneratedColumn<String> get currentDebuff => $composableBuilder(
+    column: $table.currentDebuff,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get debuffExpiresAt => $composableBuilder(
+    column: $table.debuffExpiresAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PlayersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlayersTable,
+          Player,
+          $$PlayersTableFilterComposer,
+          $$PlayersTableOrderingComposer,
+          $$PlayersTableAnnotationComposer,
+          $$PlayersTableCreateCompanionBuilder,
+          $$PlayersTableUpdateCompanionBuilder,
+          (Player, BaseReferences<_$AppDatabase, $PlayersTable, Player>),
+          Player,
+          PrefetchHooks Function()
+        > {
+  $$PlayersTableTableManager(_$AppDatabase db, $PlayersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlayersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlayersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlayersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> level = const Value.absent(),
+                Value<int> experience = const Value.absent(),
+                Value<int> str = const Value.absent(),
+                Value<int> intStat = const Value.absent(),
+                Value<int> luck = const Value.absent(),
+                Value<int> cha = const Value.absent(),
+                Value<int> willGems = const Value.absent(),
+                Value<String?> currentDebuff = const Value.absent(),
+                Value<DateTime?> debuffExpiresAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => PlayersCompanion(
+                id: id,
+                level: level,
+                experience: experience,
+                str: str,
+                intStat: intStat,
+                luck: luck,
+                cha: cha,
+                willGems: willGems,
+                currentDebuff: currentDebuff,
+                debuffExpiresAt: debuffExpiresAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> level = const Value.absent(),
+                Value<int> experience = const Value.absent(),
+                Value<int> str = const Value.absent(),
+                Value<int> intStat = const Value.absent(),
+                Value<int> luck = const Value.absent(),
+                Value<int> cha = const Value.absent(),
+                Value<int> willGems = const Value.absent(),
+                Value<String?> currentDebuff = const Value.absent(),
+                Value<DateTime?> debuffExpiresAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => PlayersCompanion.insert(
+                id: id,
+                level: level,
+                experience: experience,
+                str: str,
+                intStat: intStat,
+                luck: luck,
+                cha: cha,
+                willGems: willGems,
+                currentDebuff: currentDebuff,
+                debuffExpiresAt: debuffExpiresAt,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PlayersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlayersTable,
+      Player,
+      $$PlayersTableFilterComposer,
+      $$PlayersTableOrderingComposer,
+      $$PlayersTableAnnotationComposer,
+      $$PlayersTableCreateCompanionBuilder,
+      $$PlayersTableUpdateCompanionBuilder,
+      (Player, BaseReferences<_$AppDatabase, $PlayersTable, Player>),
+      Player,
+      PrefetchHooks Function()
+    >;
+typedef $$GachaItemsTableCreateCompanionBuilder =
+    GachaItemsCompanion Function({
+      Value<int> id,
+      required String imagePath,
+      required String title,
+      Value<String> rarity,
+      Value<bool> isUnlocked,
+      Value<int> strBonus,
+      Value<int> intBonus,
+      Value<int> luckBonus,
+      Value<int> chaBonus,
+      Value<int> bondLevel,
+      Value<DateTime> createdAt,
+      Value<DateTime?> unlockedAt,
+    });
+typedef $$GachaItemsTableUpdateCompanionBuilder =
+    GachaItemsCompanion Function({
+      Value<int> id,
+      Value<String> imagePath,
+      Value<String> title,
+      Value<String> rarity,
+      Value<bool> isUnlocked,
+      Value<int> strBonus,
+      Value<int> intBonus,
+      Value<int> luckBonus,
+      Value<int> chaBonus,
+      Value<int> bondLevel,
+      Value<DateTime> createdAt,
+      Value<DateTime?> unlockedAt,
+    });
+
+final class $$GachaItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $GachaItemsTable, GachaItem> {
+  $$GachaItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PartyMembersTable, List<PartyMember>>
+  _partyMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.partyMembers,
+    aliasName: $_aliasNameGenerator(
+      db.gachaItems.id,
+      db.partyMembers.gachaItemId,
+    ),
+  );
+
+  $$PartyMembersTableProcessedTableManager get partyMembersRefs {
+    final manager = $$PartyMembersTableTableManager(
+      $_db,
+      $_db.partyMembers,
+    ).filter((f) => f.gachaItemId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_partyMembersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$GachaItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $GachaItemsTable> {
+  $$GachaItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rarity => $composableBuilder(
+    column: $table.rarity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isUnlocked => $composableBuilder(
+    column: $table.isUnlocked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get strBonus => $composableBuilder(
+    column: $table.strBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get intBonus => $composableBuilder(
+    column: $table.intBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get luckBonus => $composableBuilder(
+    column: $table.luckBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get chaBonus => $composableBuilder(
+    column: $table.chaBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get bondLevel => $composableBuilder(
+    column: $table.bondLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get unlockedAt => $composableBuilder(
+    column: $table.unlockedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> partyMembersRefs(
+    Expression<bool> Function($$PartyMembersTableFilterComposer f) f,
+  ) {
+    final $$PartyMembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.partyMembers,
+      getReferencedColumn: (t) => t.gachaItemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyMembersTableFilterComposer(
+            $db: $db,
+            $table: $db.partyMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$GachaItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $GachaItemsTable> {
+  $$GachaItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rarity => $composableBuilder(
+    column: $table.rarity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isUnlocked => $composableBuilder(
+    column: $table.isUnlocked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get strBonus => $composableBuilder(
+    column: $table.strBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get intBonus => $composableBuilder(
+    column: $table.intBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get luckBonus => $composableBuilder(
+    column: $table.luckBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get chaBonus => $composableBuilder(
+    column: $table.chaBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get bondLevel => $composableBuilder(
+    column: $table.bondLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get unlockedAt => $composableBuilder(
+    column: $table.unlockedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GachaItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GachaItemsTable> {
+  $$GachaItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get rarity =>
+      $composableBuilder(column: $table.rarity, builder: (column) => column);
+
+  GeneratedColumn<bool> get isUnlocked => $composableBuilder(
+    column: $table.isUnlocked,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get strBonus =>
+      $composableBuilder(column: $table.strBonus, builder: (column) => column);
+
+  GeneratedColumn<int> get intBonus =>
+      $composableBuilder(column: $table.intBonus, builder: (column) => column);
+
+  GeneratedColumn<int> get luckBonus =>
+      $composableBuilder(column: $table.luckBonus, builder: (column) => column);
+
+  GeneratedColumn<int> get chaBonus =>
+      $composableBuilder(column: $table.chaBonus, builder: (column) => column);
+
+  GeneratedColumn<int> get bondLevel =>
+      $composableBuilder(column: $table.bondLevel, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get unlockedAt => $composableBuilder(
+    column: $table.unlockedAt,
+    builder: (column) => column,
+  );
+
+  Expression<T> partyMembersRefs<T extends Object>(
+    Expression<T> Function($$PartyMembersTableAnnotationComposer a) f,
+  ) {
+    final $$PartyMembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.partyMembers,
+      getReferencedColumn: (t) => t.gachaItemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyMembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.partyMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$GachaItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GachaItemsTable,
+          GachaItem,
+          $$GachaItemsTableFilterComposer,
+          $$GachaItemsTableOrderingComposer,
+          $$GachaItemsTableAnnotationComposer,
+          $$GachaItemsTableCreateCompanionBuilder,
+          $$GachaItemsTableUpdateCompanionBuilder,
+          (GachaItem, $$GachaItemsTableReferences),
+          GachaItem,
+          PrefetchHooks Function({bool partyMembersRefs})
+        > {
+  $$GachaItemsTableTableManager(_$AppDatabase db, $GachaItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GachaItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GachaItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GachaItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> imagePath = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> rarity = const Value.absent(),
+                Value<bool> isUnlocked = const Value.absent(),
+                Value<int> strBonus = const Value.absent(),
+                Value<int> intBonus = const Value.absent(),
+                Value<int> luckBonus = const Value.absent(),
+                Value<int> chaBonus = const Value.absent(),
+                Value<int> bondLevel = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> unlockedAt = const Value.absent(),
+              }) => GachaItemsCompanion(
+                id: id,
+                imagePath: imagePath,
+                title: title,
+                rarity: rarity,
+                isUnlocked: isUnlocked,
+                strBonus: strBonus,
+                intBonus: intBonus,
+                luckBonus: luckBonus,
+                chaBonus: chaBonus,
+                bondLevel: bondLevel,
+                createdAt: createdAt,
+                unlockedAt: unlockedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String imagePath,
+                required String title,
+                Value<String> rarity = const Value.absent(),
+                Value<bool> isUnlocked = const Value.absent(),
+                Value<int> strBonus = const Value.absent(),
+                Value<int> intBonus = const Value.absent(),
+                Value<int> luckBonus = const Value.absent(),
+                Value<int> chaBonus = const Value.absent(),
+                Value<int> bondLevel = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> unlockedAt = const Value.absent(),
+              }) => GachaItemsCompanion.insert(
+                id: id,
+                imagePath: imagePath,
+                title: title,
+                rarity: rarity,
+                isUnlocked: isUnlocked,
+                strBonus: strBonus,
+                intBonus: intBonus,
+                luckBonus: luckBonus,
+                chaBonus: chaBonus,
+                bondLevel: bondLevel,
+                createdAt: createdAt,
+                unlockedAt: unlockedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$GachaItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({partyMembersRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (partyMembersRefs) db.partyMembers],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (partyMembersRefs)
+                    await $_getPrefetchedData<
+                      GachaItem,
+                      $GachaItemsTable,
+                      PartyMember
+                    >(
+                      currentTable: table,
+                      referencedTable: $$GachaItemsTableReferences
+                          ._partyMembersRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$GachaItemsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).partyMembersRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.gachaItemId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$GachaItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GachaItemsTable,
+      GachaItem,
+      $$GachaItemsTableFilterComposer,
+      $$GachaItemsTableOrderingComposer,
+      $$GachaItemsTableAnnotationComposer,
+      $$GachaItemsTableCreateCompanionBuilder,
+      $$GachaItemsTableUpdateCompanionBuilder,
+      (GachaItem, $$GachaItemsTableReferences),
+      GachaItem,
+      PrefetchHooks Function({bool partyMembersRefs})
+    >;
+typedef $$HabitsTableCreateCompanionBuilder =
+    HabitsCompanion Function({
+      Value<int> id,
+      required String name,
+      required String taskType,
+      Value<String> difficulty,
+      Value<int> rewardGems,
+      Value<int> rewardXp,
+      Value<bool> isCompleted,
+      Value<DateTime?> completedAt,
+      Value<DateTime?> dueDate,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$HabitsTableUpdateCompanionBuilder =
+    HabitsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> taskType,
+      Value<String> difficulty,
+      Value<int> rewardGems,
+      Value<int> rewardXp,
+      Value<bool> isCompleted,
+      Value<DateTime?> completedAt,
+      Value<DateTime?> dueDate,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$HabitsTableFilterComposer
+    extends Composer<_$AppDatabase, $HabitsTable> {
+  $$HabitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskType => $composableBuilder(
+    column: $table.taskType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rewardGems => $composableBuilder(
+    column: $table.rewardGems,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rewardXp => $composableBuilder(
+    column: $table.rewardXp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HabitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HabitsTable> {
+  $$HabitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskType => $composableBuilder(
+    column: $table.taskType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rewardGems => $composableBuilder(
+    column: $table.rewardGems,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rewardXp => $composableBuilder(
+    column: $table.rewardXp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HabitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HabitsTable> {
+  $$HabitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get taskType =>
+      $composableBuilder(column: $table.taskType, builder: (column) => column);
+
+  GeneratedColumn<String> get difficulty => $composableBuilder(
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rewardGems => $composableBuilder(
+    column: $table.rewardGems,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rewardXp =>
+      $composableBuilder(column: $table.rewardXp, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get completedAt => $composableBuilder(
+    column: $table.completedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$HabitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HabitsTable,
+          Habit,
+          $$HabitsTableFilterComposer,
+          $$HabitsTableOrderingComposer,
+          $$HabitsTableAnnotationComposer,
+          $$HabitsTableCreateCompanionBuilder,
+          $$HabitsTableUpdateCompanionBuilder,
+          (Habit, BaseReferences<_$AppDatabase, $HabitsTable, Habit>),
+          Habit,
+          PrefetchHooks Function()
+        > {
+  $$HabitsTableTableManager(_$AppDatabase db, $HabitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HabitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HabitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HabitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> taskType = const Value.absent(),
+                Value<String> difficulty = const Value.absent(),
+                Value<int> rewardGems = const Value.absent(),
+                Value<int> rewardXp = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => HabitsCompanion(
+                id: id,
+                name: name,
+                taskType: taskType,
+                difficulty: difficulty,
+                rewardGems: rewardGems,
+                rewardXp: rewardXp,
+                isCompleted: isCompleted,
+                completedAt: completedAt,
+                dueDate: dueDate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String taskType,
+                Value<String> difficulty = const Value.absent(),
+                Value<int> rewardGems = const Value.absent(),
+                Value<int> rewardXp = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => HabitsCompanion.insert(
+                id: id,
+                name: name,
+                taskType: taskType,
+                difficulty: difficulty,
+                rewardGems: rewardGems,
+                rewardXp: rewardXp,
+                isCompleted: isCompleted,
+                completedAt: completedAt,
+                dueDate: dueDate,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HabitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HabitsTable,
+      Habit,
+      $$HabitsTableFilterComposer,
+      $$HabitsTableOrderingComposer,
+      $$HabitsTableAnnotationComposer,
+      $$HabitsTableCreateCompanionBuilder,
+      $$HabitsTableUpdateCompanionBuilder,
+      (Habit, BaseReferences<_$AppDatabase, $HabitsTable, Habit>),
+      Habit,
+      PrefetchHooks Function()
+    >;
+typedef $$TitlesTableCreateCompanionBuilder =
+    TitlesCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<String?> description,
+      Value<String?> passiveSkill,
+      required String unlockConditionType,
+      required String unlockConditionValue,
+      Value<bool> isUnlocked,
+      Value<DateTime?> unlockedAt,
+      Value<DateTime> createdAt,
+    });
+typedef $$TitlesTableUpdateCompanionBuilder =
+    TitlesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String?> description,
+      Value<String?> passiveSkill,
+      Value<String> unlockConditionType,
+      Value<String> unlockConditionValue,
+      Value<bool> isUnlocked,
+      Value<DateTime?> unlockedAt,
+      Value<DateTime> createdAt,
+    });
+
+class $$TitlesTableFilterComposer
+    extends Composer<_$AppDatabase, $TitlesTable> {
+  $$TitlesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get passiveSkill => $composableBuilder(
+    column: $table.passiveSkill,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unlockConditionType => $composableBuilder(
+    column: $table.unlockConditionType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unlockConditionValue => $composableBuilder(
+    column: $table.unlockConditionValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isUnlocked => $composableBuilder(
+    column: $table.isUnlocked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get unlockedAt => $composableBuilder(
+    column: $table.unlockedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TitlesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TitlesTable> {
+  $$TitlesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get passiveSkill => $composableBuilder(
+    column: $table.passiveSkill,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unlockConditionType => $composableBuilder(
+    column: $table.unlockConditionType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unlockConditionValue => $composableBuilder(
+    column: $table.unlockConditionValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isUnlocked => $composableBuilder(
+    column: $table.isUnlocked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get unlockedAt => $composableBuilder(
+    column: $table.unlockedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TitlesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TitlesTable> {
+  $$TitlesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get passiveSkill => $composableBuilder(
+    column: $table.passiveSkill,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unlockConditionType => $composableBuilder(
+    column: $table.unlockConditionType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unlockConditionValue => $composableBuilder(
+    column: $table.unlockConditionValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isUnlocked => $composableBuilder(
+    column: $table.isUnlocked,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get unlockedAt => $composableBuilder(
+    column: $table.unlockedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$TitlesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TitlesTable,
+          Title,
+          $$TitlesTableFilterComposer,
+          $$TitlesTableOrderingComposer,
+          $$TitlesTableAnnotationComposer,
+          $$TitlesTableCreateCompanionBuilder,
+          $$TitlesTableUpdateCompanionBuilder,
+          (Title, BaseReferences<_$AppDatabase, $TitlesTable, Title>),
+          Title,
+          PrefetchHooks Function()
+        > {
+  $$TitlesTableTableManager(_$AppDatabase db, $TitlesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TitlesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TitlesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TitlesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String?> passiveSkill = const Value.absent(),
+                Value<String> unlockConditionType = const Value.absent(),
+                Value<String> unlockConditionValue = const Value.absent(),
+                Value<bool> isUnlocked = const Value.absent(),
+                Value<DateTime?> unlockedAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => TitlesCompanion(
+                id: id,
+                name: name,
+                description: description,
+                passiveSkill: passiveSkill,
+                unlockConditionType: unlockConditionType,
+                unlockConditionValue: unlockConditionValue,
+                isUnlocked: isUnlocked,
+                unlockedAt: unlockedAt,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<String?> description = const Value.absent(),
+                Value<String?> passiveSkill = const Value.absent(),
+                required String unlockConditionType,
+                required String unlockConditionValue,
+                Value<bool> isUnlocked = const Value.absent(),
+                Value<DateTime?> unlockedAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => TitlesCompanion.insert(
+                id: id,
+                name: name,
+                description: description,
+                passiveSkill: passiveSkill,
+                unlockConditionType: unlockConditionType,
+                unlockConditionValue: unlockConditionValue,
+                isUnlocked: isUnlocked,
+                unlockedAt: unlockedAt,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TitlesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TitlesTable,
+      Title,
+      $$TitlesTableFilterComposer,
+      $$TitlesTableOrderingComposer,
+      $$TitlesTableAnnotationComposer,
+      $$TitlesTableCreateCompanionBuilder,
+      $$TitlesTableUpdateCompanionBuilder,
+      (Title, BaseReferences<_$AppDatabase, $TitlesTable, Title>),
+      Title,
+      PrefetchHooks Function()
+    >;
+typedef $$PartyDecksTableCreateCompanionBuilder =
+    PartyDecksCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<bool> isActive,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$PartyDecksTableUpdateCompanionBuilder =
+    PartyDecksCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<bool> isActive,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+final class $$PartyDecksTableReferences
+    extends BaseReferences<_$AppDatabase, $PartyDecksTable, PartyDeck> {
+  $$PartyDecksTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PartyMembersTable, List<PartyMember>>
+  _partyMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.partyMembers,
+    aliasName: $_aliasNameGenerator(db.partyDecks.id, db.partyMembers.deckId),
+  );
+
+  $$PartyMembersTableProcessedTableManager get partyMembersRefs {
+    final manager = $$PartyMembersTableTableManager(
+      $_db,
+      $_db.partyMembers,
+    ).filter((f) => f.deckId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_partyMembersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$PartyDecksTableFilterComposer
+    extends Composer<_$AppDatabase, $PartyDecksTable> {
+  $$PartyDecksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> partyMembersRefs(
+    Expression<bool> Function($$PartyMembersTableFilterComposer f) f,
+  ) {
+    final $$PartyMembersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.partyMembers,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyMembersTableFilterComposer(
+            $db: $db,
+            $table: $db.partyMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PartyDecksTableOrderingComposer
+    extends Composer<_$AppDatabase, $PartyDecksTable> {
+  $$PartyDecksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PartyDecksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PartyDecksTable> {
+  $$PartyDecksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> partyMembersRefs<T extends Object>(
+    Expression<T> Function($$PartyMembersTableAnnotationComposer a) f,
+  ) {
+    final $$PartyMembersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.partyMembers,
+      getReferencedColumn: (t) => t.deckId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyMembersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.partyMembers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$PartyDecksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PartyDecksTable,
+          PartyDeck,
+          $$PartyDecksTableFilterComposer,
+          $$PartyDecksTableOrderingComposer,
+          $$PartyDecksTableAnnotationComposer,
+          $$PartyDecksTableCreateCompanionBuilder,
+          $$PartyDecksTableUpdateCompanionBuilder,
+          (PartyDeck, $$PartyDecksTableReferences),
+          PartyDeck,
+          PrefetchHooks Function({bool partyMembersRefs})
+        > {
+  $$PartyDecksTableTableManager(_$AppDatabase db, $PartyDecksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PartyDecksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PartyDecksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PartyDecksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => PartyDecksCompanion(
+                id: id,
+                name: name,
+                isActive: isActive,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<bool> isActive = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => PartyDecksCompanion.insert(
+                id: id,
+                name: name,
+                isActive: isActive,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PartyDecksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({partyMembersRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (partyMembersRefs) db.partyMembers],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (partyMembersRefs)
+                    await $_getPrefetchedData<
+                      PartyDeck,
+                      $PartyDecksTable,
+                      PartyMember
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PartyDecksTableReferences
+                          ._partyMembersRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$PartyDecksTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).partyMembersRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.deckId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PartyDecksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PartyDecksTable,
+      PartyDeck,
+      $$PartyDecksTableFilterComposer,
+      $$PartyDecksTableOrderingComposer,
+      $$PartyDecksTableAnnotationComposer,
+      $$PartyDecksTableCreateCompanionBuilder,
+      $$PartyDecksTableUpdateCompanionBuilder,
+      (PartyDeck, $$PartyDecksTableReferences),
+      PartyDeck,
+      PrefetchHooks Function({bool partyMembersRefs})
+    >;
+typedef $$PartyMembersTableCreateCompanionBuilder =
+    PartyMembersCompanion Function({
+      Value<int> id,
+      required int deckId,
+      required int gachaItemId,
+      required int slotPosition,
+      Value<DateTime> createdAt,
+    });
+typedef $$PartyMembersTableUpdateCompanionBuilder =
+    PartyMembersCompanion Function({
+      Value<int> id,
+      Value<int> deckId,
+      Value<int> gachaItemId,
+      Value<int> slotPosition,
+      Value<DateTime> createdAt,
+    });
+
+final class $$PartyMembersTableReferences
+    extends BaseReferences<_$AppDatabase, $PartyMembersTable, PartyMember> {
+  $$PartyMembersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PartyDecksTable _deckIdTable(_$AppDatabase db) =>
+      db.partyDecks.createAlias(
+        $_aliasNameGenerator(db.partyMembers.deckId, db.partyDecks.id),
+      );
+
+  $$PartyDecksTableProcessedTableManager get deckId {
+    final $_column = $_itemColumn<int>('deck_id')!;
+
+    final manager = $$PartyDecksTableTableManager(
+      $_db,
+      $_db.partyDecks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_deckIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $GachaItemsTable _gachaItemIdTable(_$AppDatabase db) =>
+      db.gachaItems.createAlias(
+        $_aliasNameGenerator(db.partyMembers.gachaItemId, db.gachaItems.id),
+      );
+
+  $$GachaItemsTableProcessedTableManager get gachaItemId {
+    final $_column = $_itemColumn<int>('gacha_item_id')!;
+
+    final manager = $$GachaItemsTableTableManager(
+      $_db,
+      $_db.gachaItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_gachaItemIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PartyMembersTableFilterComposer
+    extends Composer<_$AppDatabase, $PartyMembersTable> {
+  $$PartyMembersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get slotPosition => $composableBuilder(
+    column: $table.slotPosition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PartyDecksTableFilterComposer get deckId {
+    final $$PartyDecksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.partyDecks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyDecksTableFilterComposer(
+            $db: $db,
+            $table: $db.partyDecks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$GachaItemsTableFilterComposer get gachaItemId {
+    final $$GachaItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.gachaItemId,
+      referencedTable: $db.gachaItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GachaItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.gachaItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PartyMembersTableOrderingComposer
+    extends Composer<_$AppDatabase, $PartyMembersTable> {
+  $$PartyMembersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get slotPosition => $composableBuilder(
+    column: $table.slotPosition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PartyDecksTableOrderingComposer get deckId {
+    final $$PartyDecksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.partyDecks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyDecksTableOrderingComposer(
+            $db: $db,
+            $table: $db.partyDecks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$GachaItemsTableOrderingComposer get gachaItemId {
+    final $$GachaItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.gachaItemId,
+      referencedTable: $db.gachaItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GachaItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.gachaItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PartyMembersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PartyMembersTable> {
+  $$PartyMembersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get slotPosition => $composableBuilder(
+    column: $table.slotPosition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$PartyDecksTableAnnotationComposer get deckId {
+    final $$PartyDecksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.deckId,
+      referencedTable: $db.partyDecks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyDecksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.partyDecks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$GachaItemsTableAnnotationComposer get gachaItemId {
+    final $$GachaItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.gachaItemId,
+      referencedTable: $db.gachaItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GachaItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.gachaItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PartyMembersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PartyMembersTable,
+          PartyMember,
+          $$PartyMembersTableFilterComposer,
+          $$PartyMembersTableOrderingComposer,
+          $$PartyMembersTableAnnotationComposer,
+          $$PartyMembersTableCreateCompanionBuilder,
+          $$PartyMembersTableUpdateCompanionBuilder,
+          (PartyMember, $$PartyMembersTableReferences),
+          PartyMember,
+          PrefetchHooks Function({bool deckId, bool gachaItemId})
+        > {
+  $$PartyMembersTableTableManager(_$AppDatabase db, $PartyMembersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PartyMembersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PartyMembersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PartyMembersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> deckId = const Value.absent(),
+                Value<int> gachaItemId = const Value.absent(),
+                Value<int> slotPosition = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => PartyMembersCompanion(
+                id: id,
+                deckId: deckId,
+                gachaItemId: gachaItemId,
+                slotPosition: slotPosition,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int deckId,
+                required int gachaItemId,
+                required int slotPosition,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => PartyMembersCompanion.insert(
+                id: id,
+                deckId: deckId,
+                gachaItemId: gachaItemId,
+                slotPosition: slotPosition,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PartyMembersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({deckId = false, gachaItemId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (deckId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.deckId,
+                                referencedTable: $$PartyMembersTableReferences
+                                    ._deckIdTable(db),
+                                referencedColumn: $$PartyMembersTableReferences
+                                    ._deckIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (gachaItemId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.gachaItemId,
+                                referencedTable: $$PartyMembersTableReferences
+                                    ._gachaItemIdTable(db),
+                                referencedColumn: $$PartyMembersTableReferences
+                                    ._gachaItemIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PartyMembersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PartyMembersTable,
+      PartyMember,
+      $$PartyMembersTableFilterComposer,
+      $$PartyMembersTableOrderingComposer,
+      $$PartyMembersTableAnnotationComposer,
+      $$PartyMembersTableCreateCompanionBuilder,
+      $$PartyMembersTableUpdateCompanionBuilder,
+      (PartyMember, $$PartyMembersTableReferences),
+      PartyMember,
+      PrefetchHooks Function({bool deckId, bool gachaItemId})
+    >;
+typedef $$UserSettingsTableCreateCompanionBuilder =
+    UserSettingsCompanion Function({
+      Value<int> id,
+      Value<bool> isPro,
+      Value<int> maxHabits,
+      Value<int> maxGachaItems,
+      Value<int> maxDecks,
+      Value<String?> themeColor,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$UserSettingsTableUpdateCompanionBuilder =
+    UserSettingsCompanion Function({
+      Value<int> id,
+      Value<bool> isPro,
+      Value<int> maxHabits,
+      Value<int> maxGachaItems,
+      Value<int> maxDecks,
+      Value<String?> themeColor,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$UserSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $UserSettingsTable> {
+  $$UserSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPro => $composableBuilder(
+    column: $table.isPro,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxHabits => $composableBuilder(
+    column: $table.maxHabits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxGachaItems => $composableBuilder(
+    column: $table.maxGachaItems,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get maxDecks => $composableBuilder(
+    column: $table.maxDecks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get themeColor => $composableBuilder(
+    column: $table.themeColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UserSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserSettingsTable> {
+  $$UserSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isPro => $composableBuilder(
+    column: $table.isPro,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxHabits => $composableBuilder(
+    column: $table.maxHabits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxGachaItems => $composableBuilder(
+    column: $table.maxGachaItems,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get maxDecks => $composableBuilder(
+    column: $table.maxDecks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get themeColor => $composableBuilder(
+    column: $table.themeColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UserSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserSettingsTable> {
+  $$UserSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPro =>
+      $composableBuilder(column: $table.isPro, builder: (column) => column);
+
+  GeneratedColumn<int> get maxHabits =>
+      $composableBuilder(column: $table.maxHabits, builder: (column) => column);
+
+  GeneratedColumn<int> get maxGachaItems => $composableBuilder(
+    column: $table.maxGachaItems,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get maxDecks =>
+      $composableBuilder(column: $table.maxDecks, builder: (column) => column);
+
+  GeneratedColumn<String> get themeColor => $composableBuilder(
+    column: $table.themeColor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$UserSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserSettingsTable,
+          UserSetting,
+          $$UserSettingsTableFilterComposer,
+          $$UserSettingsTableOrderingComposer,
+          $$UserSettingsTableAnnotationComposer,
+          $$UserSettingsTableCreateCompanionBuilder,
+          $$UserSettingsTableUpdateCompanionBuilder,
+          (
+            UserSetting,
+            BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>,
+          ),
+          UserSetting,
+          PrefetchHooks Function()
+        > {
+  $$UserSettingsTableTableManager(_$AppDatabase db, $UserSettingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserSettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<bool> isPro = const Value.absent(),
+                Value<int> maxHabits = const Value.absent(),
+                Value<int> maxGachaItems = const Value.absent(),
+                Value<int> maxDecks = const Value.absent(),
+                Value<String?> themeColor = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => UserSettingsCompanion(
+                id: id,
+                isPro: isPro,
+                maxHabits: maxHabits,
+                maxGachaItems: maxGachaItems,
+                maxDecks: maxDecks,
+                themeColor: themeColor,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<bool> isPro = const Value.absent(),
+                Value<int> maxHabits = const Value.absent(),
+                Value<int> maxGachaItems = const Value.absent(),
+                Value<int> maxDecks = const Value.absent(),
+                Value<String?> themeColor = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => UserSettingsCompanion.insert(
+                id: id,
+                isPro: isPro,
+                maxHabits: maxHabits,
+                maxGachaItems: maxGachaItems,
+                maxDecks: maxDecks,
+                themeColor: themeColor,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UserSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserSettingsTable,
+      UserSetting,
+      $$UserSettingsTableFilterComposer,
+      $$UserSettingsTableOrderingComposer,
+      $$UserSettingsTableAnnotationComposer,
+      $$UserSettingsTableCreateCompanionBuilder,
+      $$UserSettingsTableUpdateCompanionBuilder,
+      (
+        UserSetting,
+        BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>,
+      ),
+      UserSetting,
+      PrefetchHooks Function()
+    >;
+
+class $AppDatabaseManager {
+  final _$AppDatabase _db;
+  $AppDatabaseManager(this._db);
+  $$PlayersTableTableManager get players =>
+      $$PlayersTableTableManager(_db, _db.players);
+  $$GachaItemsTableTableManager get gachaItems =>
+      $$GachaItemsTableTableManager(_db, _db.gachaItems);
+  $$HabitsTableTableManager get habits =>
+      $$HabitsTableTableManager(_db, _db.habits);
+  $$TitlesTableTableManager get titles =>
+      $$TitlesTableTableManager(_db, _db.titles);
+  $$PartyDecksTableTableManager get partyDecks =>
+      $$PartyDecksTableTableManager(_db, _db.partyDecks);
+  $$PartyMembersTableTableManager get partyMembers =>
+      $$PartyMembersTableTableManager(_db, _db.partyMembers);
+  $$UserSettingsTableTableManager get userSettings =>
+      $$UserSettingsTableTableManager(_db, _db.userSettings);
+}
