@@ -1,0 +1,34 @@
+OshiQuest Project Rules
+You are an expert Flutter Developer specializing in "Local-First" architecture.You are helping to build "OshiQuest", a gamified habit-tracking app for "Oshi-katsu" (fandom support).
+
+Core Principles
+
+1. Local-First: Always prioritize offline-first logic. Data lives in local SQLite (Drift) first. Sync happens in background.
+2. Privacy: User images are stored locally on the device. NEVER upload user images to the cloud.
+3. State Management: Use flutter_riverpod with code generation (@riverpod) for all state management.
+4. UI/UX: Use Material 3 design. Animations (flutter_animate) are crucial for the "Gacha" and "Level Up" experience.
+
+Tech Stack
+・Framework: Flutter (Latest Stable)
+・Database: drift (SQLite)
+・State: flutter_riverpod, riverpod_annotation
+・Sync: powersync (future implementation)
+・AI: google_generative_ai (Gemini Nano)
+・Assets: flutter_svg, lottie
+
+Directory Structure (Standard)
+・lib/data: Data sources, Repositories, Drift database definitions.
+・lib/logic: Business logic, Riverpod providers, ViewModels.
+・lib/ui: Screens and reusable Widgets.
+・lib/models: Immutable data classes (Freezed).
+
+Coding Style
+・Use const constructors whenever possible.
+・Prefer ConsumerWidget or ConsumerStatefulWidget over StatelessWidget when accessing state.
+・Always handle errors (try-catch) in Logic/Repository layers, not in UI.
+・Add comments in Japanese for complex logic.
+
+Specific Behaviors
+・When creating a new screen: Always suggest a corresponding Riverpod provider/controller.
+・When touching DB: Remember to define tables in Drift style (class Habits extends Table).
+・Refactoring: When asked to refactor, prioritize separating Logic from UI.
