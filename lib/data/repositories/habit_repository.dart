@@ -8,17 +8,7 @@ class HabitRepository {
   HabitRepository(this._db);
 
   /// 新規タスクを追加
-  /// 
-  /// [title] タスク名
-  /// [type] タスクタイプ（STR/INT/LUCK/CHA）
-  /// [difficulty] 難易度（low/normal/high）
-  /// 
-  /// 報酬は難易度に応じて自動設定:
-  /// - Low: 80 Gems, 8 XP
-  /// - Normal: 100 Gems, 10 XP
-  /// - High: 150 Gems, 15 XP
   Future<int> addHabit(String title, TaskType type, TaskDifficulty difficulty) async {
-    // 難易度に応じた報酬を設定
     final (gems, xp) = _getBaseRewards(difficulty);
 
     final companion = HabitsCompanion.insert(
@@ -33,7 +23,6 @@ class HabitRepository {
     return await _db.into(_db.habits).insert(companion);
   }
 
-  /// 難易度に応じた基本報酬を取得
   (int gems, int xp) _getBaseRewards(TaskDifficulty difficulty) {
     switch (difficulty) {
       case TaskDifficulty.low:
@@ -45,126 +34,160 @@ class HabitRepository {
     }
   }
 
-  /// 全タスクをStreamで監視
   Stream<List<Habit>> watchAllHabits() {
-    return (_db.select(_db.habits)
-          ..orderBy([
-            (habit) => OrderingTerm.desc(habit.isCompleted),
-            (habit) => OrderingTerm.desc(habit.createdAt),
-          ]))
+    return (_db.select(_db.habits)..orderBy([
+          (habit) => OrderingTerm.desc(habit.isCompleted),
+          (habit) => OrderingTerm.desc(habit.createdAt),
+        ]))
         .watch();
   }
 
-  /// 全タスクを取得
   Future<List<Habit>> getAllHabits() async {
-    return await (_db.select(_db.habits)
-          ..orderBy([
-            (habit) => OrderingTerm.desc(habit.isCompleted),
-            (habit) => OrderingTerm.desc(habit.createdAt),
-          ]))
+    return await (_db.select(_db.habits)..orderBy([
+          (habit) => OrderingTerm.desc(habit.isCompleted),
+          (habit) => OrderingTerm.desc(habit.createdAt),
+        ]))
         .get();
   }
 
-  /// タスクを削除
   Future<void> deleteHabit(int id) async {
     await (_db.delete(_db.habits)..where((habit) => habit.id.equals(id))).go();
   }
 
   /// タスクを完了し、RPG報酬を計算・適用
-  /// 
-  /// **重要**: トランザクション処理で、PlayerとHabitの更新を原子性保証
-  /// 
-  /// 報酬計算ロジック:
-  /// 1. Base Gems = habit.rewardGems
-  /// 2. STRボーナス: 難易度HighかつPlayerのSTRが高い場合、報酬倍率UP
-  ///    - 係数: 1.0 + (str * 0.01) （例: STR=50なら1.5倍）
-  /// 3. INTボーナス: 獲得XPに係数を乗算
-  ///    - 係数: 1.0 + (intellect * 0.01) （例: INT=30なら1.3倍）
-  /// 4. 成長: タスクタイプに応じて対応ステータスを+1
-  Future<void> completeHabit(Habit habit) async {
-    await _db.transaction(() async {
-      // 1. 現在のPlayer情報を取得
-      final player = await (_db.select(_db.players)
-            ..where((p) => p.id.equals(1)))
-          .getSingleOrNull();
+  ///
+  /// 変更点: 装備中の推しのステータスボーナスを加算して計算します。
+  Future<Map<String, int>> completeHabit(Habit habit) async {
+    return await _db.transaction(() async {
+      // 1. プレイヤー情報取得
+      final player = await (_db.select(
+        _db.players,
+      )..where((p) => p.id.equals(1))).getSingleOrNull();
 
       if (player == null) {
         throw Exception('プレイヤーデータが見つかりません');
       }
 
-      // 2. 報酬計算（RPGロジック）
+      // 2. 装備ボーナスの取得・計算
+      int bonusStr = 0;
+      int bonusInt = 0;
+      // int bonusLuck = 0; // 今回の計算式では未使用だが取得可能
+      // int bonusCha = 0;
+
+      // アクティブなデッキを取得
+      final activeDeck = await (_db.select(
+        _db.partyDecks,
+      )..where((t) => t.isActive.equals(true))).getSingleOrNull();
+
+      if (activeDeck != null) {
+        // デッキに紐づくアイテム情報を結合して取得
+        final query = _db.select(_db.partyMembers).join([
+          innerJoin(_db.gachaItems, _db.gachaItems.id.equalsExp(_db.partyMembers.gachaItemId)),
+        ]);
+        query.where(_db.partyMembers.deckId.equals(activeDeck.id));
+
+        final results = await query.get();
+
+        // 全装備のボーナスを合算
+        for (final row in results) {
+          final item = row.readTable(_db.gachaItems);
+          bonusStr += item.strBonus;
+          bonusInt += item.intBonus;
+          // bonusLuck += item.luckBonus;
+          // bonusCha += item.chaBonus;
+        }
+      }
+
+      // 合計ステータス（プレイヤー基礎値 + 装備補正）
+      final totalStr = player.str + bonusStr;
+      final totalInt = player.intellect + bonusInt;
+
+      // 3. 報酬計算（合計ステータスを使用）
       final baseGems = habit.rewardGems;
       final baseXp = habit.rewardXp;
 
-      // STRボーナス: 難易度HighかつSTRが高い場合、報酬倍率UP
+      // STRボーナス: 難易度Highなら、合計STRに応じて報酬倍率UP
       double gemMultiplier = 1.0;
-      if (habit.difficulty == TaskDifficulty.high && player.str > 0) {
-        // STRが高いほど報酬倍率が上がる（例: STR=50なら1.5倍）
-        gemMultiplier = 1.0 + (player.str * 0.01);
+      if (habit.difficulty == TaskDifficulty.high && totalStr > 0) {
+        gemMultiplier = 1.0 + (totalStr * 0.01);
       }
 
-      // INTボーナス: INTが高いほど獲得XPが増加
+      // INTボーナス: 合計INTに応じて獲得XP倍率UP
       double xpMultiplier = 1.0;
-      if (player.intellect > 0) {
-        // INTが高いほどXP倍率が上がる（例: INT=30なら1.3倍）
-        xpMultiplier = 1.0 + (player.intellect * 0.01);
+      if (totalInt > 0) {
+        xpMultiplier = 1.0 + (totalInt * 0.01);
       }
 
       final calculatedGems = (baseGems * gemMultiplier).round();
       final calculatedXp = (baseXp * xpMultiplier).round();
 
-      // 3. ステータス成長: タスクタイプに応じて対応ステータスを+1
+      // 4. ステータス成長（プレイヤー自身の基礎値を上げる）
       int newStr = player.str;
       int newIntellect = player.intellect;
       int newLuck = player.luck;
       int newCha = player.cha;
 
+      int strUp = 0;
+      int intUp = 0;
+      int luckUp = 0;
+      int chaUp = 0;
+
       switch (habit.taskType) {
         case TaskType.strength:
           newStr += 1;
+          strUp = 1;
           break;
         case TaskType.intelligence:
           newIntellect += 1;
+          intUp = 1;
           break;
         case TaskType.luck:
           newLuck += 1;
+          luckUp = 1;
           break;
         case TaskType.charm:
           newCha += 1;
+          chaUp = 1;
           break;
       }
 
-      // 4. 経験値とレベルアップ判定
+      // 5. レベルアップ判定
       int newExperience = player.experience + calculatedXp;
       int newLevel = player.level;
-      
-      // 簡易レベルアップ判定（100 XP = 1 Level）
+
       final levelUp = newExperience ~/ 100;
       if (levelUp > player.level) {
         newLevel = levelUp;
       }
 
-      // 5. Update処理（トランザクション内）
-      // Habitsテーブルを更新
-      await (_db.update(_db.habits)..where((h) => h.id.equals(habit.id)))
-          .write(HabitsCompanion(
-        isCompleted: const Value(true),
-        completedAt: Value(DateTime.now()),
-      ));
+      // 6. DB更新
+      await (_db.update(_db.habits)..where((h) => h.id.equals(habit.id))).write(
+        HabitsCompanion(isCompleted: const Value(true), completedAt: Value(DateTime.now())),
+      );
 
-      // Playersテーブルを更新
-      await (_db.update(_db.players)..where((p) => p.id.equals(1)))
-          .write(PlayersCompanion(
-        willGems: Value(player.willGems + calculatedGems),
-        experience: Value(newExperience),
-        level: Value(newLevel),
-        str: Value(newStr),
-        intellect: Value(newIntellect),
-        luck: Value(newLuck),
-        cha: Value(newCha),
-        updatedAt: Value(DateTime.now()),
-      ));
+      await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
+        PlayersCompanion(
+          willGems: Value(player.willGems + calculatedGems),
+          experience: Value(newExperience),
+          level: Value(newLevel),
+          str: Value(newStr),
+          intellect: Value(newIntellect),
+          luck: Value(newLuck),
+          cha: Value(newCha),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      // 結果を返す
+      return {
+        'gems': calculatedGems,
+        'xp': calculatedXp,
+        'strUp': strUp,
+        'intUp': intUp,
+        'luckUp': luckUp,
+        'chaUp': chaUp,
+        'levelUp': (newLevel > player.level) ? 1 : 0,
+      };
     });
   }
 }
-

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
-import '../../main.dart';
+import '../../data/providers.dart';
+import '../../logic/habit_controller.dart'; // ✅ 追加
 
 class HabitScreen extends ConsumerStatefulWidget {
   const HabitScreen({super.key});
@@ -15,6 +16,13 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
   TaskType _selectedType = TaskType.strength;
   TaskDifficulty _selectedDifficulty = TaskDifficulty.normal;
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  // --- ダイアログ表示と追加処理 ---
   Future<void> _showAddHabitDialog() async {
     _titleController.clear();
     _selectedType = TaskType.strength;
@@ -37,16 +45,14 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                     hintText: '例: 朝のジョギング',
                     border: OutlineInputBorder(),
                   ),
-                  autofocus: true,
+                  autofocus: false,
                 ),
                 const SizedBox(height: 16),
                 const Text('タイプ', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<TaskType>(
-                  value: _selectedType,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  initialValue: _selectedType,
+                  decoration: const InputDecoration(border: OutlineInputBorder()),
                   items: TaskType.values.map((type) {
                     return DropdownMenuItem(
                       value: type,
@@ -60,39 +66,21 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                     );
                   }).toList(),
                   onChanged: (value) {
-                    if (value != null) {
-                      setDialogState(() {
-                        _selectedType = value;
-                      });
-                    }
+                    if (value != null) setDialogState(() => _selectedType = value);
                   },
                 ),
                 const SizedBox(height: 16),
                 const Text('難易度', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 SegmentedButton<TaskDifficulty>(
-                  segments: [
-                    ButtonSegment(
-                      value: TaskDifficulty.low,
-                      label: const Text('低'),
-                      icon: const Icon(Icons.arrow_downward, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: TaskDifficulty.normal,
-                      label: const Text('中'),
-                      icon: const Icon(Icons.remove, size: 16),
-                    ),
-                    ButtonSegment(
-                      value: TaskDifficulty.high,
-                      label: const Text('高'),
-                      icon: const Icon(Icons.arrow_upward, size: 16),
-                    ),
+                  segments: const [
+                    ButtonSegment(value: TaskDifficulty.low, label: Text('低')),
+                    ButtonSegment(value: TaskDifficulty.normal, label: Text('中')),
+                    ButtonSegment(value: TaskDifficulty.high, label: Text('高')),
                   ],
                   selected: {_selectedDifficulty},
                   onSelectionChanged: (Set<TaskDifficulty> newSelection) {
-                    setDialogState(() {
-                      _selectedDifficulty = newSelection.first;
-                    });
+                    setDialogState(() => _selectedDifficulty = newSelection.first);
                   },
                 ),
               ],
@@ -117,117 +105,107 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     );
 
     if (result == true && _titleController.text.trim().isNotEmpty) {
-      try {
-        final repository = ref.read(habitRepositoryProvider);
-        await repository.addHabit(
-          _titleController.text.trim(),
-          _selectedType,
-          _selectedDifficulty,
-        );
+      // ✅ Controller経由で追加
+      await ref
+          .read(habitControllerProvider.notifier)
+          .addHabit(
+            title: _titleController.text.trim(),
+            type: _selectedType,
+            difficulty: _selectedDifficulty,
+          );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('クエストを追加しました！'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('エラー: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('クエストを追加しました！'), backgroundColor: Colors.green),
+        );
       }
     }
   }
 
+  // --- 完了処理 ---
   Future<void> _completeHabit(Habit habit) async {
-    try {
-      final repository = ref.read(habitRepositoryProvider);
-      
-      // 完了前のプレイヤー情報を取得（報酬表示用）
-      final playerBefore = await ref.read(playerProvider.stream).first;
-      
-      await repository.completeHabit(habit);
+    // ✅ Controller経由で完了処理を実行
+    final rewards = await ref.read(habitControllerProvider.notifier).completeHabit(habit);
 
-      // 完了後のプレイヤー情報を取得（StreamProviderなので自動更新される）
-      // 少し待機してから最新の値を取得
-      await Future.delayed(const Duration(milliseconds: 200));
-      final playerAfter = await ref.read(playerProvider.stream).first;
+    if (mounted && rewards != null) {
+      final gems = rewards['gems'];
+      final xp = rewards['xp'];
+      final strUp = rewards['strUp']! > 0 ? 'STR+1 ' : '';
+      final intUp = rewards['intUp']! > 0 ? 'INT+1 ' : '';
+      final luckUp = rewards['luckUp']! > 0 ? 'LUCK+1 ' : '';
+      final chaUp = rewards['chaUp']! > 0 ? 'CHA+1 ' : '';
+      final levelUp = rewards['levelUp']! > 0 ? 'LEVEL UP! ' : '';
 
-      // 報酬計算
-      final gemsEarned = playerAfter.willGems - playerBefore.willGems;
-      final xpEarned = playerAfter.experience - playerBefore.experience;
-      
-      // ステータス上昇を確認
-      String statUp = '';
-      switch (habit.taskType) {
-        case TaskType.strength:
-          if (playerAfter.str > playerBefore.str) {
-            statUp = 'STR UP!';
-          }
-          break;
-        case TaskType.intelligence:
-          if (playerAfter.intellect > playerBefore.intellect) {
-            statUp = 'INT UP!';
-          }
-          break;
-        case TaskType.luck:
-          if (playerAfter.luck > playerBefore.luck) {
-            statUp = 'LUCK UP!';
-          }
-          break;
-        case TaskType.charm:
-          if (playerAfter.cha > playerBefore.cha) {
-            statUp = 'CHA UP!';
-          }
-          break;
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('+$gemsEarned Gems, +$xpEarned XP $statUp'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-            action: SnackBarAction(
-              label: 'OK',
-              textColor: Colors.white,
-              onPressed: () {},
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('エラー: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('達成！ +$gems Gems, +$xp XP  $strUp$intUp$luckUp$chaUp$levelUp'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
+  // --- 削除処理 ---
+  Future<void> _deleteHabit(Habit habit) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('クエスト削除'),
+        content: Text('「${habit.name}」を削除しますか？'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('キャンセル')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('削除', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      // ✅ Controller経由で削除
+      await ref.read(habitControllerProvider.notifier).deleteHabit(habit.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('クエストを削除しました')));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final habitsAsync = ref.watch(habitsProvider);
+    final playerAsync = ref.watch(playerProvider);
+    // ✅ Controllerの状態を監視（ローディング制御などに利用可能）
+    final habitState = ref.watch(habitControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('クエスト'),
+        actions: [
+          playerAsync.when(
+            data: (player) => Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.pinkAccent.withOpacity(0.5)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.diamond, color: Colors.cyanAccent, size: 16),
+                    const SizedBox(width: 4),
+                    Text('${player.willGems}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+            loading: () => const SizedBox.shrink(),
+            error: (_, __) => const SizedBox.shrink(),
+          ),
+        ],
       ),
       body: habitsAsync.when(
         data: (habits) {
@@ -238,10 +216,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                 children: [
                   Icon(Icons.task_alt, size: 64, color: Colors.grey),
                   SizedBox(height: 16),
-                  Text(
-                    'クエストを追加して始めましょう！',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                  ),
+                  Text('クエストを追加して始めましょう！', style: TextStyle(color: Colors.grey, fontSize: 16)),
                 ],
               ),
             );
@@ -256,54 +231,32 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
               if (incompleteHabits.isNotEmpty) ...[
                 const Text(
                   '進行中',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 8),
-                ...incompleteHabits.map((habit) => _buildHabitCard(habit, false)),
+                ...incompleteHabits.map(
+                  (habit) => _buildHabitCard(habit, false, habitState.isLoading),
+                ),
                 const SizedBox(height: 24),
               ],
               if (completedHabits.isNotEmpty) ...[
                 const Text(
                   '完了済み',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
-                ...completedHabits.map((habit) => _buildHabitCard(habit, true)),
+                ...completedHabits.map(
+                  (habit) => _buildHabitCard(habit, true, habitState.isLoading),
+                ),
               ],
             ],
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'エラーが発生しました',
-                style: TextStyle(color: Colors.red[300]),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
+        error: (error, stack) => const Center(child: Text('エラーが発生しました')),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddHabitDialog,
+        onPressed: habitState.isLoading ? null : _showAddHabitDialog,
         icon: const Icon(Icons.add_task),
         label: const Text('クエスト追加'),
         backgroundColor: Colors.pinkAccent,
@@ -311,17 +264,14 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     );
   }
 
-  Widget _buildHabitCard(Habit habit, bool isCompleted) {
+  Widget _buildHabitCard(Habit habit, bool isCompleted, bool isLoading) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color: isCompleted ? Colors.grey[900] : null,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: _getTaskTypeColor(habit.taskType).withOpacity(0.3),
-          child: Icon(
-            _getTaskTypeIcon(habit.taskType),
-            color: _getTaskTypeColor(habit.taskType),
-          ),
+          child: Icon(_getTaskTypeIcon(habit.taskType), color: _getTaskTypeColor(habit.taskType)),
         ),
         title: Text(
           habit.name,
@@ -333,31 +283,15 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         subtitle: Row(
           children: [
             Chip(
-              label: Text(
-                _getTaskTypeLabel(habit.taskType),
-                style: const TextStyle(fontSize: 10),
-              ),
+              label: Text(_getTaskTypeLabel(habit.taskType), style: const TextStyle(fontSize: 10)),
               backgroundColor: _getTaskTypeColor(habit.taskType).withOpacity(0.2),
-              padding: EdgeInsets.zero,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            const SizedBox(width: 4),
-            Chip(
-              label: Text(
-                _getDifficultyLabel(habit.difficulty),
-                style: const TextStyle(fontSize: 10),
-              ),
-              backgroundColor: _getDifficultyColor(habit.difficulty).withOpacity(0.2),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             const SizedBox(width: 4),
             Text(
               '${habit.rewardGems}G / ${habit.rewardXp}XP',
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.grey[400],
-              ),
+              style: TextStyle(fontSize: 10, color: Colors.grey[400]),
             ),
           ],
         ),
@@ -365,13 +299,16 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
             ? const Icon(Icons.check_circle, color: Colors.green)
             : IconButton(
                 icon: const Icon(Icons.check_circle_outline),
-                onPressed: () => _completeHabit(habit),
+                // 処理中はボタン無効化
+                onPressed: isLoading ? null : () => _completeHabit(habit),
                 tooltip: '完了',
               ),
+        onLongPress: () => _deleteHabit(habit), // 長押しで削除
       ),
     );
   }
 
+  // --- ヘルパーメソッド（アイコン・色・ラベル） ---
   IconData _getTaskTypeIcon(TaskType type) {
     switch (type) {
       case TaskType.strength:
@@ -410,27 +347,4 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         return Colors.pink;
     }
   }
-
-  String _getDifficultyLabel(TaskDifficulty difficulty) {
-    switch (difficulty) {
-      case TaskDifficulty.low:
-        return '低';
-      case TaskDifficulty.normal:
-        return '中';
-      case TaskDifficulty.high:
-        return '高';
-    }
-  }
-
-  Color _getDifficultyColor(TaskDifficulty difficulty) {
-    switch (difficulty) {
-      case TaskDifficulty.low:
-        return Colors.green;
-      case TaskDifficulty.normal:
-        return Colors.orange;
-      case TaskDifficulty.high:
-        return Colors.red;
-    }
-  }
 }
-

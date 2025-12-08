@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math'; // ✅ 忘れずにimport
 import 'package:drift/drift.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,41 +16,36 @@ class GachaItemRepository {
   /// ギャラリーから画像を選択し、アプリ内に保存してデータベースに登録
   Future<int> pickAndSaveItem(String title) async {
     try {
-      // 画像ピッカーで画像を選択
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 85, // 品質を少し下げてファイルサイズを削減
+        imageQuality: 85,
       );
 
       if (pickedFile == null) {
         throw Exception('画像が選択されませんでした');
       }
 
-      // アプリ内の 'oshi_images' フォルダにコピー
       final appDir = await getApplicationDocumentsDirectory();
       final imagesDir = Directory(p.join(appDir.path, 'oshi_images'));
-      
-      // ディレクトリが存在しない場合は作成
+
       if (!await imagesDir.exists()) {
         await imagesDir.create(recursive: true);
       }
 
-      // ファイル名を生成（タイムスタンプ + 元のファイル名）
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final originalFileName = p.basename(pickedFile.path);
       final newFileName = '${timestamp}_$originalFileName';
       final newPath = p.join(imagesDir.path, newFileName);
 
-      // ファイルをコピー
       final file = File(pickedFile.path);
       await file.copy(newPath);
 
-      // データベースに保存（isUnlocked: true, rarity: N として初期登録）
+      // 初期登録時はロック状態
       final companion = GachaItemsCompanion.insert(
         imagePath: newPath,
         title: title,
         rarity: const Value(Rarity.n),
-        isUnlocked: const Value(true),
+        isUnlocked: const Value(false),
         strBonus: const Value(0),
         intBonus: const Value(0),
         luckBonus: const Value(0),
@@ -65,25 +61,66 @@ class GachaItemRepository {
 
   /// 全アイテムをStreamで監視
   Stream<List<GachaItem>> watchAllItems() {
-    return (_db.select(_db.gachaItems)
-          ..orderBy([(item) => OrderingTerm.desc(item.createdAt)]))
-        .watch();
+    return (_db.select(
+      _db.gachaItems,
+    )..orderBy([(item) => OrderingTerm.desc(item.createdAt)])).watch();
   }
 
   /// 全アイテムを取得
   Future<List<GachaItem>> getAllItems() async {
-    return await (_db.select(_db.gachaItems)
-          ..orderBy([(item) => OrderingTerm.desc(item.createdAt)]))
-        .get();
+    return await (_db.select(
+      _db.gachaItems,
+    )..orderBy([(item) => OrderingTerm.desc(item.createdAt)])).get();
   }
 
-  /// アイテムをアンロック
+  /// アイテムをアンロック（デバッグ用など）
   Future<void> unlockItem(int id) async {
-    await (_db.update(_db.gachaItems)..where((item) => item.id.equals(id)))
-        .write(GachaItemsCompanion(
-      isUnlocked: const Value(true),
-      unlockedAt: Value(DateTime.now()),
-    ));
+    await (_db.update(_db.gachaItems)..where((item) => item.id.equals(id))).write(
+      GachaItemsCompanion(isUnlocked: const Value(true), unlockedAt: Value(DateTime.now())),
+    );
+  }
+
+  // 👇 追加・修正したガチャロジック
+  Future<GachaItem> pullGacha(int gemCost) async {
+    return await _db.transaction(() async {
+      // 1. プレイヤー情報取得
+      final player = await (_db.select(_db.players)..where((p) => p.id.equals(1))).getSingle();
+
+      if (player.willGems < gemCost) {
+        throw Exception('ジェムが足りません（必要: $gemCost Gems）');
+      }
+
+      // 2. 排出候補（未アンロック）を取得
+      final candidates = await (_db.select(
+        _db.gachaItems,
+      )..where((tbl) => tbl.isUnlocked.not())).get();
+
+      if (candidates.isEmpty) {
+        throw Exception('ガチャから出る推しがもういません！\n画像を新しく追加してください。');
+      }
+
+      // ランダム抽選
+      final random = Random();
+      final winner = candidates[random.nextInt(candidates.length)];
+      final now = DateTime.now();
+
+      // 3. 更新処理
+      // ジェム消費
+      await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
+        PlayersCompanion(willGems: Value(player.willGems - gemCost), updatedAt: Value(now)),
+      );
+
+      // アイテムアンロック
+      await (_db.update(_db.gachaItems)..where((i) => i.id.equals(winner.id))).write(
+        GachaItemsCompanion(isUnlocked: const Value(true), unlockedAt: Value(now)),
+      );
+
+      // 4. 更新後のアイテムを返す
+      // 修正ポイント: Value() で包む
+      return winner.copyWith(
+        isUnlocked: true,
+        unlockedAt: Value(now), // ✅ ここで Value() が必要です
+      );
+    });
   }
 }
-
