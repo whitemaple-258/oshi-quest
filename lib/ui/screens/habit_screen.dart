@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/habit_controller.dart';
+import '../../logic/audio_controller.dart';
+import '../../ui/widgets/level_up_dialog.dart';
 
 class HabitScreen extends ConsumerStatefulWidget {
   const HabitScreen({super.key});
@@ -152,15 +154,48 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
       final intUp = rewards['intUp']! > 0 ? 'INT+1 ' : '';
       final luckUp = rewards['luckUp']! > 0 ? 'LUCK+1 ' : '';
       final chaUp = rewards['chaUp']! > 0 ? 'CHA+1 ' : '';
-      final levelUp = rewards['levelUp']! > 0 ? 'LEVEL UP! ' : '';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('達成！ +$gems Gems, +$xp XP  $strUp$intUp$luckUp$chaUp$levelUp'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      // レベルアップ判定
+      final isLevelUp = rewards['levelUp'] == 1;
+
+      if (isLevelUp) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final player = await ref.read(playerProvider.future);
+
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => LevelUpDialog(newLevel: player.level, onClosed: () {}),
+          );
+          // ✅ レベルアップ時のSE再生
+          ref.read(audioControllerProvider.notifier).playLevelUpSE();
+
+          // 少し待ってからダイアログ (現在のレベルを再取得するため)
+          await Future.delayed(const Duration(milliseconds: 500));
+          final player = await ref.read(playerProvider.future);
+
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => LevelUpDialog(newLevel: player.level, onClosed: () {}),
+            );
+          }
+        }
+      } else {
+        // ✅ 通常完了時のSE再生
+        ref.read(audioControllerProvider.notifier).playCompleteSE();
+
+        // スナックバー表示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('達成！ +$gems Gems, +$xp XP  $strUp$intUp$luckUp$chaUp'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 

@@ -163,11 +163,11 @@ class HabitRepository {
 
       // 5. レベルアップ判定
       int newExperience = player.experience + calculatedXp;
-      int newLevel = player.level;
+      final calculatedLevel = (newExperience ~/ 100) + 1;
 
-      final levelUp = newExperience ~/ 100;
-      if (levelUp > player.level) {
-        newLevel = levelUp;
+      int newLevel = player.level;
+      if (calculatedLevel > player.level) {
+        newLevel = calculatedLevel;
       }
 
       // 6. DB更新

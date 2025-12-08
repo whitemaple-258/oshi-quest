@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
-import 'gacha_screen.dart'; // ✅ 追加
+import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'registered_items_screen.dart';
 
@@ -16,12 +16,7 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
-  // ✅ 3つの画面を管理
-  final List<Widget> _screens = [
-    const HomeTab(),
-    const HabitScreen(),
-    const GachaScreen(), // ✅ 追加
-  ];
+  final List<Widget> _screens = [const HomeTab(), const HabitScreen(), const GachaScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +40,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             selectedIcon: Icon(Icons.task_alt),
             label: 'Quests',
           ),
-          // ✅ ガチャタブ追加
           NavigationDestination(
             icon: Icon(Icons.auto_awesome_outlined),
             selectedIcon: Icon(Icons.auto_awesome),
@@ -65,8 +59,6 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
-  // ⚠️ ガチャ関連のロジックは全て GachaScreen へ移動したため削除
-
   @override
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
@@ -82,7 +74,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          // 装備変更ボタン
           IconButton(
             icon: const Icon(Icons.list_alt),
             tooltip: '推し一覧・装備変更',
@@ -98,7 +89,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             },
           ),
           const SizedBox(width: 8),
-          // ジェム表示
           playerAsync.when(
             data: (player) => Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -168,45 +158,125 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             top: 100,
             left: 16,
             child: playerAsync.when(
-              data: (player) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildStatBadge('Lv.${player.level}', Colors.white, Colors.black54),
-                  const SizedBox(height: 8),
-                  _buildStatBadge('STR ${player.str}', Colors.redAccent, Colors.black54),
-                  const SizedBox(height: 4),
-                  _buildStatBadge('INT ${player.intellect}', Colors.blueAccent, Colors.black54),
-                  const SizedBox(height: 4),
-                  _buildStatBadge('LUCK ${player.luck}', Colors.amber, Colors.black54),
-                  const SizedBox(height: 4),
-                  _buildStatBadge('CHA ${player.cha}', Colors.pinkAccent, Colors.black54),
-                ],
-              ),
+              data: (player) {
+                final partner = partnerAsync.value;
+                final bonusStr = partner?.strBonus ?? 0;
+                final bonusInt = partner?.intBonus ?? 0;
+                final bonusLuck = partner?.luckBonus ?? 0;
+                final bonusCha = partner?.chaBonus ?? 0;
+
+                // --- EXP計算 ---
+                // Lv1: 0-99 (Next 100)
+                // Lv2: 100-199 (Next 200)
+                // 現在のレベルの開始XP = (Lv-1) * 100
+                // 次のレベルのXP = Lv * 100
+                final nextLevelExp = player.level * 100;
+                final currentLevelStartExp = (player.level - 1) * 100;
+
+                // 現在の進捗 = 現在の総XP - 現在のレベルの開始XP
+                final currentProgressExp = player.experience - currentLevelStartExp;
+                // 次のレベルまでに必要な1レベル分のXP（固定100だが計算式として）
+                final requiredExpForNext = 100;
+
+                final progress = (currentProgressExp / requiredExpForNext).clamp(0.0, 1.0);
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Lvバッジ & EXPバー
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white24),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Lv.${player.level}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          SizedBox(
+                            width: 100,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                LinearProgressIndicator(
+                                  value: progress,
+                                  backgroundColor: Colors.white24,
+                                  color: Colors.amber,
+                                  minHeight: 6,
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'EXP: $currentProgressExp / $requiredExpForNext',
+                                  style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                    _buildStatRow('STR', player.str, bonusStr, Colors.redAccent),
+                    const SizedBox(height: 4),
+                    _buildStatRow('INT', player.intellect, bonusInt, Colors.blueAccent),
+                    const SizedBox(height: 4),
+                    _buildStatRow('LUCK', player.luck, bonusLuck, Colors.amber),
+                    const SizedBox(height: 4),
+                    _buildStatRow('CHA', player.cha, bonusCha, Colors.pinkAccent),
+                  ],
+                );
+              },
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
           ),
         ],
       ),
-      // ⚠️ FABは削除（GachaScreenへ移動）
     );
   }
 
-  Widget _buildStatBadge(String text, Color textColor, Color bgColor) {
+  Widget _buildStatRow(String label, int base, int bonus, Color color) {
+    final total = base + bonus;
+    final hasBonus = bonus > 0;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: Colors.black54,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: textColor.withOpacity(0.3)),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-          shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '$label $total ',
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
+              ),
+            ),
+            if (hasBonus)
+              TextSpan(
+                text: '(+$bonus)',
+                style: const TextStyle(color: Colors.white70, fontSize: 10),
+              ),
+          ],
         ),
       ),
     );
