@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
-import '../../logic/gacha_controller.dart';
-import '../widgets/magic_circle_dialog.dart';
+import 'gacha_screen.dart'; // ✅ 追加
 import 'habit_screen.dart';
 import 'registered_items_screen.dart';
 
@@ -17,7 +16,12 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [const HomeTab(), const HabitScreen()];
+  // ✅ 3つの画面を管理
+  final List<Widget> _screens = [
+    const HomeTab(),
+    const HabitScreen(),
+    const GachaScreen(), // ✅ 追加
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +45,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             selectedIcon: Icon(Icons.task_alt),
             label: 'Quests',
           ),
+          // ✅ ガチャタブ追加
+          NavigationDestination(
+            icon: Icon(Icons.auto_awesome_outlined),
+            selectedIcon: Icon(Icons.auto_awesome),
+            label: 'Gacha',
+          ),
         ],
       ),
     );
@@ -55,100 +65,12 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
-  final TextEditingController _titleController = TextEditingController();
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickAndSaveImage() async {
-    final title = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('推しのタイトルを入力'),
-        content: TextField(
-          controller: _titleController,
-          decoration: const InputDecoration(
-            hintText: '例: 推しの日常ショット',
-            helperText: '※追加した画像はガチャから排出されるまでロックされます',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: false,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _titleController.clear();
-            },
-            child: const Text('キャンセル'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (_titleController.text.trim().isNotEmpty) {
-                Navigator.of(context).pop(_titleController.text.trim());
-              }
-            },
-            child: const Text('追加する'),
-          ),
-        ],
-      ),
-    );
-
-    if (title == null || title.isEmpty) return;
-
-    try {
-      final repository = ref.read(gachaItemRepositoryProvider);
-      await repository.pickAndSaveItem(title);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ガチャBOXに追加しました！'), backgroundColor: Colors.green),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('エラー: $e'), backgroundColor: Colors.red));
-      }
-    } finally {
-      _titleController.clear();
-    }
-  }
-
-  void _pullGacha() async {
-    try {
-      // コントローラー経由でガチャを実行
-      final resultItem = await ref.read(gachaControllerProvider.notifier).pullGacha();
-
-      if (resultItem != null && mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => GachaAnimationDialog(item: resultItem, onAnimationComplete: () {}),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        // エラーメッセージの整形
-        final errorMsg = e.toString().replaceAll('Exception: ', '');
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMsg), backgroundColor: Colors.redAccent));
-      }
-    }
-  }
+  // ⚠️ ガチャ関連のロジックは全て GachaScreen へ移動したため削除
 
   @override
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
     final partnerAsync = ref.watch(currentPartnerProvider);
-
-    // ✅ 追加: ガチャ状態を監視（処理中の破棄を防ぐ）
-    final gachaState = ref.watch(gachaControllerProvider);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -160,7 +82,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          // ✅ リストボタン（登録アイテム一覧へ）
+          // 装備変更ボタン
           IconButton(
             icon: const Icon(Icons.list_alt),
             tooltip: '推し一覧・装備変更',
@@ -222,7 +144,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          '右上のリストから装備するか、\nガチャで推しを召喚してください',
+                          '右上のリストから装備するか、\nガチャタブで推しを召喚してください',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.grey),
                         ),
@@ -266,33 +188,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           ),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton.small(
-            heroTag: 'add_image',
-            onPressed: gachaState.isLoading ? null : _pickAndSaveImage,
-            backgroundColor: Colors.grey[800],
-            child: const Icon(Icons.add_photo_alternate),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton.extended(
-            heroTag: 'summon',
-            // 処理中はボタンを無効化
-            onPressed: gachaState.isLoading ? null : _pullGacha,
-            icon: gachaState.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : const Icon(Icons.auto_awesome),
-            label: Text(gachaState.isLoading ? '召喚中...' : '召喚 (100💎)'),
-            backgroundColor: Colors.pinkAccent,
-          ),
-        ],
-      ),
+      // ⚠️ FABは削除（GachaScreenへ移動）
     );
   }
 

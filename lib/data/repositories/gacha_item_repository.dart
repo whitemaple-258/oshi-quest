@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:math'; // ✅ 忘れずにimport
+import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -40,7 +40,6 @@ class GachaItemRepository {
       final file = File(pickedFile.path);
       await file.copy(newPath);
 
-      // 初期登録時はロック状態
       final companion = GachaItemsCompanion.insert(
         imagePath: newPath,
         title: title,
@@ -73,14 +72,13 @@ class GachaItemRepository {
     )..orderBy([(item) => OrderingTerm.desc(item.createdAt)])).get();
   }
 
-  /// アイテムをアンロック（デバッグ用など）
   Future<void> unlockItem(int id) async {
     await (_db.update(_db.gachaItems)..where((item) => item.id.equals(id))).write(
       GachaItemsCompanion(isUnlocked: const Value(true), unlockedAt: Value(DateTime.now())),
     );
   }
 
-  // 👇 追加・修正したガチャロジック
+  // 👇 重複あり・親密度加算ロジックに変更
   Future<GachaItem> pullGacha(int gemCost) async {
     return await _db.transaction(() async {
       // 1. プレイヤー情報取得
@@ -90,13 +88,11 @@ class GachaItemRepository {
         throw Exception('ジェムが足りません（必要: $gemCost Gems）');
       }
 
-      // 2. 排出候補（未アンロック）を取得
-      final candidates = await (_db.select(
-        _db.gachaItems,
-      )..where((tbl) => tbl.isUnlocked.not())).get();
+      // 2. 排出候補：全てのアイテムを対象にする（重複OK）
+      final candidates = await (_db.select(_db.gachaItems)).get();
 
       if (candidates.isEmpty) {
-        throw Exception('ガチャから出る推しがもういません！\n画像を新しく追加してください。');
+        throw Exception('ガチャから出る推しがいません！\nまずは画像を登録してください。');
       }
 
       // ランダム抽選
@@ -110,17 +106,20 @@ class GachaItemRepository {
         PlayersCompanion(willGems: Value(player.willGems - gemCost), updatedAt: Value(now)),
       );
 
-      // アイテムアンロック
+      // アイテム更新（アンロック & 親密度加算）
+      // 既に所持している場合でも bondLevel を +1 する
+      final newBondLevel = winner.bondLevel + 1;
+
       await (_db.update(_db.gachaItems)..where((i) => i.id.equals(winner.id))).write(
-        GachaItemsCompanion(isUnlocked: const Value(true), unlockedAt: Value(now)),
+        GachaItemsCompanion(
+          isUnlocked: const Value(true),
+          unlockedAt: Value(now), // 更新日時として記録
+          bondLevel: Value(newBondLevel), // ✅ 親密度UP
+        ),
       );
 
       // 4. 更新後のアイテムを返す
-      // 修正ポイント: Value() で包む
-      return winner.copyWith(
-        isUnlocked: true,
-        unlockedAt: Value(now), // ✅ ここで Value() が必要です
-      );
+      return winner.copyWith(isUnlocked: true, unlockedAt: Value(now), bondLevel: newBondLevel);
     });
   }
 }

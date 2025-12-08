@@ -8,10 +8,9 @@ part 'habit_controller.g.dart';
 class HabitController extends _$HabitController {
   @override
   FutureOr<void> build() {
-    // 初期化処理は不要
+    // 初期化不要
   }
 
-  /// タスクの追加
   Future<void> addHabit({
     required String title,
     required TaskType type,
@@ -27,12 +26,27 @@ class HabitController extends _$HabitController {
     }
   }
 
-  /// タスクの完了（報酬データを返す）
+  // 👇 追加: 更新アクション
+  Future<void> updateHabit({
+    required Habit habit,
+    required String title,
+    required TaskType type,
+    required TaskDifficulty difficulty,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final repository = ref.read(habitRepositoryProvider);
+      await repository.updateHabit(habit, title, type, difficulty);
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
   Future<Map<String, int>?> completeHabit(Habit habit) async {
     state = const AsyncValue.loading();
     try {
       final repository = ref.read(habitRepositoryProvider);
-      // Repositoryから報酬計算結果を受け取る
       final rewards = await repository.completeHabit(habit);
       state = const AsyncValue.data(null);
       return rewards;
@@ -42,7 +56,6 @@ class HabitController extends _$HabitController {
     }
   }
 
-  /// タスクの削除
   Future<void> deleteHabit(int id) async {
     state = const AsyncValue.loading();
     try {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
-import '../../logic/habit_controller.dart'; // ✅ 追加
+import '../../logic/habit_controller.dart';
 
 class HabitScreen extends ConsumerStatefulWidget {
   const HabitScreen({super.key});
@@ -22,17 +22,20 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     super.dispose();
   }
 
-  // --- ダイアログ表示と追加処理 ---
-  Future<void> _showAddHabitDialog() async {
-    _titleController.clear();
-    _selectedType = TaskType.strength;
-    _selectedDifficulty = TaskDifficulty.normal;
+  // --- ダイアログ表示（追加・編集兼用） ---
+  Future<void> _showEditHabitDialog({Habit? habit}) async {
+    // 初期値の設定（編集時は既存データをセット）
+    _titleController.text = habit?.name ?? '';
+    _selectedType = habit?.taskType ?? TaskType.strength;
+    _selectedDifficulty = habit?.difficulty ?? TaskDifficulty.normal;
+
+    final isEditing = habit != null;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('新しいクエストを追加'),
+          title: Text(isEditing ? 'クエスト編集' : '新しいクエスト'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -97,7 +100,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                   Navigator.of(context).pop(true);
                 }
               },
-              child: const Text('追加'),
+              child: Text(isEditing ? '更新' : '追加'),
             ),
           ],
         ),
@@ -105,26 +108,41 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     );
 
     if (result == true && _titleController.text.trim().isNotEmpty) {
-      // ✅ Controller経由で追加
-      await ref
-          .read(habitControllerProvider.notifier)
-          .addHabit(
-            title: _titleController.text.trim(),
-            type: _selectedType,
-            difficulty: _selectedDifficulty,
+      if (isEditing) {
+        // 更新処理
+        await ref
+            .read(habitControllerProvider.notifier)
+            .updateHabit(
+              habit: habit,
+              title: _titleController.text.trim(),
+              type: _selectedType,
+              difficulty: _selectedDifficulty,
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('クエストを更新しました！'), backgroundColor: Colors.green),
           );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('クエストを追加しました！'), backgroundColor: Colors.green),
-        );
+        }
+      } else {
+        // 追加処理
+        await ref
+            .read(habitControllerProvider.notifier)
+            .addHabit(
+              title: _titleController.text.trim(),
+              type: _selectedType,
+              difficulty: _selectedDifficulty,
+            );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('クエストを追加しました！'), backgroundColor: Colors.green),
+          );
+        }
       }
     }
   }
 
   // --- 完了処理 ---
   Future<void> _completeHabit(Habit habit) async {
-    // ✅ Controller経由で完了処理を実行
     final rewards = await ref.read(habitControllerProvider.notifier).completeHabit(habit);
 
     if (mounted && rewards != null) {
@@ -146,8 +164,37 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     }
   }
 
-  // --- 削除処理 ---
-  Future<void> _deleteHabit(Habit habit) async {
+  // --- 操作メニュー（編集/削除） ---
+  void _showHabitActionMenu(Habit habit) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('編集'),
+              onTap: () {
+                Navigator.pop(context); // シートを閉じる
+                _showEditHabitDialog(habit: habit); // 編集ダイアログを開く
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('削除', style: TextStyle(color: Colors.red)),
+              onTap: () async {
+                Navigator.pop(context); // シートを閉じる
+                await _confirmDelete(habit); // 削除確認
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(Habit habit) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -164,7 +211,6 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     );
 
     if (confirm == true) {
-      // ✅ Controller経由で削除
       await ref.read(habitControllerProvider.notifier).deleteHabit(habit.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('クエストを削除しました')));
@@ -176,7 +222,6 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
   Widget build(BuildContext context) {
     final habitsAsync = ref.watch(habitsProvider);
     final playerAsync = ref.watch(playerProvider);
-    // ✅ Controllerの状態を監視（ローディング制御などに利用可能）
     final habitState = ref.watch(habitControllerProvider);
 
     return Scaffold(
@@ -256,7 +301,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         error: (error, stack) => const Center(child: Text('エラーが発生しました')),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: habitState.isLoading ? null : _showAddHabitDialog,
+        onPressed: habitState.isLoading ? null : () => _showEditHabitDialog(),
         icon: const Icon(Icons.add_task),
         label: const Text('クエスト追加'),
         backgroundColor: Colors.pinkAccent,
@@ -299,16 +344,15 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
             ? const Icon(Icons.check_circle, color: Colors.green)
             : IconButton(
                 icon: const Icon(Icons.check_circle_outline),
-                // 処理中はボタン無効化
                 onPressed: isLoading ? null : () => _completeHabit(habit),
                 tooltip: '完了',
               ),
-        onLongPress: () => _deleteHabit(habit), // 長押しで削除
+        // ✅ 変更: 長押しでアクションメニューを表示
+        onLongPress: () => _showHabitActionMenu(habit),
       ),
     );
   }
 
-  // --- ヘルパーメソッド（アイコン・色・ラベル） ---
   IconData _getTaskTypeIcon(TaskType type) {
     switch (type) {
       case TaskType.strength:
