@@ -22,6 +22,7 @@ class GachaStudioScreen extends StatelessWidget {
           rarity: isSSR ? Rarity.ssr : Rarity.n,
           isUnlocked: false,
           strBonus: 0,
+          vitBonus: 0,
           intBonus: 0,
           luckBonus: 0,
           chaBonus: 0,

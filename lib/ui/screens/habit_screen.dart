@@ -154,14 +154,38 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
       final gems = rewards['gems'];
       final xp = rewards['xp'];
       final strUp = rewards['strUp']! > 0 ? 'STR+1 ' : '';
+      final vitUp = rewards['vitUp']! > 0 ? 'VIT+1 ' : '';
       final intUp = rewards['intUp']! > 0 ? 'INT+1 ' : '';
       final luckUp = rewards['luckUp']! > 0 ? 'LUCK+1 ' : '';
       final chaUp = rewards['chaUp']! > 0 ? 'CHA+1 ' : '';
-
+      final newTitles = rewards['newTitles'] as List<String>? ?? [];
       final isLevelUp = rewards['levelUp'] == 1;
 
+      // 1. 称号獲得通知
+      if (newTitles.isNotEmpty) {
+        // 称号獲得ダイアログなどを出すとリッチですが、まずはスナックバーで通知
+        // 複数ある場合はまとめて表示
+        final titleText = newTitles.join(', ');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.emoji_events, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text('称号獲得！「$titleText」')),
+              ],
+            ),
+            backgroundColor: Colors.amber[800],
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        // 音も鳴らす（レベルアップ音などで代用、または専用SEを追加）
+        ref.read(audioControllerProvider.notifier).playLevelUpSE();
+        await Future.delayed(const Duration(seconds: 2)); // 演出待ち
+      }
+
+      // 2. レベルアップ処理
       if (isLevelUp) {
-        // ✅ レベルアップ時の処理
         // 振動
         HapticFeedback.heavyImpact();
         // 先に音を鳴らす
@@ -182,7 +206,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
           );
         }
       } else {
-        // ✅ 通常完了時の処理
+        // タスク完了時の処理
         HapticFeedback.mediumImpact();
         ref.read(audioControllerProvider.notifier).playCompleteSE();
 
@@ -391,6 +415,8 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return Icons.fitness_center;
+      case TaskType.vitality:
+        return Icons.directions_run;
       case TaskType.intelligence:
         return Icons.school;
       case TaskType.luck:
@@ -404,6 +430,8 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return 'STR';
+      case TaskType.vitality:
+        return 'VIT';
       case TaskType.intelligence:
         return 'INT';
       case TaskType.luck:
@@ -417,10 +445,12 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return Colors.red;
+      case TaskType.vitality:
+        return Colors.amber;
       case TaskType.intelligence:
         return Colors.blue;
       case TaskType.luck:
-        return Colors.amber;
+        return Colors.purple;
       case TaskType.charm:
         return Colors.pink;
     }

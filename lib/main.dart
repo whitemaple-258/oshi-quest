@@ -25,6 +25,7 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
               willGems: const drift.Value(500),
               experience: const drift.Value(0),
               str: const drift.Value(0),
+              vit: const drift.Value(0),
               intellect: const drift.Value(0),
               luck: const drift.Value(0),
               cha: const drift.Value(0),

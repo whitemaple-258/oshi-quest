@@ -78,6 +78,7 @@ class GachaItemRepository {
         rarity: const Value(Rarity.n),
         isUnlocked: const Value(false),
         strBonus: const Value(0),
+        vitBonus: const Value(0),
         intBonus: const Value(0),
         luckBonus: const Value(0),
         chaBonus: const Value(0),

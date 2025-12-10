@@ -53,6 +53,16 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _vitMeta = const VerificationMeta('vit');
+  @override
+  late final GeneratedColumn<int> vit = GeneratedColumn<int>(
+    'vit',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _intellectMeta = const VerificationMeta(
     'intellect',
   );
@@ -150,6 +160,7 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     level,
     experience,
     str,
+    vit,
     intellect,
     luck,
     cha,
@@ -190,6 +201,12 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
       context.handle(
         _strMeta,
         str.isAcceptableOrUnknown(data['str']!, _strMeta),
+      );
+    }
+    if (data.containsKey('vit')) {
+      context.handle(
+        _vitMeta,
+        vit.isAcceptableOrUnknown(data['vit']!, _vitMeta),
       );
     }
     if (data.containsKey('intellect')) {
@@ -271,6 +288,10 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.int,
         data['${effectivePrefix}str'],
       )!,
+      vit: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vit'],
+      )!,
       intellect: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}intellect'],
@@ -317,6 +338,7 @@ class Player extends DataClass implements Insertable<Player> {
   final int level;
   final int experience;
   final int str;
+  final int vit;
   final int intellect;
   final int luck;
   final int cha;
@@ -330,6 +352,7 @@ class Player extends DataClass implements Insertable<Player> {
     required this.level,
     required this.experience,
     required this.str,
+    required this.vit,
     required this.intellect,
     required this.luck,
     required this.cha,
@@ -346,6 +369,7 @@ class Player extends DataClass implements Insertable<Player> {
     map['level'] = Variable<int>(level);
     map['experience'] = Variable<int>(experience);
     map['str'] = Variable<int>(str);
+    map['vit'] = Variable<int>(vit);
     map['intellect'] = Variable<int>(intellect);
     map['luck'] = Variable<int>(luck);
     map['cha'] = Variable<int>(cha);
@@ -367,6 +391,7 @@ class Player extends DataClass implements Insertable<Player> {
       level: Value(level),
       experience: Value(experience),
       str: Value(str),
+      vit: Value(vit),
       intellect: Value(intellect),
       luck: Value(luck),
       cha: Value(cha),
@@ -392,6 +417,7 @@ class Player extends DataClass implements Insertable<Player> {
       level: serializer.fromJson<int>(json['level']),
       experience: serializer.fromJson<int>(json['experience']),
       str: serializer.fromJson<int>(json['str']),
+      vit: serializer.fromJson<int>(json['vit']),
       intellect: serializer.fromJson<int>(json['intellect']),
       luck: serializer.fromJson<int>(json['luck']),
       cha: serializer.fromJson<int>(json['cha']),
@@ -410,6 +436,7 @@ class Player extends DataClass implements Insertable<Player> {
       'level': serializer.toJson<int>(level),
       'experience': serializer.toJson<int>(experience),
       'str': serializer.toJson<int>(str),
+      'vit': serializer.toJson<int>(vit),
       'intellect': serializer.toJson<int>(intellect),
       'luck': serializer.toJson<int>(luck),
       'cha': serializer.toJson<int>(cha),
@@ -426,6 +453,7 @@ class Player extends DataClass implements Insertable<Player> {
     int? level,
     int? experience,
     int? str,
+    int? vit,
     int? intellect,
     int? luck,
     int? cha,
@@ -439,6 +467,7 @@ class Player extends DataClass implements Insertable<Player> {
     level: level ?? this.level,
     experience: experience ?? this.experience,
     str: str ?? this.str,
+    vit: vit ?? this.vit,
     intellect: intellect ?? this.intellect,
     luck: luck ?? this.luck,
     cha: cha ?? this.cha,
@@ -460,6 +489,7 @@ class Player extends DataClass implements Insertable<Player> {
           ? data.experience.value
           : this.experience,
       str: data.str.present ? data.str.value : this.str,
+      vit: data.vit.present ? data.vit.value : this.vit,
       intellect: data.intellect.present ? data.intellect.value : this.intellect,
       luck: data.luck.present ? data.luck.value : this.luck,
       cha: data.cha.present ? data.cha.value : this.cha,
@@ -482,6 +512,7 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('level: $level, ')
           ..write('experience: $experience, ')
           ..write('str: $str, ')
+          ..write('vit: $vit, ')
           ..write('intellect: $intellect, ')
           ..write('luck: $luck, ')
           ..write('cha: $cha, ')
@@ -500,6 +531,7 @@ class Player extends DataClass implements Insertable<Player> {
     level,
     experience,
     str,
+    vit,
     intellect,
     luck,
     cha,
@@ -517,6 +549,7 @@ class Player extends DataClass implements Insertable<Player> {
           other.level == this.level &&
           other.experience == this.experience &&
           other.str == this.str &&
+          other.vit == this.vit &&
           other.intellect == this.intellect &&
           other.luck == this.luck &&
           other.cha == this.cha &&
@@ -532,6 +565,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<int> level;
   final Value<int> experience;
   final Value<int> str;
+  final Value<int> vit;
   final Value<int> intellect;
   final Value<int> luck;
   final Value<int> cha;
@@ -545,6 +579,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.level = const Value.absent(),
     this.experience = const Value.absent(),
     this.str = const Value.absent(),
+    this.vit = const Value.absent(),
     this.intellect = const Value.absent(),
     this.luck = const Value.absent(),
     this.cha = const Value.absent(),
@@ -559,6 +594,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.level = const Value.absent(),
     this.experience = const Value.absent(),
     this.str = const Value.absent(),
+    this.vit = const Value.absent(),
     this.intellect = const Value.absent(),
     this.luck = const Value.absent(),
     this.cha = const Value.absent(),
@@ -573,6 +609,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<int>? level,
     Expression<int>? experience,
     Expression<int>? str,
+    Expression<int>? vit,
     Expression<int>? intellect,
     Expression<int>? luck,
     Expression<int>? cha,
@@ -587,6 +624,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (level != null) 'level': level,
       if (experience != null) 'experience': experience,
       if (str != null) 'str': str,
+      if (vit != null) 'vit': vit,
       if (intellect != null) 'intellect': intellect,
       if (luck != null) 'luck': luck,
       if (cha != null) 'cha': cha,
@@ -603,6 +641,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<int>? level,
     Value<int>? experience,
     Value<int>? str,
+    Value<int>? vit,
     Value<int>? intellect,
     Value<int>? luck,
     Value<int>? cha,
@@ -617,6 +656,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       level: level ?? this.level,
       experience: experience ?? this.experience,
       str: str ?? this.str,
+      vit: vit ?? this.vit,
       intellect: intellect ?? this.intellect,
       luck: luck ?? this.luck,
       cha: cha ?? this.cha,
@@ -642,6 +682,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     }
     if (str.present) {
       map['str'] = Variable<int>(str.value);
+    }
+    if (vit.present) {
+      map['vit'] = Variable<int>(vit.value);
     }
     if (intellect.present) {
       map['intellect'] = Variable<int>(intellect.value);
@@ -677,6 +720,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('level: $level, ')
           ..write('experience: $experience, ')
           ..write('str: $str, ')
+          ..write('vit: $vit, ')
           ..write('intellect: $intellect, ')
           ..write('luck: $luck, ')
           ..write('cha: $cha, ')
@@ -766,6 +810,18 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _vitBonusMeta = const VerificationMeta(
+    'vitBonus',
+  );
+  @override
+  late final GeneratedColumn<int> vitBonus = GeneratedColumn<int>(
+    'vit_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _intBonusMeta = const VerificationMeta(
     'intBonus',
   );
@@ -845,6 +901,7 @@ class $GachaItemsTable extends GachaItems
     rarity,
     isUnlocked,
     strBonus,
+    vitBonus,
     intBonus,
     luckBonus,
     chaBonus,
@@ -893,6 +950,12 @@ class $GachaItemsTable extends GachaItems
       context.handle(
         _strBonusMeta,
         strBonus.isAcceptableOrUnknown(data['str_bonus']!, _strBonusMeta),
+      );
+    }
+    if (data.containsKey('vit_bonus')) {
+      context.handle(
+        _vitBonusMeta,
+        vitBonus.isAcceptableOrUnknown(data['vit_bonus']!, _vitBonusMeta),
       );
     }
     if (data.containsKey('int_bonus')) {
@@ -966,6 +1029,10 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}str_bonus'],
       )!,
+      vitBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vit_bonus'],
+      )!,
       intBonus: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}int_bonus'],
@@ -1009,6 +1076,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final Rarity rarity;
   final bool isUnlocked;
   final int strBonus;
+  final int vitBonus;
   final int intBonus;
   final int luckBonus;
   final int chaBonus;
@@ -1022,6 +1090,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.rarity,
     required this.isUnlocked,
     required this.strBonus,
+    required this.vitBonus,
     required this.intBonus,
     required this.luckBonus,
     required this.chaBonus,
@@ -1042,6 +1111,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     }
     map['is_unlocked'] = Variable<bool>(isUnlocked);
     map['str_bonus'] = Variable<int>(strBonus);
+    map['vit_bonus'] = Variable<int>(vitBonus);
     map['int_bonus'] = Variable<int>(intBonus);
     map['luck_bonus'] = Variable<int>(luckBonus);
     map['cha_bonus'] = Variable<int>(chaBonus);
@@ -1061,6 +1131,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       rarity: Value(rarity),
       isUnlocked: Value(isUnlocked),
       strBonus: Value(strBonus),
+      vitBonus: Value(vitBonus),
       intBonus: Value(intBonus),
       luckBonus: Value(luckBonus),
       chaBonus: Value(chaBonus),
@@ -1086,6 +1157,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       ),
       isUnlocked: serializer.fromJson<bool>(json['isUnlocked']),
       strBonus: serializer.fromJson<int>(json['strBonus']),
+      vitBonus: serializer.fromJson<int>(json['vitBonus']),
       intBonus: serializer.fromJson<int>(json['intBonus']),
       luckBonus: serializer.fromJson<int>(json['luckBonus']),
       chaBonus: serializer.fromJson<int>(json['chaBonus']),
@@ -1106,6 +1178,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       ),
       'isUnlocked': serializer.toJson<bool>(isUnlocked),
       'strBonus': serializer.toJson<int>(strBonus),
+      'vitBonus': serializer.toJson<int>(vitBonus),
       'intBonus': serializer.toJson<int>(intBonus),
       'luckBonus': serializer.toJson<int>(luckBonus),
       'chaBonus': serializer.toJson<int>(chaBonus),
@@ -1122,6 +1195,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     Rarity? rarity,
     bool? isUnlocked,
     int? strBonus,
+    int? vitBonus,
     int? intBonus,
     int? luckBonus,
     int? chaBonus,
@@ -1135,6 +1209,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     rarity: rarity ?? this.rarity,
     isUnlocked: isUnlocked ?? this.isUnlocked,
     strBonus: strBonus ?? this.strBonus,
+    vitBonus: vitBonus ?? this.vitBonus,
     intBonus: intBonus ?? this.intBonus,
     luckBonus: luckBonus ?? this.luckBonus,
     chaBonus: chaBonus ?? this.chaBonus,
@@ -1152,6 +1227,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ? data.isUnlocked.value
           : this.isUnlocked,
       strBonus: data.strBonus.present ? data.strBonus.value : this.strBonus,
+      vitBonus: data.vitBonus.present ? data.vitBonus.value : this.vitBonus,
       intBonus: data.intBonus.present ? data.intBonus.value : this.intBonus,
       luckBonus: data.luckBonus.present ? data.luckBonus.value : this.luckBonus,
       chaBonus: data.chaBonus.present ? data.chaBonus.value : this.chaBonus,
@@ -1172,6 +1248,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
+          ..write('vitBonus: $vitBonus, ')
           ..write('intBonus: $intBonus, ')
           ..write('luckBonus: $luckBonus, ')
           ..write('chaBonus: $chaBonus, ')
@@ -1190,6 +1267,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     rarity,
     isUnlocked,
     strBonus,
+    vitBonus,
     intBonus,
     luckBonus,
     chaBonus,
@@ -1207,6 +1285,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.rarity == this.rarity &&
           other.isUnlocked == this.isUnlocked &&
           other.strBonus == this.strBonus &&
+          other.vitBonus == this.vitBonus &&
           other.intBonus == this.intBonus &&
           other.luckBonus == this.luckBonus &&
           other.chaBonus == this.chaBonus &&
@@ -1222,6 +1301,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<Rarity> rarity;
   final Value<bool> isUnlocked;
   final Value<int> strBonus;
+  final Value<int> vitBonus;
   final Value<int> intBonus;
   final Value<int> luckBonus;
   final Value<int> chaBonus;
@@ -1235,6 +1315,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
+    this.vitBonus = const Value.absent(),
     this.intBonus = const Value.absent(),
     this.luckBonus = const Value.absent(),
     this.chaBonus = const Value.absent(),
@@ -1249,6 +1330,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
+    this.vitBonus = const Value.absent(),
     this.intBonus = const Value.absent(),
     this.luckBonus = const Value.absent(),
     this.chaBonus = const Value.absent(),
@@ -1264,6 +1346,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<int>? rarity,
     Expression<bool>? isUnlocked,
     Expression<int>? strBonus,
+    Expression<int>? vitBonus,
     Expression<int>? intBonus,
     Expression<int>? luckBonus,
     Expression<int>? chaBonus,
@@ -1278,6 +1361,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (rarity != null) 'rarity': rarity,
       if (isUnlocked != null) 'is_unlocked': isUnlocked,
       if (strBonus != null) 'str_bonus': strBonus,
+      if (vitBonus != null) 'vit_bonus': vitBonus,
       if (intBonus != null) 'int_bonus': intBonus,
       if (luckBonus != null) 'luck_bonus': luckBonus,
       if (chaBonus != null) 'cha_bonus': chaBonus,
@@ -1294,6 +1378,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<Rarity>? rarity,
     Value<bool>? isUnlocked,
     Value<int>? strBonus,
+    Value<int>? vitBonus,
     Value<int>? intBonus,
     Value<int>? luckBonus,
     Value<int>? chaBonus,
@@ -1308,6 +1393,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       rarity: rarity ?? this.rarity,
       isUnlocked: isUnlocked ?? this.isUnlocked,
       strBonus: strBonus ?? this.strBonus,
+      vitBonus: vitBonus ?? this.vitBonus,
       intBonus: intBonus ?? this.intBonus,
       luckBonus: luckBonus ?? this.luckBonus,
       chaBonus: chaBonus ?? this.chaBonus,
@@ -1340,6 +1426,9 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (strBonus.present) {
       map['str_bonus'] = Variable<int>(strBonus.value);
     }
+    if (vitBonus.present) {
+      map['vit_bonus'] = Variable<int>(vitBonus.value);
+    }
     if (intBonus.present) {
       map['int_bonus'] = Variable<int>(intBonus.value);
     }
@@ -1370,6 +1459,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
+          ..write('vitBonus: $vitBonus, ')
           ..write('intBonus: $intBonus, ')
           ..write('luckBonus: $luckBonus, ')
           ..write('chaBonus: $chaBonus, ')
@@ -3885,6 +3975,7 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<int> level,
       Value<int> experience,
       Value<int> str,
+      Value<int> vit,
       Value<int> intellect,
       Value<int> luck,
       Value<int> cha,
@@ -3900,6 +3991,7 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<int> level,
       Value<int> experience,
       Value<int> str,
+      Value<int> vit,
       Value<int> intellect,
       Value<int> luck,
       Value<int> cha,
@@ -3936,6 +4028,11 @@ class $$PlayersTableFilterComposer
 
   ColumnFilters<int> get str => $composableBuilder(
     column: $table.str,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get vit => $composableBuilder(
+    column: $table.vit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4009,6 +4106,11 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get vit => $composableBuilder(
+    column: $table.vit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get intellect => $composableBuilder(
     column: $table.intellect,
     builder: (column) => ColumnOrderings(column),
@@ -4073,6 +4175,9 @@ class $$PlayersTableAnnotationComposer
   GeneratedColumn<int> get str =>
       $composableBuilder(column: $table.str, builder: (column) => column);
 
+  GeneratedColumn<int> get vit =>
+      $composableBuilder(column: $table.vit, builder: (column) => column);
+
   GeneratedColumn<int> get intellect =>
       $composableBuilder(column: $table.intellect, builder: (column) => column);
 
@@ -4134,6 +4239,7 @@ class $$PlayersTableTableManager
                 Value<int> level = const Value.absent(),
                 Value<int> experience = const Value.absent(),
                 Value<int> str = const Value.absent(),
+                Value<int> vit = const Value.absent(),
                 Value<int> intellect = const Value.absent(),
                 Value<int> luck = const Value.absent(),
                 Value<int> cha = const Value.absent(),
@@ -4147,6 +4253,7 @@ class $$PlayersTableTableManager
                 level: level,
                 experience: experience,
                 str: str,
+                vit: vit,
                 intellect: intellect,
                 luck: luck,
                 cha: cha,
@@ -4162,6 +4269,7 @@ class $$PlayersTableTableManager
                 Value<int> level = const Value.absent(),
                 Value<int> experience = const Value.absent(),
                 Value<int> str = const Value.absent(),
+                Value<int> vit = const Value.absent(),
                 Value<int> intellect = const Value.absent(),
                 Value<int> luck = const Value.absent(),
                 Value<int> cha = const Value.absent(),
@@ -4175,6 +4283,7 @@ class $$PlayersTableTableManager
                 level: level,
                 experience: experience,
                 str: str,
+                vit: vit,
                 intellect: intellect,
                 luck: luck,
                 cha: cha,
@@ -4214,6 +4323,7 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
+      Value<int> vitBonus,
       Value<int> intBonus,
       Value<int> luckBonus,
       Value<int> chaBonus,
@@ -4229,6 +4339,7 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
+      Value<int> vitBonus,
       Value<int> intBonus,
       Value<int> luckBonus,
       Value<int> chaBonus,
@@ -4300,6 +4411,11 @@ class $$GachaItemsTableFilterComposer
 
   ColumnFilters<int> get strBonus => $composableBuilder(
     column: $table.strBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get vitBonus => $composableBuilder(
+    column: $table.vitBonus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4398,6 +4514,11 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get vitBonus => $composableBuilder(
+    column: $table.vitBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get intBonus => $composableBuilder(
     column: $table.intBonus,
     builder: (column) => ColumnOrderings(column),
@@ -4457,6 +4578,9 @@ class $$GachaItemsTableAnnotationComposer
 
   GeneratedColumn<int> get strBonus =>
       $composableBuilder(column: $table.strBonus, builder: (column) => column);
+
+  GeneratedColumn<int> get vitBonus =>
+      $composableBuilder(column: $table.vitBonus, builder: (column) => column);
 
   GeneratedColumn<int> get intBonus =>
       $composableBuilder(column: $table.intBonus, builder: (column) => column);
@@ -4538,6 +4662,7 @@ class $$GachaItemsTableTableManager
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
+                Value<int> vitBonus = const Value.absent(),
                 Value<int> intBonus = const Value.absent(),
                 Value<int> luckBonus = const Value.absent(),
                 Value<int> chaBonus = const Value.absent(),
@@ -4551,6 +4676,7 @@ class $$GachaItemsTableTableManager
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
+                vitBonus: vitBonus,
                 intBonus: intBonus,
                 luckBonus: luckBonus,
                 chaBonus: chaBonus,
@@ -4566,6 +4692,7 @@ class $$GachaItemsTableTableManager
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
+                Value<int> vitBonus = const Value.absent(),
                 Value<int> intBonus = const Value.absent(),
                 Value<int> luckBonus = const Value.absent(),
                 Value<int> chaBonus = const Value.absent(),
@@ -4579,6 +4706,7 @@ class $$GachaItemsTableTableManager
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
+                vitBonus: vitBonus,
                 intBonus: intBonus,
                 luckBonus: luckBonus,
                 chaBonus: chaBonus,

@@ -167,7 +167,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          'STR:${item.strBonus} INT:${item.intBonus} LUCK:${item.luckBonus} CHA:${item.chaBonus}',
+                          'STR:${item.strBonus} VIT:${item.vitBonus} INT:${item.intBonus} LUCK:${item.luckBonus} CHA:${item.chaBonus}',
                         ),
                         trailing: equippedAt != null
                             ? Chip(
@@ -205,9 +205,10 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
   // --- Widgets ---
 
   Widget _buildTotalBonus(Map<int, GachaItem> partyMap) {
-    int str = 0, intellect = 0, luck = 0, cha = 0;
+    int str = 0, vit = 0, intellect = 0, luck = 0, cha = 0;
     for (var item in partyMap.values) {
       str += item.strBonus;
+      vit += item.vitBonus;
       intellect += item.intBonus;
       luck += item.luckBonus;
       cha += item.chaBonus;
@@ -217,8 +218,9 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatValue('STR', str, Colors.redAccent),
+        _buildStatValue('VIT', vit, Colors.amber),
         _buildStatValue('INT', intellect, Colors.blueAccent),
-        _buildStatValue('LUCK', luck, Colors.amber),
+        _buildStatValue('LUCK', luck, Colors.purple),
         _buildStatValue('CHA', cha, Colors.pinkAccent),
       ],
     );

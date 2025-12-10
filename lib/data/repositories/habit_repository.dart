@@ -133,11 +133,13 @@ class HabitRepository {
 
       // 4. ステータス成長
       int newStr = player.str;
+      int newVit = player.vit;
       int newIntellect = player.intellect;
       int newLuck = player.luck;
       int newCha = player.cha;
 
       int strUp = 0;
+      int vitUp = 0;
       int intUp = 0;
       int luckUp = 0;
       int chaUp = 0;
@@ -147,6 +149,9 @@ class HabitRepository {
           newStr += 1;
           strUp = 1;
           break;
+        case TaskType.vitality:
+          newVit += 1;
+          vitUp = 1;
         case TaskType.intelligence:
           newIntellect += 1;
           intUp = 1;
@@ -181,6 +186,7 @@ class HabitRepository {
           experience: Value(newExperience),
           level: Value(newLevel),
           str: Value(newStr),
+          vit: Value(newVit),
           intellect: Value(newIntellect),
           luck: Value(newLuck),
           cha: Value(newCha),
@@ -192,6 +198,7 @@ class HabitRepository {
         'gems': calculatedGems,
         'xp': calculatedXp,
         'strUp': strUp,
+        'vitUp': vitUp,
         'intUp': intUp,
         'luckUp': luckUp,
         'chaUp': chaUp,

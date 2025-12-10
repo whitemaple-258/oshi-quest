@@ -5,6 +5,7 @@ import '../../data/providers.dart';
 import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'party_edit_screen.dart';
+import 'title_list_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -27,10 +28,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -90,6 +88,21 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          // 称号ボタン
+          IconButton(
+            icon: const Icon(Icons.emoji_events),
+            tooltip: '称号コレクション',
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black45,
+              foregroundColor: Colors.amber, // 金色っぽく
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TitleListScreen()),
+              );
+            },
+          ),
           const SizedBox(width: 8),
           // ジェム表示
           playerAsync.when(
@@ -106,10 +119,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   children: [
                     const Icon(Icons.diamond, color: Colors.cyanAccent, size: 16),
                     const SizedBox(width: 4),
-                    Text(
-                      '${player.willGems}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    Text('${player.willGems}', style: const TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -158,7 +168,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => const Center(child: Text('エラーが発生しました')),
           ),
-          
+
           // ステータス表示
           Positioned(
             top: 100,
@@ -168,6 +178,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 // パートナーのボーナスを取得
                 final partner = partnerAsync.value;
                 final bonusStr = partner?.strBonus ?? 0;
+                final bonusVit = partner?.vitBonus ?? 0;
                 final bonusInt = partner?.intBonus ?? 0;
                 final bonusLuck = partner?.luckBonus ?? 0;
                 final bonusCha = partner?.chaBonus ?? 0;
@@ -226,13 +237,15 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
                     _buildStatRow('STR', player.str, bonusStr, Colors.redAccent),
                     const SizedBox(height: 4),
+                    _buildStatRow('VIT', player.vit, bonusVit, Colors.amber),
+                    const SizedBox(height: 4),
                     _buildStatRow('INT', player.intellect, bonusInt, Colors.blueAccent),
                     const SizedBox(height: 4),
-                    _buildStatRow('LUCK', player.luck, bonusLuck, Colors.amber),
+                    _buildStatRow('LUCK', player.luck, bonusLuck, Colors.purple),
                     const SizedBox(height: 4),
                     _buildStatRow('CHA', player.cha, bonusCha, Colors.pinkAccent),
                   ],
@@ -273,10 +286,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             if (hasBonus)
               TextSpan(
                 text: '(+$bonus)',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 10,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 10),
               ),
           ],
         ),

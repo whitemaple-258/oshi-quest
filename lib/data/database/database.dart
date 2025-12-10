@@ -13,9 +13,10 @@ part 'database.g.dart';
 // タスクタイプ
 enum TaskType {
   strength(0),
-  intelligence(1),
-  luck(2),
-  charm(3);
+  vitality(1),
+  intelligence(2),
+  luck(3),
+  charm(4);
 
   const TaskType(this.value);
   final int value;
@@ -52,6 +53,7 @@ class Players extends Table {
   IntColumn get level => integer().withDefault(const Constant(1))();
   IntColumn get experience => integer().withDefault(const Constant(0))();
   IntColumn get str => integer().withDefault(const Constant(0))();
+  IntColumn get vit => integer().withDefault(const Constant(0))();
   IntColumn get intellect => integer().withDefault(const Constant(0))(); // intは予約語のためintellect
   IntColumn get luck => integer().withDefault(const Constant(0))();
   IntColumn get cha => integer().withDefault(const Constant(0))();
@@ -70,6 +72,7 @@ class GachaItems extends Table {
   IntColumn get rarity => intEnum<Rarity>().withDefault(Constant(Rarity.n.value))();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
+  IntColumn get vitBonus => integer().withDefault(const Constant(0))();
   IntColumn get intBonus => integer().withDefault(const Constant(0))();
   IntColumn get luckBonus => integer().withDefault(const Constant(0))();
   IntColumn get chaBonus => integer().withDefault(const Constant(0))();

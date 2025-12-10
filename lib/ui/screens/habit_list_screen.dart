@@ -139,10 +139,12 @@ class _HabitCard extends ConsumerWidget {
     switch (type) {
       case TaskType.strength:
         return Colors.redAccent;
+      case TaskType.vitality:
+        return Colors.amber;
       case TaskType.intelligence:
         return Colors.blueAccent;
       case TaskType.luck:
-        return Colors.amber;
+        return Colors.purple;
       case TaskType.charm:
         return Colors.pinkAccent;
     }
@@ -152,6 +154,8 @@ class _HabitCard extends ConsumerWidget {
     switch (type) {
       case TaskType.strength:
         return Icons.fitness_center;
+      case TaskType.vitality:
+        return Icons.directions_run;
       case TaskType.intelligence:
         return Icons.school;
       case TaskType.luck:
