@@ -2,9 +2,9 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/database/database.dart';
-import 'data/providers.dart'; // ✅ providers.dart をインポート
+import 'data/providers.dart';
+import 'logic/settings_controller.dart'; // ✅ 追加: テーマカラー取得用
 import 'ui/screens/main_screen.dart';
-import 'logic/settings_controller.dart';
 
 /// アプリの初期化処理を行うプロバイダー
 final appInitializationProvider = FutureProvider<void>((ref) async {
@@ -26,12 +26,11 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
               willGems: const drift.Value(500),
               experience: const drift.Value(0),
               str: const drift.Value(0),
-              vit: const drift.Value(0),
               intellect: const drift.Value(0),
               luck: const drift.Value(0),
               cha: const drift.Value(0),
-              createdAt: drift.Value(DateTime.now()),
-              updatedAt: drift.Value(DateTime.now()),
+              vit: const drift.Value(0),
+              lastLoginAt: drift.Value(DateTime.now()),
             ),
           );
       print('✅ プレイヤーデータ(ID:1)を作成しました！');
@@ -44,18 +43,13 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     await titleRepo.initMasterData();
     print('✅ 称号データチェック完了');
 
-    // 3. ✅ 追加: デイリーリセット & サボり判定
-    final habitRepo = ref.read(habitRepositoryProvider);
-    final messages = await habitRepo.checkDailyReset();
-
-    if (messages.isNotEmpty) {
-      // ログに出す（UIでダイアログを出すにはController経由にするのが理想だが、今回は簡易的に）
-      print('💀 デイリーチェック結果: ${messages.join(", ")}');
-    }
-
-    print('✅ 初期化完了');
+    // 3. 設定データの初期化（SettingsRepository内のgetSettingsで自動生成されるため呼び出しておく）
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+    await settingsRepo.getSettings();
+    print('✅ 設定データチェック完了');
   } catch (e, stack) {
     print('❌ 初期化エラー発生: $e');
+    print(stack);
     rethrow;
   }
 });
@@ -71,6 +65,8 @@ class OshiQuestApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // 初期化処理を監視
     final initAsync = ref.watch(appInitializationProvider);
+
+    // テーマカラーを監視 (デフォルトはピンク)
     final themeColor = ref.watch(currentThemeColorProvider);
 
     return MaterialApp(
@@ -78,17 +74,14 @@ class OshiQuestApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: themeColor,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: themeColor,brightness: 
-          Brightness.dark,
-        )
+        primarySwatch: themeColor, // ✅ 適用
+        colorScheme: ColorScheme.fromSeed(seedColor: themeColor, brightness: Brightness.dark),
         scaffoldBackgroundColor: const Color(0xFF1A1A2E),
         useMaterial3: true,
       ),
       // 初期化状態に応じて画面を切り替え
       home: initAsync.when(
-        data: (_) => const MainScreen(), // 完了したらメイン画面へ
+        data: (_) => const MainScreen(),
         loading: () => const Scaffold(
           body: Center(
             child: Column(
