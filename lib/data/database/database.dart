@@ -156,6 +156,7 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
+<<<<<<< HEAD
         // 初期プレイヤー作成
         await into(players).insert(
           PlayersCompanion.insert(
@@ -171,6 +172,19 @@ class AppDatabase extends _$AppDatabase {
             lastLoginAt: Value(DateTime.now()),
           ),
         );
+=======
+        // デフォルトのPlayer(id:1)を作成
+        await into(players).insert(PlayersCompanion.insert(
+          id: const Value(1),
+          level: const Value(1),
+          experience: const Value(0),
+          str: const Value(0),
+          intellect: const Value(0),
+          luck: const Value(0),
+          cha: const Value(0),
+          willGems: const Value(500),
+        ));
+>>>>>>> parent of da413d2 (Add settings management and daily reset logic)
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
@@ -195,3 +209,4 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(file);
   });
 }
+

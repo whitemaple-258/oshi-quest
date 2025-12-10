@@ -42,11 +42,14 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     final titleRepo = ref.read(titleRepositoryProvider);
     await titleRepo.initMasterData();
     print('✅ 称号データチェック完了');
+<<<<<<< HEAD
 
     // 3. 設定データの初期化（SettingsRepository内のgetSettingsで自動生成されるため呼び出しておく）
     final settingsRepo = ref.read(settingsRepositoryProvider);
     await settingsRepo.getSettings();
     print('✅ 設定データチェック完了');
+=======
+>>>>>>> parent of da413d2 (Add settings management and daily reset logic)
   } catch (e, stack) {
     print('❌ 初期化エラー発生: $e');
     print(stack);
@@ -65,17 +68,24 @@ class OshiQuestApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // 初期化処理を監視
     final initAsync = ref.watch(appInitializationProvider);
+<<<<<<< HEAD
 
     // テーマカラーを監視 (デフォルトはピンク)
     final themeColor = ref.watch(currentThemeColorProvider);
+=======
+>>>>>>> parent of da413d2 (Add settings management and daily reset logic)
 
     return MaterialApp(
       title: 'OshiQuest',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
+<<<<<<< HEAD
         primarySwatch: themeColor, // ✅ 適用
         colorScheme: ColorScheme.fromSeed(seedColor: themeColor, brightness: Brightness.dark),
+=======
+        primarySwatch: Colors.pink,
+>>>>>>> parent of da413d2 (Add settings management and daily reset logic)
         scaffoldBackgroundColor: const Color(0xFF1A1A2E),
         useMaterial3: true,
       ),
