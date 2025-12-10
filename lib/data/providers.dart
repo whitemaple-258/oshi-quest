@@ -4,7 +4,6 @@ import 'repositories/gacha_item_repository.dart';
 import 'repositories/habit_repository.dart';
 import 'repositories/party_repository.dart';
 import 'repositories/title_repository.dart';
-import 'repositories/settings_repository.dart';
 
 // ============================================================================
 // Global Providers
@@ -72,11 +71,4 @@ final titleRepositoryProvider = Provider<TitleRepository>((ref) {
 final titlesProvider = StreamProvider<List<Title>>((ref) {
   final repository = ref.watch(titleRepositoryProvider);
   return repository.watchAllTitles();
-});
-
-// --- Settings (設定) ✅ 追加 ---
-
-final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
-  final db = ref.watch(databaseProvider);
-  return SettingsRepository(db);
 });

@@ -130,18 +130,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _lastLoginAtMeta = const VerificationMeta(
-    'lastLoginAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> lastLoginAt = GeneratedColumn<DateTime>(
-    'last_login_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -179,7 +167,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     willGems,
     currentDebuff,
     debuffExpiresAt,
-    lastLoginAt,
     createdAt,
     updatedAt,
   ];
@@ -264,15 +251,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         ),
       );
     }
-    if (data.containsKey('last_login_at')) {
-      context.handle(
-        _lastLoginAtMeta,
-        lastLoginAt.isAcceptableOrUnknown(
-          data['last_login_at']!,
-          _lastLoginAtMeta,
-        ),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -338,10 +316,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}debuff_expires_at'],
       ),
-      lastLoginAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}last_login_at'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -371,7 +345,6 @@ class Player extends DataClass implements Insertable<Player> {
   final int willGems;
   final String? currentDebuff;
   final DateTime? debuffExpiresAt;
-  final DateTime lastLoginAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Player({
@@ -386,7 +359,6 @@ class Player extends DataClass implements Insertable<Player> {
     required this.willGems,
     this.currentDebuff,
     this.debuffExpiresAt,
-    required this.lastLoginAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -408,7 +380,6 @@ class Player extends DataClass implements Insertable<Player> {
     if (!nullToAbsent || debuffExpiresAt != null) {
       map['debuff_expires_at'] = Variable<DateTime>(debuffExpiresAt);
     }
-    map['last_login_at'] = Variable<DateTime>(lastLoginAt);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -431,7 +402,6 @@ class Player extends DataClass implements Insertable<Player> {
       debuffExpiresAt: debuffExpiresAt == null && nullToAbsent
           ? const Value.absent()
           : Value(debuffExpiresAt),
-      lastLoginAt: Value(lastLoginAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -454,7 +424,6 @@ class Player extends DataClass implements Insertable<Player> {
       willGems: serializer.fromJson<int>(json['willGems']),
       currentDebuff: serializer.fromJson<String?>(json['currentDebuff']),
       debuffExpiresAt: serializer.fromJson<DateTime?>(json['debuffExpiresAt']),
-      lastLoginAt: serializer.fromJson<DateTime>(json['lastLoginAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -474,7 +443,6 @@ class Player extends DataClass implements Insertable<Player> {
       'willGems': serializer.toJson<int>(willGems),
       'currentDebuff': serializer.toJson<String?>(currentDebuff),
       'debuffExpiresAt': serializer.toJson<DateTime?>(debuffExpiresAt),
-      'lastLoginAt': serializer.toJson<DateTime>(lastLoginAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -492,7 +460,6 @@ class Player extends DataClass implements Insertable<Player> {
     int? willGems,
     Value<String?> currentDebuff = const Value.absent(),
     Value<DateTime?> debuffExpiresAt = const Value.absent(),
-    DateTime? lastLoginAt,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Player(
@@ -511,7 +478,6 @@ class Player extends DataClass implements Insertable<Player> {
     debuffExpiresAt: debuffExpiresAt.present
         ? debuffExpiresAt.value
         : this.debuffExpiresAt,
-    lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -534,9 +500,6 @@ class Player extends DataClass implements Insertable<Player> {
       debuffExpiresAt: data.debuffExpiresAt.present
           ? data.debuffExpiresAt.value
           : this.debuffExpiresAt,
-      lastLoginAt: data.lastLoginAt.present
-          ? data.lastLoginAt.value
-          : this.lastLoginAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -556,7 +519,6 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('willGems: $willGems, ')
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
-          ..write('lastLoginAt: $lastLoginAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -576,7 +538,6 @@ class Player extends DataClass implements Insertable<Player> {
     willGems,
     currentDebuff,
     debuffExpiresAt,
-    lastLoginAt,
     createdAt,
     updatedAt,
   );
@@ -595,7 +556,6 @@ class Player extends DataClass implements Insertable<Player> {
           other.willGems == this.willGems &&
           other.currentDebuff == this.currentDebuff &&
           other.debuffExpiresAt == this.debuffExpiresAt &&
-          other.lastLoginAt == this.lastLoginAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -612,7 +572,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<int> willGems;
   final Value<String?> currentDebuff;
   final Value<DateTime?> debuffExpiresAt;
-  final Value<DateTime> lastLoginAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const PlayersCompanion({
@@ -627,7 +586,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.willGems = const Value.absent(),
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
-    this.lastLoginAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -643,7 +601,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.willGems = const Value.absent(),
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
-    this.lastLoginAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -659,7 +616,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<int>? willGems,
     Expression<String>? currentDebuff,
     Expression<DateTime>? debuffExpiresAt,
-    Expression<DateTime>? lastLoginAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -675,7 +631,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (willGems != null) 'will_gems': willGems,
       if (currentDebuff != null) 'current_debuff': currentDebuff,
       if (debuffExpiresAt != null) 'debuff_expires_at': debuffExpiresAt,
-      if (lastLoginAt != null) 'last_login_at': lastLoginAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -693,7 +648,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<int>? willGems,
     Value<String?>? currentDebuff,
     Value<DateTime?>? debuffExpiresAt,
-    Value<DateTime>? lastLoginAt,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -709,7 +663,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       willGems: willGems ?? this.willGems,
       currentDebuff: currentDebuff ?? this.currentDebuff,
       debuffExpiresAt: debuffExpiresAt ?? this.debuffExpiresAt,
-      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -751,9 +704,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     if (debuffExpiresAt.present) {
       map['debuff_expires_at'] = Variable<DateTime>(debuffExpiresAt.value);
     }
-    if (lastLoginAt.present) {
-      map['last_login_at'] = Variable<DateTime>(lastLoginAt.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -777,7 +727,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('willGems: $willGems, ')
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
-          ..write('lastLoginAt: $lastLoginAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4033,7 +3982,6 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<int> willGems,
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
-      Value<DateTime> lastLoginAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -4050,7 +3998,6 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<int> willGems,
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
-      Value<DateTime> lastLoginAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -4116,11 +4063,6 @@ class $$PlayersTableFilterComposer
 
   ColumnFilters<DateTime> get debuffExpiresAt => $composableBuilder(
     column: $table.debuffExpiresAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get lastLoginAt => $composableBuilder(
-    column: $table.lastLoginAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4199,11 +4141,6 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get lastLoginAt => $composableBuilder(
-    column: $table.lastLoginAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4263,11 +4200,6 @@ class $$PlayersTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get lastLoginAt => $composableBuilder(
-    column: $table.lastLoginAt,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -4314,7 +4246,6 @@ class $$PlayersTableTableManager
                 Value<int> willGems = const Value.absent(),
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
-                Value<DateTime> lastLoginAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PlayersCompanion(
@@ -4329,7 +4260,6 @@ class $$PlayersTableTableManager
                 willGems: willGems,
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
-                lastLoginAt: lastLoginAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -4346,7 +4276,6 @@ class $$PlayersTableTableManager
                 Value<int> willGems = const Value.absent(),
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
-                Value<DateTime> lastLoginAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PlayersCompanion.insert(
@@ -4361,7 +4290,6 @@ class $$PlayersTableTableManager
                 willGems: willGems,
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
-                lastLoginAt: lastLoginAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
