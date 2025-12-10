@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/providers.dart'; // ✅ プロバイダーの正しいインポート先
-import 'gacha_screen.dart'; // ✅ ガチャ画面
+import '../../data/providers.dart';
+import 'gacha_screen.dart';
 import 'habit_screen.dart';
+import 'party_edit_screen.dart';
 import 'registered_items_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -16,17 +17,21 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
-  // ✅ 3つのタブ画面を管理
+  // ✅ 4つの画面を定義（順番重要）
   final List<Widget> _screens = [
     const HomeTab(),
     const HabitScreen(),
-    const GachaScreen(), // ガチャタブ
+    const PartyEditScreen(),
+    const GachaScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -34,6 +39,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             _currentIndex = index;
           });
         },
+        // ✅ 4つのタブを定義（_screensと同じ順番）
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
@@ -46,6 +52,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             label: 'Quests',
           ),
           NavigationDestination(
+            icon: Icon(Icons.people_alt_outlined),
+            selectedIcon: Icon(Icons.people_alt),
+            label: 'Party',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.auto_awesome_outlined),
             selectedIcon: Icon(Icons.auto_awesome),
             label: 'Gacha',
@@ -56,6 +67,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 }
 
+// --- HomeTab (パートナー表示) ---
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
@@ -110,7 +122,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   children: [
                     const Icon(Icons.diamond, color: Colors.cyanAccent, size: 16),
                     const SizedBox(width: 4),
-                    Text('${player.willGems}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      '${player.willGems}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
               ),
@@ -123,7 +138,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // --- パートナー画像表示 ---
+          // パートナー画像表示
           partnerAsync.when(
             data: (partner) {
               if (partner == null) {
@@ -141,7 +156,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          '右上のリストから装備するか、\nガチャタブで推しを召喚してください',
+                          'Partyタブから推しを編成するか、\nGachaタブで召喚してください',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.grey),
                         ),
@@ -159,8 +174,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => const Center(child: Text('エラーが発生しました')),
           ),
-
-          // --- ステータス表示 (Base + Bonus) ---
+          
+          // ステータス表示
           Positioned(
             top: 100,
             left: 16,
@@ -227,7 +242,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                         ],
                       ),
                     ),
-
+                    
                     const SizedBox(height: 16),
                     _buildStatRow('STR', player.str, bonusStr, Colors.redAccent),
                     const SizedBox(height: 4),
@@ -248,7 +263,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  // ステータス行のビルド（合計値表示）
   Widget _buildStatRow(String label, int base, int bonus, Color color) {
     final total = base + bonus;
     final hasBonus = bonus > 0;
@@ -275,7 +289,10 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             if (hasBonus)
               TextSpan(
                 text: '(+$bonus)',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                ),
               ),
           ],
         ),

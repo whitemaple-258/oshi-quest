@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/habit_controller.dart';
@@ -161,6 +162,8 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
 
       if (isLevelUp) {
         // ✅ レベルアップ時の処理
+        // 振動
+        HapticFeedback.heavyImpact();
         // 先に音を鳴らす
         ref.read(audioControllerProvider.notifier).playLevelUpSE();
 
@@ -180,6 +183,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         }
       } else {
         // ✅ 通常完了時の処理
+        HapticFeedback.mediumImpact();
         ref.read(audioControllerProvider.notifier).playCompleteSE();
 
         // スナックバー表示

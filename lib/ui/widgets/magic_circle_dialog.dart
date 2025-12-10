@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
 import '../../data/database/database.dart';
 import '../../logic/audio_controller.dart';
 
+// ConsumerStatefulWidget に変更して Riverpod を使えるようにする
 class GachaAnimationDialog extends ConsumerStatefulWidget {
   final GachaItem item;
   final VoidCallback onAnimationComplete;
@@ -15,10 +17,12 @@ class GachaAnimationDialog extends ConsumerStatefulWidget {
   ConsumerState<GachaAnimationDialog> createState() => _GachaAnimationDialogState();
 }
 
-class _GachaAnimationDialogState extends State<GachaAnimationDialog> with TickerProviderStateMixin {
+class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
+    with TickerProviderStateMixin {
   late final AnimationController _rotationController;
   late final AnimationController _scaleController;
 
+  // ドラムロールの長さに合わせて調整 (例: 4秒)
   final Duration _drumDuration = const Duration(seconds: 4);
 
   bool _showResult = false;
@@ -26,30 +30,48 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
   @override
   void initState() {
     super.initState();
-    _rotationController = AnimationController(vsync: this, duration: const Duration(seconds: 2))
+
+    // 魔法陣のアニメーション
+    _rotationController = AnimationController(vsync: this, duration: const Duration(seconds: 1))
       ..repeat();
-    _scaleController = AnimationController(vsync: this, duration: const Duration(seconds: 1))
-      ..repeat();
+
+    // 出現アニメーション
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    // 開始シーケンスを実行
     _startSequence();
   }
 
   void _startSequence() async {
-    // 1. ドラムロール再生開始 🥁
+    // 1. ドラムロール再生開始
+    // (AudioController経由で再生。エラー時はログ出力のみで進行)
     ref.read(audioControllerProvider.notifier).playGachaDrum();
 
-    // 2. 指定時間待機（演出時間）
+    // 2. 演出時間分だけ待機
     await Future.delayed(_drumDuration);
 
     if (mounted) {
-      // 3. 結果表示へ切り替え 🎉
-      // ドラムロールを止めて結果音を鳴らす
+      // 3. 結果表示へ切り替え
+      // ドラムロールを停止して結果音を再生
       ref.read(audioControllerProvider.notifier).playGachaResult();
+
+      //結果表示の瞬間に振動
+      if (widget.item.rarity == Rarity.ssr) {
+        HapticFeedback.heavyImpact();
+      } else {
+        HapticFeedback.mediumImpact();
+      }
 
       setState(() {
         _showResult = true;
       });
       _rotationController.stop();
       _scaleController.forward();
+
+      // 完了コールバック
       widget.onAnimationComplete();
     }
   }
@@ -61,7 +83,7 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
     super.dispose();
   }
 
-  // ✅ 修正: Enumの値を正しく比較
+  // SSR判定（DriftのEnumを使用）
   bool get _isSSR {
     return widget.item.rarity == Rarity.ssr;
   }
@@ -78,7 +100,7 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // --- 魔法陣 ---
+            // --- 魔法陣 (演出中) ---
             if (!_showResult)
               AnimatedBuilder(
                 animation: _rotationController,
@@ -102,13 +124,15 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
                           ),
                         ],
                       ),
-                      child: const Center(child: Icon(Icons.star, color: Colors.white, size: 100)),
+                      child: const Center(
+                        child: Icon(Icons.auto_awesome, color: Colors.white, size: 100),
+                      ),
                     ),
                   );
                 },
               ),
 
-            // --- 結果カード ---
+            // --- 結果カード (表示後) ---
             if (_showResult)
               ScaleTransition(
                 scale: CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
@@ -116,14 +140,16 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        "UNSEALED!",
+                      Text(
+                        _isSSR ? "LEGENDARY!" : "UNSEALED!",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: _isSSR ? Colors.amber : Colors.white,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
-                          shadows: [Shadow(blurRadius: 10, color: Colors.pink)],
+                          shadows: [
+                            Shadow(blurRadius: 20, color: _isSSR ? Colors.orange : Colors.pink),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -147,7 +173,7 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          // ✅ 修正: Image.file を使用してローカル画像を表示
+                          // ✅ 修正: Image.file を使用
                           child: Image.file(
                             File(widget.item.imagePath),
                             fit: BoxFit.cover,
@@ -162,7 +188,27 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
                           ),
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 16),
+
+                      // Bond Level表示
+                      if (widget.item.bondLevel > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.pinkAccent),
+                          ),
+                          child: Text(
+                            'Bond Level +1 (Lv.${widget.item.bondLevel})',
+                            style: const TextStyle(
+                              color: Colors.pinkAccent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                      const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () => Navigator.of(context).pop(),
                         style: ElevatedButton.styleFrom(
