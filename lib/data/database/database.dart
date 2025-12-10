@@ -7,20 +7,22 @@ import 'package:path/path.dart' as p;
 part 'database.g.dart';
 
 // ============================================================================
-// Enums
+// Enums (IntEnum for Drift)
 // ============================================================================
 
+// タスクタイプ
 enum TaskType {
   strength(0),
-  intelligence(1),
-  luck(2),
-  charm(3),
-  vitality(4); // ✅ VIT追加
+  vitality(1),
+  intelligence(2),
+  luck(3),
+  charm(4);
 
   const TaskType(this.value);
   final int value;
 }
 
+// レアリティ
 enum Rarity {
   n(0),
   r(1),
@@ -31,6 +33,7 @@ enum Rarity {
   final int value;
 }
 
+// タスク難易度
 enum TaskDifficulty {
   low(0),
   normal(1),
@@ -44,26 +47,25 @@ enum TaskDifficulty {
 // Tables
 // ============================================================================
 
+// 1. プレイヤーテーブル
 class Players extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get level => integer().withDefault(const Constant(1))();
   IntColumn get experience => integer().withDefault(const Constant(0))();
   IntColumn get str => integer().withDefault(const Constant(0))();
-  IntColumn get intellect => integer().withDefault(const Constant(0))();
+  IntColumn get vit => integer().withDefault(const Constant(0))();
+  IntColumn get intellect => integer().withDefault(const Constant(0))(); // intは予約語のためintellect
   IntColumn get luck => integer().withDefault(const Constant(0))();
   IntColumn get cha => integer().withDefault(const Constant(0))();
-  IntColumn get vit => integer().withDefault(const Constant(0))(); // ✅ VIT追加
   IntColumn get willGems => integer().withDefault(const Constant(500))();
-
-  // ✅ サボり判定用
   TextColumn get currentDebuff => text().nullable()();
   DateTimeColumn get debuffExpiresAt => dateTime().nullable()();
   DateTimeColumn get lastLoginAt => dateTime().withDefault(currentDateAndTime)();
-
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// 2. ガチャアイテムテーブル
 class GachaItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get imagePath => text()();
@@ -71,15 +73,16 @@ class GachaItems extends Table {
   IntColumn get rarity => intEnum<Rarity>().withDefault(Constant(Rarity.n.value))();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
+  IntColumn get vitBonus => integer().withDefault(const Constant(0))();
   IntColumn get intBonus => integer().withDefault(const Constant(0))();
   IntColumn get luckBonus => integer().withDefault(const Constant(0))();
   IntColumn get chaBonus => integer().withDefault(const Constant(0))();
-  IntColumn get vitBonus => integer().withDefault(const Constant(0))(); // ✅ VIT追加
   IntColumn get bondLevel => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get unlockedAt => dateTime().nullable()();
 }
 
+// 3. 習慣テーブル
 class Habits extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
@@ -95,6 +98,7 @@ class Habits extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// 4. 称号テーブル（Phase 2用）
 class Titles extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
@@ -107,6 +111,7 @@ class Titles extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// 5. パーティデッキテーブル（Phase 2用）
 class PartyDecks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
@@ -115,6 +120,7 @@ class PartyDecks extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// 6. パーティメンバーテーブル（Phase 2用）
 class PartyMembers extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get deckId => integer().references(PartyDecks, #id, onDelete: KeyAction.cascade)();
@@ -124,8 +130,7 @@ class PartyMembers extends Table {
   Set<Column> get uniqueKey => {deckId, slotPosition};
 }
 
-// ✅ 重要: この行がないと UserSettingsData クラスが作られません！
-@DataClassName('UserSettingsData')
+// 7. ユーザー設定テーブル（Phase 3用）
 class UserSettings extends Table {
   IntColumn get id => integer().autoIncrement()();
   BoolColumn get isPro => boolean().withDefault(const Constant(false))();
@@ -147,42 +152,30 @@ class UserSettings extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  // ✅ バージョンを 3 に設定
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
-        // 初期プレイヤー作成
+        // デフォルトのPlayer(id:1)を作成
         await into(players).insert(
           PlayersCompanion.insert(
             id: const Value(1),
             level: const Value(1),
-            willGems: const Value(500),
             experience: const Value(0),
             str: const Value(0),
             intellect: const Value(0),
             luck: const Value(0),
             cha: const Value(0),
-            vit: const Value(0),
-            lastLoginAt: Value(DateTime.now()),
+            willGems: const Value(500),
           ),
         );
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await m.addColumn(players, players.vit);
-          await m.addColumn(gachaItems, gachaItems.vitBonus);
-        }
-        if (from < 3) {
-          await m.addColumn(players, players.lastLoginAt);
-          await m.addColumn(players, players.currentDebuff);
-          await m.addColumn(players, players.debuffExpiresAt);
-          await m.createTable(userSettings); // 新規テーブル作成
-        }
+        // 将来のマイグレーション処理をここに追加
       },
     );
   }
