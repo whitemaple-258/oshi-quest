@@ -167,7 +167,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          'STR:${item.strBonus} VIT:${item.vitBonus} INT:${item.intBonus} LUCK:${item.luckBonus} CHA:${item.chaBonus}',
+                          'STR:${item.strBonus} VIT:${item.vitBonus} INT:${item.intBonus} LUK:${item.luckBonus} CHA:${item.chaBonus}',
                         ),
                         trailing: equippedAt != null
                             ? Chip(
@@ -220,7 +220,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
         _buildStatValue('STR', str, Colors.redAccent),
         _buildStatValue('VIT', vit, Colors.amber),
         _buildStatValue('INT', intellect, Colors.blueAccent),
-        _buildStatValue('LUCK', luck, Colors.purple),
+        _buildStatValue('LUK', luck, Colors.purpleAccent),
         _buildStatValue('CHA', cha, Colors.pinkAccent),
       ],
     );

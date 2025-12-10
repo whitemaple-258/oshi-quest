@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/habit_controller.dart';
 import '../../logic/audio_controller.dart';
-import '../../ui/widgets/level_up_dialog.dart';
+import '../widgets/level_up_dialog.dart';
 
 class HabitScreen extends ConsumerStatefulWidget {
   const HabitScreen({super.key});
@@ -25,9 +25,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     super.dispose();
   }
 
-  // --- ダイアログ表示（追加・編集兼用） ---
   Future<void> _showEditHabitDialog({Habit? habit}) async {
-    // 初期値の設定（編集時は既存データをセット）
     _titleController.text = habit?.name ?? '';
     _selectedType = habit?.taskType ?? TaskType.strength;
     _selectedDifficulty = habit?.difficulty ?? TaskDifficulty.normal;
@@ -64,7 +62,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                       value: type,
                       child: Row(
                         children: [
-                          Icon(_getTaskTypeIcon(type), size: 20),
+                          Icon(_getTaskTypeIcon(type), size: 20, color: _getTaskTypeColor(type)),
                           const SizedBox(width: 8),
                           Text(_getTaskTypeLabel(type)),
                         ],
@@ -112,7 +110,6 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
 
     if (result == true && _titleController.text.trim().isNotEmpty) {
       if (isEditing) {
-        // 更新処理
         await ref
             .read(habitControllerProvider.notifier)
             .updateHabit(
@@ -127,7 +124,6 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
           );
         }
       } else {
-        // 追加処理
         await ref
             .read(habitControllerProvider.notifier)
             .addHabit(
@@ -144,27 +140,22 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     }
   }
 
-  // --- 完了処理 (修正版) ---
   Future<void> _completeHabit(Habit habit) async {
-    // 1. まず完了処理を実行
     final rewards = await ref.read(habitControllerProvider.notifier).completeHabit(habit);
 
-    // 2. 結果が返ってきたらUI更新
     if (mounted && rewards != null) {
-      final gems = rewards['gems'];
-      final xp = rewards['xp'];
+      final gems = rewards['gems'] as int;
+      final xp = rewards['xp'] as int;
       final strUp = rewards['strUp']! > 0 ? 'STR+1 ' : '';
-      final vitUp = rewards['vitUp']! > 0 ? 'VIT+1 ' : '';
       final intUp = rewards['intUp']! > 0 ? 'INT+1 ' : '';
-      final luckUp = rewards['luckUp']! > 0 ? 'LUCK+1 ' : '';
+      final luckUp = rewards['luckUp']! > 0 ? 'LUK+1 ' : '';
       final chaUp = rewards['chaUp']! > 0 ? 'CHA+1 ' : '';
-      final newTitles = rewards['newTitles'] as List<String>? ?? [];
+      final vitUp = rewards['vitUp']! > 0 ? 'VIT+1 ' : '';
       final isLevelUp = rewards['levelUp'] == 1;
 
-      // 1. 称号獲得通知
+      final newTitles = rewards['newTitles'] as List<String>? ?? [];
+
       if (newTitles.isNotEmpty) {
-        // 称号獲得ダイアログなどを出すとリッチですが、まずはスナックバーで通知
-        // 複数ある場合はまとめて表示
         final titleText = newTitles.join(', ');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -179,26 +170,18 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
             duration: const Duration(seconds: 4),
           ),
         );
-        // 音も鳴らす（レベルアップ音などで代用、または専用SEを追加）
         ref.read(audioControllerProvider.notifier).playLevelUpSE();
-        await Future.delayed(const Duration(seconds: 2)); // 演出待ち
+        await Future.delayed(const Duration(seconds: 2));
       }
 
-      // 2. レベルアップ処理
       if (isLevelUp) {
-        // 振動
         HapticFeedback.heavyImpact();
-        // 先に音を鳴らす
         ref.read(audioControllerProvider.notifier).playLevelUpSE();
 
-        // データの反映待ち（アニメーション用）
         await Future.delayed(const Duration(milliseconds: 500));
-
-        // 最新のプレイヤー情報を取得
         final player = await ref.read(playerProvider.future);
 
         if (mounted) {
-          // ダイアログ表示
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -206,14 +189,12 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
           );
         }
       } else {
-        // タスク完了時の処理
         HapticFeedback.mediumImpact();
         ref.read(audioControllerProvider.notifier).playCompleteSE();
 
-        // スナックバー表示
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('達成！ +$gems Gems, +$xp XP  $strUp$intUp$luckUp$chaUp'),
+            content: Text('達成！ +$gems Gems, +$xp XP  $strUp$intUp$vitUp$luckUp$chaUp'),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -222,37 +203,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     }
   }
 
-  // --- 操作メニュー（編集/削除） ---
-  void _showHabitActionMenu(Habit habit) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('編集'),
-              onTap: () {
-                Navigator.pop(context); // シートを閉じる
-                _showEditHabitDialog(habit: habit); // 編集ダイアログを開く
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('削除', style: TextStyle(color: Colors.red)),
-              onTap: () async {
-                Navigator.pop(context); // シートを閉じる
-                await _confirmDelete(habit); // 削除確認
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmDelete(Habit habit) async {
+  Future<void> _deleteHabit(Habit habit) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -274,6 +225,35 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('クエストを削除しました')));
       }
     }
+  }
+
+  void _showHabitActionMenu(Habit habit) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('編集'),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditHabitDialog(habit: habit);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text('削除', style: TextStyle(color: Colors.red)),
+              onTap: () async {
+                Navigator.pop(context);
+                await _deleteHabit(habit);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -405,7 +385,6 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                 onPressed: isLoading ? null : () => _completeHabit(habit),
                 tooltip: '完了',
               ),
-        // ✅ 変更: 長押しでアクションメニューを表示
         onLongPress: () => _showHabitActionMenu(habit),
       ),
     );
@@ -415,14 +394,14 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return Icons.fitness_center;
-      case TaskType.vitality:
-        return Icons.directions_run;
       case TaskType.intelligence:
         return Icons.school;
       case TaskType.luck:
         return Icons.casino;
       case TaskType.charm:
         return Icons.favorite;
+      case TaskType.vitality:
+        return Icons.directions_run;
     }
   }
 
@@ -430,14 +409,14 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return 'STR';
-      case TaskType.vitality:
-        return 'VIT';
       case TaskType.intelligence:
         return 'INT';
       case TaskType.luck:
-        return 'LUCK';
+        return 'LUK';
       case TaskType.charm:
         return 'CHA';
+      case TaskType.vitality:
+        return 'VIT';
     }
   }
 
@@ -445,14 +424,14 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return Colors.red;
-      case TaskType.vitality:
-        return Colors.amber;
       case TaskType.intelligence:
         return Colors.blue;
       case TaskType.luck:
-        return Colors.purple;
+        return Colors.purple; // ✅ 変更 (紫)
       case TaskType.charm:
         return Colors.pink;
+      case TaskType.vitality:
+        return Colors.orange; // ✅ 変更 (オレンジ)
     }
   }
 }

@@ -4,10 +4,7 @@ import 'repositories/gacha_item_repository.dart';
 import 'repositories/habit_repository.dart';
 import 'repositories/party_repository.dart';
 import 'repositories/title_repository.dart';
-<<<<<<< HEAD
 import 'repositories/settings_repository.dart'; // ✅ 追加
-=======
->>>>>>> parent of da413d2 (Add settings management and daily reset logic)
 
 // ============================================================================
 // Global Providers
@@ -76,12 +73,9 @@ final titlesProvider = StreamProvider<List<Title>>((ref) {
   final repository = ref.watch(titleRepositoryProvider);
   return repository.watchAllTitles();
 });
-<<<<<<< HEAD
 
 // --- Settings (設定) ---
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return SettingsRepository(db);
 });
-=======
->>>>>>> parent of da413d2 (Add settings management and daily reset logic)
