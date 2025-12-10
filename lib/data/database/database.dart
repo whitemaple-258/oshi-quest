@@ -60,6 +60,7 @@ class Players extends Table {
   IntColumn get willGems => integer().withDefault(const Constant(500))();
   TextColumn get currentDebuff => text().nullable()();
   DateTimeColumn get debuffExpiresAt => dateTime().nullable()();
+  DateTimeColumn get lastLoginAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -86,7 +87,8 @@ class Habits extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   IntColumn get taskType => intEnum<TaskType>()();
-  IntColumn get difficulty => intEnum<TaskDifficulty>().withDefault(Constant(TaskDifficulty.normal.value))();
+  IntColumn get difficulty =>
+      intEnum<TaskDifficulty>().withDefault(Constant(TaskDifficulty.normal.value))();
   IntColumn get rewardGems => integer().withDefault(const Constant(100))();
   IntColumn get rewardXp => integer().withDefault(const Constant(10))();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
@@ -145,15 +147,7 @@ class UserSettings extends Table {
 // ============================================================================
 
 @DriftDatabase(
-  tables: [
-    Players,
-    GachaItems,
-    Habits,
-    Titles,
-    PartyDecks,
-    PartyMembers,
-    UserSettings,
-  ],
+  tables: [Players, GachaItems, Habits, Titles, PartyDecks, PartyMembers, UserSettings],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -167,16 +161,18 @@ class AppDatabase extends _$AppDatabase {
       onCreate: (Migrator m) async {
         await m.createAll();
         // デフォルトのPlayer(id:1)を作成
-        await into(players).insert(PlayersCompanion.insert(
-          id: const Value(1),
-          level: const Value(1),
-          experience: const Value(0),
-          str: const Value(0),
-          intellect: const Value(0),
-          luck: const Value(0),
-          cha: const Value(0),
-          willGems: const Value(500),
-        ));
+        await into(players).insert(
+          PlayersCompanion.insert(
+            id: const Value(1),
+            level: const Value(1),
+            experience: const Value(0),
+            str: const Value(0),
+            intellect: const Value(0),
+            luck: const Value(0),
+            cha: const Value(0),
+            willGems: const Value(500),
+          ),
+        );
       },
       onUpgrade: (Migrator m, int from, int to) async {
         // 将来のマイグレーション処理をここに追加
@@ -192,4 +188,3 @@ LazyDatabase _openConnection() {
     return NativeDatabase.createInBackground(file);
   });
 }
-

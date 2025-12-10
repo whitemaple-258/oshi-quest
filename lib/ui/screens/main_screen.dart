@@ -5,7 +5,7 @@ import '../../data/providers.dart';
 import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'party_edit_screen.dart';
-import 'title_list_screen.dart';
+import 'title_list_screen.dart'; // ✅ 称号画面
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -17,7 +17,7 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
-  // ✅ 4つの画面を定義（順番重要）
+  // ✅ 4つのタブ画面
   final List<Widget> _screens = [
     const HomeTab(),
     const HabitScreen(),
@@ -36,7 +36,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             _currentIndex = index;
           });
         },
-        // ✅ 4つのタブを定義（_screensと同じ順番）
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
@@ -64,7 +63,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 }
 
-// --- HomeTab (パートナー表示) ---
+// --- HomeTab (パートナー表示 & ステータス) ---
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
@@ -82,19 +81,19 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
-          'OshiQuest',
+          '推しQuest',
           style: TextStyle(shadows: [Shadow(color: Colors.black, blurRadius: 4)]),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          // 称号ボタン
+          // ✅ 称号ボタン (TitleListScreenへ)
           IconButton(
             icon: const Icon(Icons.emoji_events),
             tooltip: '称号コレクション',
             style: IconButton.styleFrom(
               backgroundColor: Colors.black45,
-              foregroundColor: Colors.amber, // 金色っぽく
+              foregroundColor: Colors.amber,
             ),
             onPressed: () {
               Navigator.push(
@@ -103,7 +102,9 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               );
             },
           ),
+          
           const SizedBox(width: 8),
+
           // ジェム表示
           playerAsync.when(
             data: (player) => Padding(
@@ -132,7 +133,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // パートナー画像表示
+          // --- パートナー画像 ---
           partnerAsync.when(
             data: (partner) {
               if (partner == null) {
@@ -169,7 +170,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             error: (_, __) => const Center(child: Text('エラーが発生しました')),
           ),
 
-          // ステータス表示
+          // --- ステータス表示 (Base + Bonus) ---
           Positioned(
             top: 100,
             left: 16,
@@ -178,13 +179,13 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 // パートナーのボーナスを取得
                 final partner = partnerAsync.value;
                 final bonusStr = partner?.strBonus ?? 0;
-                final bonusVit = partner?.vitBonus ?? 0;
                 final bonusInt = partner?.intBonus ?? 0;
                 final bonusLuck = partner?.luckBonus ?? 0;
                 final bonusCha = partner?.chaBonus ?? 0;
+                final bonusVit = partner?.vitBonus ?? 0; // ✅ VIT追加
 
                 // EXP計算
-                final nextLevelExp = player.level * 100;
+                // final nextLevelExp = player.level * 100;
                 final currentLevelStartExp = (player.level - 1) * 100;
                 final currentProgressExp = player.experience - currentLevelStartExp;
                 final requiredExpForNext = 100;
@@ -238,14 +239,42 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                       ),
                     ),
 
+                    // ✅ デバフ表示 (怠惰の呪い)
+                    if (player.currentDebuff == 'sloth')
+                      Container(
+                        margin: const EdgeInsets.only(top: 8, bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.purpleAccent),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.sick, color: Colors.white, size: 16),
+                            SizedBox(width: 4),
+                            Text(
+                              '怠惰の呪い',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     const SizedBox(height: 16),
+                    // パラメーター表示 (STR -> VIT -> INT -> LUCK -> CHA)
                     _buildStatRow('STR', player.str, bonusStr, Colors.redAccent),
                     const SizedBox(height: 4),
-                    _buildStatRow('VIT', player.vit, bonusVit, Colors.amber),
+                    _buildStatRow('VIT', player.vit, bonusVit, Colors.orange), // ✅ VIT追加
                     const SizedBox(height: 4),
                     _buildStatRow('INT', player.intellect, bonusInt, Colors.blueAccent),
                     const SizedBox(height: 4),
-                    _buildStatRow('LUCK', player.luck, bonusLuck, Colors.purple),
+                    _buildStatRow('LUK', player.luck, bonusLuck, Colors.purpleAccent),
                     const SizedBox(height: 4),
                     _buildStatRow('CHA', player.cha, bonusCha, Colors.pinkAccent),
                   ],
@@ -260,6 +289,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
+  // ステータス行のビルド
   Widget _buildStatRow(String label, int base, int bonus, Color color) {
     final total = base + bonus;
     final hasBonus = bonus > 0;

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/database/database.dart';
 import 'data/providers.dart'; // ✅ providers.dart をインポート
 import 'ui/screens/main_screen.dart';
+import 'logic/settings_controller.dart';
 
 /// アプリの初期化処理を行うプロバイダー
 final appInitializationProvider = FutureProvider<void>((ref) async {
@@ -42,9 +43,19 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     final titleRepo = ref.read(titleRepositoryProvider);
     await titleRepo.initMasterData();
     print('✅ 称号データチェック完了');
+
+    // 3. ✅ 追加: デイリーリセット & サボり判定
+    final habitRepo = ref.read(habitRepositoryProvider);
+    final messages = await habitRepo.checkDailyReset();
+
+    if (messages.isNotEmpty) {
+      // ログに出す（UIでダイアログを出すにはController経由にするのが理想だが、今回は簡易的に）
+      print('💀 デイリーチェック結果: ${messages.join(", ")}');
+    }
+
+    print('✅ 初期化完了');
   } catch (e, stack) {
     print('❌ 初期化エラー発生: $e');
-    print(stack);
     rethrow;
   }
 });
@@ -60,13 +71,18 @@ class OshiQuestApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // 初期化処理を監視
     final initAsync = ref.watch(appInitializationProvider);
+    final themeColor = ref.watch(currentThemeColorProvider);
 
     return MaterialApp(
       title: 'OshiQuest',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.pink,
+        primarySwatch: themeColor,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: themeColor,brightness: 
+          Brightness.dark,
+        )
         scaffoldBackgroundColor: const Color(0xFF1A1A2E),
         useMaterial3: true,
       ),
