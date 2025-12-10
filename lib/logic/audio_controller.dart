@@ -1,9 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+
 part 'audio_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AudioController extends _$AudioController {
   late final AudioPlayer _player;
 
@@ -16,22 +17,46 @@ class AudioController extends _$AudioController {
     });
   }
 
-  /// タスク完了SEを再生
+  /// タスク完了SEを再生（安全版）
   Future<void> playCompleteSE() async {
-    // 連続再生に対応するため、再生ごとにモードを設定（必要に応じて調整）
-    await _player.stop();
-    await _player.play(AssetSource('sounds/task_complete.mp3'));
+    try {
+      if (_player.state == PlayerState.playing) {
+        await _player.stop();
+      }
+      // 音量は 0.0 ~ 1.0 で設定可能（ここでは0.5）
+      await _player.setVolume(0.5);
+      await _player.play(AssetSource('sounds/task_complete.mp3'));
+    } catch (e) {
+      // エラーが起きてもアプリを止めずにログだけ出す
+      print('⚠️ 音声再生エラー (Complete): $e');
+    }
   }
 
-  /// レベルアップSEを再生
+  /// レベルアップSEを再生（安全版）
   Future<void> playLevelUpSE() async {
-    await _player.stop();
-    await _player.play(AssetSource('sounds/level_up.mp3'));
+    try {
+      if (_player.state == PlayerState.playing) {
+        await _player.stop();
+      }
+      await _player.setVolume(0.5);
+      await _player.play(AssetSource('sounds/level_up.mp3'));
+    } catch (e) {
+      print('⚠️ 音声再生エラー (LevelUp): $e');
+    }
   }
 
-  /// ガチャSEを再生（オプション）
-  Future<void> playGachaSE() async {
+  /// ガチャ演出中のドラムロール
+  Future<void> playGachaDrum() async {
     await _player.stop();
-    await _player.play(AssetSource('sounds/gacha_pull.mp3'));
+    await _player.setVolume(0.5);
+    // ループ再生しない場合は play でOK（長さ分だけ鳴る）
+    await _player.play(AssetSource('sounds/gacha_drum.mp3'));
+  }
+
+  /// ガチャ結果表示音（ドラムロールを止めて鳴らす）
+  Future<void> playGachaResult() async {
+    await _player.stop(); // ドラムロールを強制停止
+    await _player.setVolume(0.5);
+    await _player.play(AssetSource('sounds/gacha_result.mp3'));
   }
 }

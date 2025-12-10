@@ -1,21 +1,25 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
 import '../../data/database/database.dart';
+import '../../logic/audio_controller.dart';
 
-class GachaAnimationDialog extends StatefulWidget {
+class GachaAnimationDialog extends ConsumerStatefulWidget {
   final GachaItem item;
   final VoidCallback onAnimationComplete;
 
   const GachaAnimationDialog({super.key, required this.item, required this.onAnimationComplete});
 
   @override
-  State<GachaAnimationDialog> createState() => _GachaAnimationDialogState();
+  ConsumerState<GachaAnimationDialog> createState() => _GachaAnimationDialogState();
 }
 
 class _GachaAnimationDialogState extends State<GachaAnimationDialog> with TickerProviderStateMixin {
   late final AnimationController _rotationController;
   late final AnimationController _scaleController;
+
+  final Duration _drumDuration = const Duration(seconds: 4);
 
   bool _showResult = false;
 
@@ -24,16 +28,23 @@ class _GachaAnimationDialogState extends State<GachaAnimationDialog> with Ticker
     super.initState();
     _rotationController = AnimationController(vsync: this, duration: const Duration(seconds: 2))
       ..repeat();
-    _scaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
+    _scaleController = AnimationController(vsync: this, duration: const Duration(seconds: 1))
+      ..repeat();
     _startSequence();
   }
 
   void _startSequence() async {
-    await Future.delayed(const Duration(seconds: 2));
+    // 1. ドラムロール再生開始 🥁
+    ref.read(audioControllerProvider.notifier).playGachaDrum();
+
+    // 2. 指定時間待機（演出時間）
+    await Future.delayed(_drumDuration);
+
     if (mounted) {
+      // 3. 結果表示へ切り替え 🎉
+      // ドラムロールを止めて結果音を鳴らす
+      ref.read(audioControllerProvider.notifier).playGachaResult();
+
       setState(() {
         _showResult = true;
       });

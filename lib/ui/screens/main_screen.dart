@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/providers.dart';
-import 'gacha_screen.dart';
+import '../../data/providers.dart'; // ✅ プロバイダーの正しいインポート先
+import 'gacha_screen.dart'; // ✅ ガチャ画面
 import 'habit_screen.dart';
 import 'registered_items_screen.dart';
 
@@ -16,7 +16,12 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [const HomeTab(), const HabitScreen(), const GachaScreen()];
+  // ✅ 3つのタブ画面を管理
+  final List<Widget> _screens = [
+    const HomeTab(),
+    const HabitScreen(),
+    const GachaScreen(), // ガチャタブ
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +79,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          // 装備変更ボタン（リスト画面へ）
           IconButton(
             icon: const Icon(Icons.list_alt),
             tooltip: '推し一覧・装備変更',
@@ -89,6 +95,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             },
           ),
           const SizedBox(width: 8),
+          // ジェム表示
           playerAsync.when(
             data: (player) => Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -116,7 +123,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // パートナー画像表示
+          // --- パートナー画像表示 ---
           partnerAsync.when(
             data: (partner) {
               if (partner == null) {
@@ -153,31 +160,24 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             error: (_, __) => const Center(child: Text('エラーが発生しました')),
           ),
 
-          // ステータス表示
+          // --- ステータス表示 (Base + Bonus) ---
           Positioned(
             top: 100,
             left: 16,
             child: playerAsync.when(
               data: (player) {
+                // パートナーのボーナスを取得
                 final partner = partnerAsync.value;
                 final bonusStr = partner?.strBonus ?? 0;
                 final bonusInt = partner?.intBonus ?? 0;
                 final bonusLuck = partner?.luckBonus ?? 0;
                 final bonusCha = partner?.chaBonus ?? 0;
 
-                // --- EXP計算 ---
-                // Lv1: 0-99 (Next 100)
-                // Lv2: 100-199 (Next 200)
-                // 現在のレベルの開始XP = (Lv-1) * 100
-                // 次のレベルのXP = Lv * 100
+                // EXP計算
                 final nextLevelExp = player.level * 100;
                 final currentLevelStartExp = (player.level - 1) * 100;
-
-                // 現在の進捗 = 現在の総XP - 現在のレベルの開始XP
                 final currentProgressExp = player.experience - currentLevelStartExp;
-                // 次のレベルまでに必要な1レベル分のXP（固定100だが計算式として）
                 final requiredExpForNext = 100;
-
                 final progress = (currentProgressExp / requiredExpForNext).clamp(0.0, 1.0);
 
                 return Column(
@@ -248,6 +248,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
+  // ステータス行のビルド（合計値表示）
   Widget _buildStatRow(String label, int base, int bonus, Color color) {
     final total = base + bonus;
     final hasBonus = bonus > 0;

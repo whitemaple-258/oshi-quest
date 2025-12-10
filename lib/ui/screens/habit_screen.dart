@@ -143,10 +143,12 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     }
   }
 
-  // --- 完了処理 ---
+  // --- 完了処理 (修正版) ---
   Future<void> _completeHabit(Habit habit) async {
+    // 1. まず完了処理を実行
     final rewards = await ref.read(habitControllerProvider.notifier).completeHabit(habit);
 
+    // 2. 結果が返ってきたらUI更新
     if (mounted && rewards != null) {
       final gems = rewards['gems'];
       final xp = rewards['xp'];
@@ -155,36 +157,29 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
       final luckUp = rewards['luckUp']! > 0 ? 'LUCK+1 ' : '';
       final chaUp = rewards['chaUp']! > 0 ? 'CHA+1 ' : '';
 
-      // レベルアップ判定
       final isLevelUp = rewards['levelUp'] == 1;
 
       if (isLevelUp) {
+        // ✅ レベルアップ時の処理
+        // 先に音を鳴らす
+        ref.read(audioControllerProvider.notifier).playLevelUpSE();
+
+        // データの反映待ち（アニメーション用）
         await Future.delayed(const Duration(milliseconds: 500));
+
+        // 最新のプレイヤー情報を取得
         final player = await ref.read(playerProvider.future);
 
         if (mounted) {
+          // ダイアログ表示
           showDialog(
             context: context,
             barrierDismissible: false,
             builder: (context) => LevelUpDialog(newLevel: player.level, onClosed: () {}),
           );
-          // ✅ レベルアップ時のSE再生
-          ref.read(audioControllerProvider.notifier).playLevelUpSE();
-
-          // 少し待ってからダイアログ (現在のレベルを再取得するため)
-          await Future.delayed(const Duration(milliseconds: 500));
-          final player = await ref.read(playerProvider.future);
-
-          if (mounted) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => LevelUpDialog(newLevel: player.level, onClosed: () {}),
-            );
-          }
         }
       } else {
-        // ✅ 通常完了時のSE再生
+        // ✅ 通常完了時の処理
         ref.read(audioControllerProvider.notifier).playCompleteSE();
 
         // スナックバー表示
