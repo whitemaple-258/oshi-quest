@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../data/database/database.dart';
 import '../data/providers.dart';
 
 part 'party_controller.g.dart';

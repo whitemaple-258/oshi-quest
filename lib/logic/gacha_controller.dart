@@ -29,4 +29,27 @@ class GachaController extends _$GachaController {
       rethrow; // UI側でエラーメッセージを出すために再スロー
     }
   }
+  // 👇 追加: 削除
+  Future<void> deleteItem(int id) async {
+    state = const AsyncValue.loading();
+    try {
+      final repository = ref.read(gachaItemRepositoryProvider);
+      await repository.deleteItem(id);
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  // 👇 追加: 編集
+  Future<void> updateItem(int id, String title, {bool reCrop = false}) async {
+    state = const AsyncValue.loading();
+    try {
+      final repository = ref.read(gachaItemRepositoryProvider);
+      await repository.updateItem(id, title, reCropImage: reCrop);
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
 }

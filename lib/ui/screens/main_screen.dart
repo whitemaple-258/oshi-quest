@@ -5,7 +5,6 @@ import '../../data/providers.dart';
 import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'party_edit_screen.dart';
-import 'registered_items_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -91,21 +90,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          // 装備変更ボタン（リスト画面へ）
-          IconButton(
-            icon: const Icon(Icons.list_alt),
-            tooltip: '推し一覧・装備変更',
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.black45,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const RegisteredItemsScreen()),
-              );
-            },
-          ),
           const SizedBox(width: 8),
           // ジェム表示
           playerAsync.when(

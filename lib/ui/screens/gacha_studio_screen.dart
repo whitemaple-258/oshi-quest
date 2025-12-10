@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../../data/models/gacha_item.dart';
 import '../../data/database/database.dart';
 
 class GachaStudioScreen extends StatelessWidget {

@@ -47,7 +47,7 @@ class PartyRepository {
           .into(_db.partyMembers)
           .insert(
             PartyMembersCompanion.insert(
-              deckId: deck!.id,
+              deckId: deck.id,
               gachaItemId: gachaItemId,
               slotPosition: slot,
               createdAt: Value(DateTime.now()),
