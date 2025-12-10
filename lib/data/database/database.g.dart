@@ -53,6 +53,16 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _vitMeta = const VerificationMeta('vit');
+  @override
+  late final GeneratedColumn<int> vit = GeneratedColumn<int>(
+    'vit',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _intellectMeta = const VerificationMeta(
     'intellect',
   );
@@ -79,16 +89,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
   @override
   late final GeneratedColumn<int> cha = GeneratedColumn<int>(
     'cha',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _vitMeta = const VerificationMeta('vit');
-  @override
-  late final GeneratedColumn<int> vit = GeneratedColumn<int>(
-    'vit',
     aliasedName,
     false,
     type: DriftSqlType.int,
@@ -172,10 +172,10 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     level,
     experience,
     str,
+    vit,
     intellect,
     luck,
     cha,
-    vit,
     willGems,
     currentDebuff,
     debuffExpiresAt,
@@ -216,6 +216,12 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         str.isAcceptableOrUnknown(data['str']!, _strMeta),
       );
     }
+    if (data.containsKey('vit')) {
+      context.handle(
+        _vitMeta,
+        vit.isAcceptableOrUnknown(data['vit']!, _vitMeta),
+      );
+    }
     if (data.containsKey('intellect')) {
       context.handle(
         _intellectMeta,
@@ -232,12 +238,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
       context.handle(
         _chaMeta,
         cha.isAcceptableOrUnknown(data['cha']!, _chaMeta),
-      );
-    }
-    if (data.containsKey('vit')) {
-      context.handle(
-        _vitMeta,
-        vit.isAcceptableOrUnknown(data['vit']!, _vitMeta),
       );
     }
     if (data.containsKey('will_gems')) {
@@ -310,6 +310,10 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.int,
         data['${effectivePrefix}str'],
       )!,
+      vit: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vit'],
+      )!,
       intellect: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}intellect'],
@@ -321,10 +325,6 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
       cha: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}cha'],
-      )!,
-      vit: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}vit'],
       )!,
       willGems: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -364,10 +364,10 @@ class Player extends DataClass implements Insertable<Player> {
   final int level;
   final int experience;
   final int str;
+  final int vit;
   final int intellect;
   final int luck;
   final int cha;
-  final int vit;
   final int willGems;
   final String? currentDebuff;
   final DateTime? debuffExpiresAt;
@@ -379,10 +379,10 @@ class Player extends DataClass implements Insertable<Player> {
     required this.level,
     required this.experience,
     required this.str,
+    required this.vit,
     required this.intellect,
     required this.luck,
     required this.cha,
-    required this.vit,
     required this.willGems,
     this.currentDebuff,
     this.debuffExpiresAt,
@@ -397,10 +397,10 @@ class Player extends DataClass implements Insertable<Player> {
     map['level'] = Variable<int>(level);
     map['experience'] = Variable<int>(experience);
     map['str'] = Variable<int>(str);
+    map['vit'] = Variable<int>(vit);
     map['intellect'] = Variable<int>(intellect);
     map['luck'] = Variable<int>(luck);
     map['cha'] = Variable<int>(cha);
-    map['vit'] = Variable<int>(vit);
     map['will_gems'] = Variable<int>(willGems);
     if (!nullToAbsent || currentDebuff != null) {
       map['current_debuff'] = Variable<String>(currentDebuff);
@@ -420,10 +420,10 @@ class Player extends DataClass implements Insertable<Player> {
       level: Value(level),
       experience: Value(experience),
       str: Value(str),
+      vit: Value(vit),
       intellect: Value(intellect),
       luck: Value(luck),
       cha: Value(cha),
-      vit: Value(vit),
       willGems: Value(willGems),
       currentDebuff: currentDebuff == null && nullToAbsent
           ? const Value.absent()
@@ -447,10 +447,10 @@ class Player extends DataClass implements Insertable<Player> {
       level: serializer.fromJson<int>(json['level']),
       experience: serializer.fromJson<int>(json['experience']),
       str: serializer.fromJson<int>(json['str']),
+      vit: serializer.fromJson<int>(json['vit']),
       intellect: serializer.fromJson<int>(json['intellect']),
       luck: serializer.fromJson<int>(json['luck']),
       cha: serializer.fromJson<int>(json['cha']),
-      vit: serializer.fromJson<int>(json['vit']),
       willGems: serializer.fromJson<int>(json['willGems']),
       currentDebuff: serializer.fromJson<String?>(json['currentDebuff']),
       debuffExpiresAt: serializer.fromJson<DateTime?>(json['debuffExpiresAt']),
@@ -467,10 +467,10 @@ class Player extends DataClass implements Insertable<Player> {
       'level': serializer.toJson<int>(level),
       'experience': serializer.toJson<int>(experience),
       'str': serializer.toJson<int>(str),
+      'vit': serializer.toJson<int>(vit),
       'intellect': serializer.toJson<int>(intellect),
       'luck': serializer.toJson<int>(luck),
       'cha': serializer.toJson<int>(cha),
-      'vit': serializer.toJson<int>(vit),
       'willGems': serializer.toJson<int>(willGems),
       'currentDebuff': serializer.toJson<String?>(currentDebuff),
       'debuffExpiresAt': serializer.toJson<DateTime?>(debuffExpiresAt),
@@ -485,10 +485,10 @@ class Player extends DataClass implements Insertable<Player> {
     int? level,
     int? experience,
     int? str,
+    int? vit,
     int? intellect,
     int? luck,
     int? cha,
-    int? vit,
     int? willGems,
     Value<String?> currentDebuff = const Value.absent(),
     Value<DateTime?> debuffExpiresAt = const Value.absent(),
@@ -500,10 +500,10 @@ class Player extends DataClass implements Insertable<Player> {
     level: level ?? this.level,
     experience: experience ?? this.experience,
     str: str ?? this.str,
+    vit: vit ?? this.vit,
     intellect: intellect ?? this.intellect,
     luck: luck ?? this.luck,
     cha: cha ?? this.cha,
-    vit: vit ?? this.vit,
     willGems: willGems ?? this.willGems,
     currentDebuff: currentDebuff.present
         ? currentDebuff.value
@@ -523,10 +523,10 @@ class Player extends DataClass implements Insertable<Player> {
           ? data.experience.value
           : this.experience,
       str: data.str.present ? data.str.value : this.str,
+      vit: data.vit.present ? data.vit.value : this.vit,
       intellect: data.intellect.present ? data.intellect.value : this.intellect,
       luck: data.luck.present ? data.luck.value : this.luck,
       cha: data.cha.present ? data.cha.value : this.cha,
-      vit: data.vit.present ? data.vit.value : this.vit,
       willGems: data.willGems.present ? data.willGems.value : this.willGems,
       currentDebuff: data.currentDebuff.present
           ? data.currentDebuff.value
@@ -549,10 +549,10 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('level: $level, ')
           ..write('experience: $experience, ')
           ..write('str: $str, ')
+          ..write('vit: $vit, ')
           ..write('intellect: $intellect, ')
           ..write('luck: $luck, ')
           ..write('cha: $cha, ')
-          ..write('vit: $vit, ')
           ..write('willGems: $willGems, ')
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
@@ -569,10 +569,10 @@ class Player extends DataClass implements Insertable<Player> {
     level,
     experience,
     str,
+    vit,
     intellect,
     luck,
     cha,
-    vit,
     willGems,
     currentDebuff,
     debuffExpiresAt,
@@ -588,10 +588,10 @@ class Player extends DataClass implements Insertable<Player> {
           other.level == this.level &&
           other.experience == this.experience &&
           other.str == this.str &&
+          other.vit == this.vit &&
           other.intellect == this.intellect &&
           other.luck == this.luck &&
           other.cha == this.cha &&
-          other.vit == this.vit &&
           other.willGems == this.willGems &&
           other.currentDebuff == this.currentDebuff &&
           other.debuffExpiresAt == this.debuffExpiresAt &&
@@ -605,10 +605,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<int> level;
   final Value<int> experience;
   final Value<int> str;
+  final Value<int> vit;
   final Value<int> intellect;
   final Value<int> luck;
   final Value<int> cha;
-  final Value<int> vit;
   final Value<int> willGems;
   final Value<String?> currentDebuff;
   final Value<DateTime?> debuffExpiresAt;
@@ -620,10 +620,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.level = const Value.absent(),
     this.experience = const Value.absent(),
     this.str = const Value.absent(),
+    this.vit = const Value.absent(),
     this.intellect = const Value.absent(),
     this.luck = const Value.absent(),
     this.cha = const Value.absent(),
-    this.vit = const Value.absent(),
     this.willGems = const Value.absent(),
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
@@ -636,10 +636,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.level = const Value.absent(),
     this.experience = const Value.absent(),
     this.str = const Value.absent(),
+    this.vit = const Value.absent(),
     this.intellect = const Value.absent(),
     this.luck = const Value.absent(),
     this.cha = const Value.absent(),
-    this.vit = const Value.absent(),
     this.willGems = const Value.absent(),
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
@@ -652,10 +652,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<int>? level,
     Expression<int>? experience,
     Expression<int>? str,
+    Expression<int>? vit,
     Expression<int>? intellect,
     Expression<int>? luck,
     Expression<int>? cha,
-    Expression<int>? vit,
     Expression<int>? willGems,
     Expression<String>? currentDebuff,
     Expression<DateTime>? debuffExpiresAt,
@@ -668,10 +668,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (level != null) 'level': level,
       if (experience != null) 'experience': experience,
       if (str != null) 'str': str,
+      if (vit != null) 'vit': vit,
       if (intellect != null) 'intellect': intellect,
       if (luck != null) 'luck': luck,
       if (cha != null) 'cha': cha,
-      if (vit != null) 'vit': vit,
       if (willGems != null) 'will_gems': willGems,
       if (currentDebuff != null) 'current_debuff': currentDebuff,
       if (debuffExpiresAt != null) 'debuff_expires_at': debuffExpiresAt,
@@ -686,10 +686,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<int>? level,
     Value<int>? experience,
     Value<int>? str,
+    Value<int>? vit,
     Value<int>? intellect,
     Value<int>? luck,
     Value<int>? cha,
-    Value<int>? vit,
     Value<int>? willGems,
     Value<String?>? currentDebuff,
     Value<DateTime?>? debuffExpiresAt,
@@ -702,10 +702,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       level: level ?? this.level,
       experience: experience ?? this.experience,
       str: str ?? this.str,
+      vit: vit ?? this.vit,
       intellect: intellect ?? this.intellect,
       luck: luck ?? this.luck,
       cha: cha ?? this.cha,
-      vit: vit ?? this.vit,
       willGems: willGems ?? this.willGems,
       currentDebuff: currentDebuff ?? this.currentDebuff,
       debuffExpiresAt: debuffExpiresAt ?? this.debuffExpiresAt,
@@ -730,6 +730,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     if (str.present) {
       map['str'] = Variable<int>(str.value);
     }
+    if (vit.present) {
+      map['vit'] = Variable<int>(vit.value);
+    }
     if (intellect.present) {
       map['intellect'] = Variable<int>(intellect.value);
     }
@@ -738,9 +741,6 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     }
     if (cha.present) {
       map['cha'] = Variable<int>(cha.value);
-    }
-    if (vit.present) {
-      map['vit'] = Variable<int>(vit.value);
     }
     if (willGems.present) {
       map['will_gems'] = Variable<int>(willGems.value);
@@ -770,10 +770,10 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('level: $level, ')
           ..write('experience: $experience, ')
           ..write('str: $str, ')
+          ..write('vit: $vit, ')
           ..write('intellect: $intellect, ')
           ..write('luck: $luck, ')
           ..write('cha: $cha, ')
-          ..write('vit: $vit, ')
           ..write('willGems: $willGems, ')
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
@@ -861,6 +861,18 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _vitBonusMeta = const VerificationMeta(
+    'vitBonus',
+  );
+  @override
+  late final GeneratedColumn<int> vitBonus = GeneratedColumn<int>(
+    'vit_bonus',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _intBonusMeta = const VerificationMeta(
     'intBonus',
   );
@@ -891,18 +903,6 @@ class $GachaItemsTable extends GachaItems
   @override
   late final GeneratedColumn<int> chaBonus = GeneratedColumn<int>(
     'cha_bonus',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _vitBonusMeta = const VerificationMeta(
-    'vitBonus',
-  );
-  @override
-  late final GeneratedColumn<int> vitBonus = GeneratedColumn<int>(
-    'vit_bonus',
     aliasedName,
     false,
     type: DriftSqlType.int,
@@ -952,10 +952,10 @@ class $GachaItemsTable extends GachaItems
     rarity,
     isUnlocked,
     strBonus,
+    vitBonus,
     intBonus,
     luckBonus,
     chaBonus,
-    vitBonus,
     bondLevel,
     createdAt,
     unlockedAt,
@@ -1003,6 +1003,12 @@ class $GachaItemsTable extends GachaItems
         strBonus.isAcceptableOrUnknown(data['str_bonus']!, _strBonusMeta),
       );
     }
+    if (data.containsKey('vit_bonus')) {
+      context.handle(
+        _vitBonusMeta,
+        vitBonus.isAcceptableOrUnknown(data['vit_bonus']!, _vitBonusMeta),
+      );
+    }
     if (data.containsKey('int_bonus')) {
       context.handle(
         _intBonusMeta,
@@ -1019,12 +1025,6 @@ class $GachaItemsTable extends GachaItems
       context.handle(
         _chaBonusMeta,
         chaBonus.isAcceptableOrUnknown(data['cha_bonus']!, _chaBonusMeta),
-      );
-    }
-    if (data.containsKey('vit_bonus')) {
-      context.handle(
-        _vitBonusMeta,
-        vitBonus.isAcceptableOrUnknown(data['vit_bonus']!, _vitBonusMeta),
       );
     }
     if (data.containsKey('bond_level')) {
@@ -1080,6 +1080,10 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}str_bonus'],
       )!,
+      vitBonus: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vit_bonus'],
+      )!,
       intBonus: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}int_bonus'],
@@ -1091,10 +1095,6 @@ class $GachaItemsTable extends GachaItems
       chaBonus: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}cha_bonus'],
-      )!,
-      vitBonus: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}vit_bonus'],
       )!,
       bondLevel: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -1127,10 +1127,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final Rarity rarity;
   final bool isUnlocked;
   final int strBonus;
+  final int vitBonus;
   final int intBonus;
   final int luckBonus;
   final int chaBonus;
-  final int vitBonus;
   final int bondLevel;
   final DateTime createdAt;
   final DateTime? unlockedAt;
@@ -1141,10 +1141,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.rarity,
     required this.isUnlocked,
     required this.strBonus,
+    required this.vitBonus,
     required this.intBonus,
     required this.luckBonus,
     required this.chaBonus,
-    required this.vitBonus,
     required this.bondLevel,
     required this.createdAt,
     this.unlockedAt,
@@ -1162,10 +1162,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     }
     map['is_unlocked'] = Variable<bool>(isUnlocked);
     map['str_bonus'] = Variable<int>(strBonus);
+    map['vit_bonus'] = Variable<int>(vitBonus);
     map['int_bonus'] = Variable<int>(intBonus);
     map['luck_bonus'] = Variable<int>(luckBonus);
     map['cha_bonus'] = Variable<int>(chaBonus);
-    map['vit_bonus'] = Variable<int>(vitBonus);
     map['bond_level'] = Variable<int>(bondLevel);
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || unlockedAt != null) {
@@ -1182,10 +1182,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       rarity: Value(rarity),
       isUnlocked: Value(isUnlocked),
       strBonus: Value(strBonus),
+      vitBonus: Value(vitBonus),
       intBonus: Value(intBonus),
       luckBonus: Value(luckBonus),
       chaBonus: Value(chaBonus),
-      vitBonus: Value(vitBonus),
       bondLevel: Value(bondLevel),
       createdAt: Value(createdAt),
       unlockedAt: unlockedAt == null && nullToAbsent
@@ -1208,10 +1208,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       ),
       isUnlocked: serializer.fromJson<bool>(json['isUnlocked']),
       strBonus: serializer.fromJson<int>(json['strBonus']),
+      vitBonus: serializer.fromJson<int>(json['vitBonus']),
       intBonus: serializer.fromJson<int>(json['intBonus']),
       luckBonus: serializer.fromJson<int>(json['luckBonus']),
       chaBonus: serializer.fromJson<int>(json['chaBonus']),
-      vitBonus: serializer.fromJson<int>(json['vitBonus']),
       bondLevel: serializer.fromJson<int>(json['bondLevel']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       unlockedAt: serializer.fromJson<DateTime?>(json['unlockedAt']),
@@ -1229,10 +1229,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       ),
       'isUnlocked': serializer.toJson<bool>(isUnlocked),
       'strBonus': serializer.toJson<int>(strBonus),
+      'vitBonus': serializer.toJson<int>(vitBonus),
       'intBonus': serializer.toJson<int>(intBonus),
       'luckBonus': serializer.toJson<int>(luckBonus),
       'chaBonus': serializer.toJson<int>(chaBonus),
-      'vitBonus': serializer.toJson<int>(vitBonus),
       'bondLevel': serializer.toJson<int>(bondLevel),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'unlockedAt': serializer.toJson<DateTime?>(unlockedAt),
@@ -1246,10 +1246,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     Rarity? rarity,
     bool? isUnlocked,
     int? strBonus,
+    int? vitBonus,
     int? intBonus,
     int? luckBonus,
     int? chaBonus,
-    int? vitBonus,
     int? bondLevel,
     DateTime? createdAt,
     Value<DateTime?> unlockedAt = const Value.absent(),
@@ -1260,10 +1260,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     rarity: rarity ?? this.rarity,
     isUnlocked: isUnlocked ?? this.isUnlocked,
     strBonus: strBonus ?? this.strBonus,
+    vitBonus: vitBonus ?? this.vitBonus,
     intBonus: intBonus ?? this.intBonus,
     luckBonus: luckBonus ?? this.luckBonus,
     chaBonus: chaBonus ?? this.chaBonus,
-    vitBonus: vitBonus ?? this.vitBonus,
     bondLevel: bondLevel ?? this.bondLevel,
     createdAt: createdAt ?? this.createdAt,
     unlockedAt: unlockedAt.present ? unlockedAt.value : this.unlockedAt,
@@ -1278,10 +1278,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ? data.isUnlocked.value
           : this.isUnlocked,
       strBonus: data.strBonus.present ? data.strBonus.value : this.strBonus,
+      vitBonus: data.vitBonus.present ? data.vitBonus.value : this.vitBonus,
       intBonus: data.intBonus.present ? data.intBonus.value : this.intBonus,
       luckBonus: data.luckBonus.present ? data.luckBonus.value : this.luckBonus,
       chaBonus: data.chaBonus.present ? data.chaBonus.value : this.chaBonus,
-      vitBonus: data.vitBonus.present ? data.vitBonus.value : this.vitBonus,
       bondLevel: data.bondLevel.present ? data.bondLevel.value : this.bondLevel,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       unlockedAt: data.unlockedAt.present
@@ -1299,10 +1299,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
+          ..write('vitBonus: $vitBonus, ')
           ..write('intBonus: $intBonus, ')
           ..write('luckBonus: $luckBonus, ')
           ..write('chaBonus: $chaBonus, ')
-          ..write('vitBonus: $vitBonus, ')
           ..write('bondLevel: $bondLevel, ')
           ..write('createdAt: $createdAt, ')
           ..write('unlockedAt: $unlockedAt')
@@ -1318,10 +1318,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     rarity,
     isUnlocked,
     strBonus,
+    vitBonus,
     intBonus,
     luckBonus,
     chaBonus,
-    vitBonus,
     bondLevel,
     createdAt,
     unlockedAt,
@@ -1336,10 +1336,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.rarity == this.rarity &&
           other.isUnlocked == this.isUnlocked &&
           other.strBonus == this.strBonus &&
+          other.vitBonus == this.vitBonus &&
           other.intBonus == this.intBonus &&
           other.luckBonus == this.luckBonus &&
           other.chaBonus == this.chaBonus &&
-          other.vitBonus == this.vitBonus &&
           other.bondLevel == this.bondLevel &&
           other.createdAt == this.createdAt &&
           other.unlockedAt == this.unlockedAt);
@@ -1352,10 +1352,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<Rarity> rarity;
   final Value<bool> isUnlocked;
   final Value<int> strBonus;
+  final Value<int> vitBonus;
   final Value<int> intBonus;
   final Value<int> luckBonus;
   final Value<int> chaBonus;
-  final Value<int> vitBonus;
   final Value<int> bondLevel;
   final Value<DateTime> createdAt;
   final Value<DateTime?> unlockedAt;
@@ -1366,10 +1366,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
+    this.vitBonus = const Value.absent(),
     this.intBonus = const Value.absent(),
     this.luckBonus = const Value.absent(),
     this.chaBonus = const Value.absent(),
-    this.vitBonus = const Value.absent(),
     this.bondLevel = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
@@ -1381,10 +1381,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
+    this.vitBonus = const Value.absent(),
     this.intBonus = const Value.absent(),
     this.luckBonus = const Value.absent(),
     this.chaBonus = const Value.absent(),
-    this.vitBonus = const Value.absent(),
     this.bondLevel = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
@@ -1397,10 +1397,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<int>? rarity,
     Expression<bool>? isUnlocked,
     Expression<int>? strBonus,
+    Expression<int>? vitBonus,
     Expression<int>? intBonus,
     Expression<int>? luckBonus,
     Expression<int>? chaBonus,
-    Expression<int>? vitBonus,
     Expression<int>? bondLevel,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? unlockedAt,
@@ -1412,10 +1412,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (rarity != null) 'rarity': rarity,
       if (isUnlocked != null) 'is_unlocked': isUnlocked,
       if (strBonus != null) 'str_bonus': strBonus,
+      if (vitBonus != null) 'vit_bonus': vitBonus,
       if (intBonus != null) 'int_bonus': intBonus,
       if (luckBonus != null) 'luck_bonus': luckBonus,
       if (chaBonus != null) 'cha_bonus': chaBonus,
-      if (vitBonus != null) 'vit_bonus': vitBonus,
       if (bondLevel != null) 'bond_level': bondLevel,
       if (createdAt != null) 'created_at': createdAt,
       if (unlockedAt != null) 'unlocked_at': unlockedAt,
@@ -1429,10 +1429,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<Rarity>? rarity,
     Value<bool>? isUnlocked,
     Value<int>? strBonus,
+    Value<int>? vitBonus,
     Value<int>? intBonus,
     Value<int>? luckBonus,
     Value<int>? chaBonus,
-    Value<int>? vitBonus,
     Value<int>? bondLevel,
     Value<DateTime>? createdAt,
     Value<DateTime?>? unlockedAt,
@@ -1444,10 +1444,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       rarity: rarity ?? this.rarity,
       isUnlocked: isUnlocked ?? this.isUnlocked,
       strBonus: strBonus ?? this.strBonus,
+      vitBonus: vitBonus ?? this.vitBonus,
       intBonus: intBonus ?? this.intBonus,
       luckBonus: luckBonus ?? this.luckBonus,
       chaBonus: chaBonus ?? this.chaBonus,
-      vitBonus: vitBonus ?? this.vitBonus,
       bondLevel: bondLevel ?? this.bondLevel,
       createdAt: createdAt ?? this.createdAt,
       unlockedAt: unlockedAt ?? this.unlockedAt,
@@ -1477,6 +1477,9 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (strBonus.present) {
       map['str_bonus'] = Variable<int>(strBonus.value);
     }
+    if (vitBonus.present) {
+      map['vit_bonus'] = Variable<int>(vitBonus.value);
+    }
     if (intBonus.present) {
       map['int_bonus'] = Variable<int>(intBonus.value);
     }
@@ -1485,9 +1488,6 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     }
     if (chaBonus.present) {
       map['cha_bonus'] = Variable<int>(chaBonus.value);
-    }
-    if (vitBonus.present) {
-      map['vit_bonus'] = Variable<int>(vitBonus.value);
     }
     if (bondLevel.present) {
       map['bond_level'] = Variable<int>(bondLevel.value);
@@ -1510,10 +1510,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
+          ..write('vitBonus: $vitBonus, ')
           ..write('intBonus: $intBonus, ')
           ..write('luckBonus: $luckBonus, ')
           ..write('chaBonus: $chaBonus, ')
-          ..write('vitBonus: $vitBonus, ')
           ..write('bondLevel: $bondLevel, ')
           ..write('createdAt: $createdAt, ')
           ..write('unlockedAt: $unlockedAt')
@@ -3479,7 +3479,7 @@ class PartyMembersCompanion extends UpdateCompanion<PartyMember> {
 }
 
 class $UserSettingsTable extends UserSettings
-    with TableInfo<$UserSettingsTable, UserSettingsData> {
+    with TableInfo<$UserSettingsTable, UserSetting> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -3599,7 +3599,7 @@ class $UserSettingsTable extends UserSettings
   static const String $name = 'user_settings';
   @override
   VerificationContext validateIntegrity(
-    Insertable<UserSettingsData> instance, {
+    Insertable<UserSetting> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -3658,9 +3658,9 @@ class $UserSettingsTable extends UserSettings
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  UserSettingsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  UserSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return UserSettingsData(
+    return UserSetting(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -3702,8 +3702,7 @@ class $UserSettingsTable extends UserSettings
   }
 }
 
-class UserSettingsData extends DataClass
-    implements Insertable<UserSettingsData> {
+class UserSetting extends DataClass implements Insertable<UserSetting> {
   final int id;
   final bool isPro;
   final int maxHabits;
@@ -3712,7 +3711,7 @@ class UserSettingsData extends DataClass
   final String? themeColor;
   final DateTime createdAt;
   final DateTime updatedAt;
-  const UserSettingsData({
+  const UserSetting({
     required this.id,
     required this.isPro,
     required this.maxHabits,
@@ -3753,12 +3752,12 @@ class UserSettingsData extends DataClass
     );
   }
 
-  factory UserSettingsData.fromJson(
+  factory UserSetting.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return UserSettingsData(
+    return UserSetting(
       id: serializer.fromJson<int>(json['id']),
       isPro: serializer.fromJson<bool>(json['isPro']),
       maxHabits: serializer.fromJson<int>(json['maxHabits']),
@@ -3784,7 +3783,7 @@ class UserSettingsData extends DataClass
     };
   }
 
-  UserSettingsData copyWith({
+  UserSetting copyWith({
     int? id,
     bool? isPro,
     int? maxHabits,
@@ -3793,7 +3792,7 @@ class UserSettingsData extends DataClass
     Value<String?> themeColor = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) => UserSettingsData(
+  }) => UserSetting(
     id: id ?? this.id,
     isPro: isPro ?? this.isPro,
     maxHabits: maxHabits ?? this.maxHabits,
@@ -3803,8 +3802,8 @@ class UserSettingsData extends DataClass
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
-  UserSettingsData copyWithCompanion(UserSettingsCompanion data) {
-    return UserSettingsData(
+  UserSetting copyWithCompanion(UserSettingsCompanion data) {
+    return UserSetting(
       id: data.id.present ? data.id.value : this.id,
       isPro: data.isPro.present ? data.isPro.value : this.isPro,
       maxHabits: data.maxHabits.present ? data.maxHabits.value : this.maxHabits,
@@ -3822,7 +3821,7 @@ class UserSettingsData extends DataClass
 
   @override
   String toString() {
-    return (StringBuffer('UserSettingsData(')
+    return (StringBuffer('UserSetting(')
           ..write('id: $id, ')
           ..write('isPro: $isPro, ')
           ..write('maxHabits: $maxHabits, ')
@@ -3849,7 +3848,7 @@ class UserSettingsData extends DataClass
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is UserSettingsData &&
+      (other is UserSetting &&
           other.id == this.id &&
           other.isPro == this.isPro &&
           other.maxHabits == this.maxHabits &&
@@ -3860,7 +3859,7 @@ class UserSettingsData extends DataClass
           other.updatedAt == this.updatedAt);
 }
 
-class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
+class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
   final Value<int> id;
   final Value<bool> isPro;
   final Value<int> maxHabits;
@@ -3889,7 +3888,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
-  static Insertable<UserSettingsData> custom({
+  static Insertable<UserSetting> custom({
     Expression<int>? id,
     Expression<bool>? isPro,
     Expression<int>? maxHabits,
@@ -4027,10 +4026,10 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<int> level,
       Value<int> experience,
       Value<int> str,
+      Value<int> vit,
       Value<int> intellect,
       Value<int> luck,
       Value<int> cha,
-      Value<int> vit,
       Value<int> willGems,
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
@@ -4044,10 +4043,10 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<int> level,
       Value<int> experience,
       Value<int> str,
+      Value<int> vit,
       Value<int> intellect,
       Value<int> luck,
       Value<int> cha,
-      Value<int> vit,
       Value<int> willGems,
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
@@ -4085,6 +4084,11 @@ class $$PlayersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get vit => $composableBuilder(
+    column: $table.vit,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get intellect => $composableBuilder(
     column: $table.intellect,
     builder: (column) => ColumnFilters(column),
@@ -4097,11 +4101,6 @@ class $$PlayersTableFilterComposer
 
   ColumnFilters<int> get cha => $composableBuilder(
     column: $table.cha,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get vit => $composableBuilder(
-    column: $table.vit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4165,6 +4164,11 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get vit => $composableBuilder(
+    column: $table.vit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get intellect => $composableBuilder(
     column: $table.intellect,
     builder: (column) => ColumnOrderings(column),
@@ -4177,11 +4181,6 @@ class $$PlayersTableOrderingComposer
 
   ColumnOrderings<int> get cha => $composableBuilder(
     column: $table.cha,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get vit => $composableBuilder(
-    column: $table.vit,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4239,6 +4238,9 @@ class $$PlayersTableAnnotationComposer
   GeneratedColumn<int> get str =>
       $composableBuilder(column: $table.str, builder: (column) => column);
 
+  GeneratedColumn<int> get vit =>
+      $composableBuilder(column: $table.vit, builder: (column) => column);
+
   GeneratedColumn<int> get intellect =>
       $composableBuilder(column: $table.intellect, builder: (column) => column);
 
@@ -4247,9 +4249,6 @@ class $$PlayersTableAnnotationComposer
 
   GeneratedColumn<int> get cha =>
       $composableBuilder(column: $table.cha, builder: (column) => column);
-
-  GeneratedColumn<int> get vit =>
-      $composableBuilder(column: $table.vit, builder: (column) => column);
 
   GeneratedColumn<int> get willGems =>
       $composableBuilder(column: $table.willGems, builder: (column) => column);
@@ -4308,10 +4307,10 @@ class $$PlayersTableTableManager
                 Value<int> level = const Value.absent(),
                 Value<int> experience = const Value.absent(),
                 Value<int> str = const Value.absent(),
+                Value<int> vit = const Value.absent(),
                 Value<int> intellect = const Value.absent(),
                 Value<int> luck = const Value.absent(),
                 Value<int> cha = const Value.absent(),
-                Value<int> vit = const Value.absent(),
                 Value<int> willGems = const Value.absent(),
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
@@ -4323,10 +4322,10 @@ class $$PlayersTableTableManager
                 level: level,
                 experience: experience,
                 str: str,
+                vit: vit,
                 intellect: intellect,
                 luck: luck,
                 cha: cha,
-                vit: vit,
                 willGems: willGems,
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
@@ -4340,10 +4339,10 @@ class $$PlayersTableTableManager
                 Value<int> level = const Value.absent(),
                 Value<int> experience = const Value.absent(),
                 Value<int> str = const Value.absent(),
+                Value<int> vit = const Value.absent(),
                 Value<int> intellect = const Value.absent(),
                 Value<int> luck = const Value.absent(),
                 Value<int> cha = const Value.absent(),
-                Value<int> vit = const Value.absent(),
                 Value<int> willGems = const Value.absent(),
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
@@ -4355,10 +4354,10 @@ class $$PlayersTableTableManager
                 level: level,
                 experience: experience,
                 str: str,
+                vit: vit,
                 intellect: intellect,
                 luck: luck,
                 cha: cha,
-                vit: vit,
                 willGems: willGems,
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
@@ -4396,10 +4395,10 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
+      Value<int> vitBonus,
       Value<int> intBonus,
       Value<int> luckBonus,
       Value<int> chaBonus,
-      Value<int> vitBonus,
       Value<int> bondLevel,
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
@@ -4412,10 +4411,10 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
+      Value<int> vitBonus,
       Value<int> intBonus,
       Value<int> luckBonus,
       Value<int> chaBonus,
-      Value<int> vitBonus,
       Value<int> bondLevel,
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
@@ -4487,6 +4486,11 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get vitBonus => $composableBuilder(
+    column: $table.vitBonus,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get intBonus => $composableBuilder(
     column: $table.intBonus,
     builder: (column) => ColumnFilters(column),
@@ -4499,11 +4503,6 @@ class $$GachaItemsTableFilterComposer
 
   ColumnFilters<int> get chaBonus => $composableBuilder(
     column: $table.chaBonus,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get vitBonus => $composableBuilder(
-    column: $table.vitBonus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4587,6 +4586,11 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get vitBonus => $composableBuilder(
+    column: $table.vitBonus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get intBonus => $composableBuilder(
     column: $table.intBonus,
     builder: (column) => ColumnOrderings(column),
@@ -4599,11 +4603,6 @@ class $$GachaItemsTableOrderingComposer
 
   ColumnOrderings<int> get chaBonus => $composableBuilder(
     column: $table.chaBonus,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get vitBonus => $composableBuilder(
-    column: $table.vitBonus,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4652,6 +4651,9 @@ class $$GachaItemsTableAnnotationComposer
   GeneratedColumn<int> get strBonus =>
       $composableBuilder(column: $table.strBonus, builder: (column) => column);
 
+  GeneratedColumn<int> get vitBonus =>
+      $composableBuilder(column: $table.vitBonus, builder: (column) => column);
+
   GeneratedColumn<int> get intBonus =>
       $composableBuilder(column: $table.intBonus, builder: (column) => column);
 
@@ -4660,9 +4662,6 @@ class $$GachaItemsTableAnnotationComposer
 
   GeneratedColumn<int> get chaBonus =>
       $composableBuilder(column: $table.chaBonus, builder: (column) => column);
-
-  GeneratedColumn<int> get vitBonus =>
-      $composableBuilder(column: $table.vitBonus, builder: (column) => column);
 
   GeneratedColumn<int> get bondLevel =>
       $composableBuilder(column: $table.bondLevel, builder: (column) => column);
@@ -4735,10 +4734,10 @@ class $$GachaItemsTableTableManager
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
+                Value<int> vitBonus = const Value.absent(),
                 Value<int> intBonus = const Value.absent(),
                 Value<int> luckBonus = const Value.absent(),
                 Value<int> chaBonus = const Value.absent(),
-                Value<int> vitBonus = const Value.absent(),
                 Value<int> bondLevel = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
@@ -4749,10 +4748,10 @@ class $$GachaItemsTableTableManager
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
+                vitBonus: vitBonus,
                 intBonus: intBonus,
                 luckBonus: luckBonus,
                 chaBonus: chaBonus,
-                vitBonus: vitBonus,
                 bondLevel: bondLevel,
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
@@ -4765,10 +4764,10 @@ class $$GachaItemsTableTableManager
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
+                Value<int> vitBonus = const Value.absent(),
                 Value<int> intBonus = const Value.absent(),
                 Value<int> luckBonus = const Value.absent(),
                 Value<int> chaBonus = const Value.absent(),
-                Value<int> vitBonus = const Value.absent(),
                 Value<int> bondLevel = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
@@ -4779,10 +4778,10 @@ class $$GachaItemsTableTableManager
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
+                vitBonus: vitBonus,
                 intBonus: intBonus,
                 luckBonus: luckBonus,
                 chaBonus: chaBonus,
-                vitBonus: vitBonus,
                 bondLevel: bondLevel,
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
@@ -6298,17 +6297,17 @@ class $$UserSettingsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $UserSettingsTable,
-          UserSettingsData,
+          UserSetting,
           $$UserSettingsTableFilterComposer,
           $$UserSettingsTableOrderingComposer,
           $$UserSettingsTableAnnotationComposer,
           $$UserSettingsTableCreateCompanionBuilder,
           $$UserSettingsTableUpdateCompanionBuilder,
           (
-            UserSettingsData,
-            BaseReferences<_$AppDatabase, $UserSettingsTable, UserSettingsData>,
+            UserSetting,
+            BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>,
           ),
-          UserSettingsData,
+          UserSetting,
           PrefetchHooks Function()
         > {
   $$UserSettingsTableTableManager(_$AppDatabase db, $UserSettingsTable table)
@@ -6374,17 +6373,17 @@ typedef $$UserSettingsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $UserSettingsTable,
-      UserSettingsData,
+      UserSetting,
       $$UserSettingsTableFilterComposer,
       $$UserSettingsTableOrderingComposer,
       $$UserSettingsTableAnnotationComposer,
       $$UserSettingsTableCreateCompanionBuilder,
       $$UserSettingsTableUpdateCompanionBuilder,
       (
-        UserSettingsData,
-        BaseReferences<_$AppDatabase, $UserSettingsTable, UserSettingsData>,
+        UserSetting,
+        BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>,
       ),
-      UserSettingsData,
+      UserSetting,
       PrefetchHooks Function()
     >;
 
