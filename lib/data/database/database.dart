@@ -143,12 +143,6 @@ class UserSettings extends Table {
 
 @DriftDatabase(
   tables: [Players, GachaItems, Habits, Titles, PartyDecks, PartyMembers, UserSettings],
-  tables: [
-    Players,
-    GachaItems,
-    Habits,
-    Titles,
-    PartyDecks,
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
