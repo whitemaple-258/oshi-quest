@@ -2,7 +2,8 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/database/database.dart';
-import 'data/providers.dart'; // ✅ providers.dart をインポート
+import 'data/providers.dart'; // ✅ ここに集約したプロバイダーを使用
+import 'logic/settings_controller.dart'; // ✅ テーマカラー用
 import 'ui/screens/main_screen.dart';
 
 /// アプリの初期化処理を行うプロバイダー
@@ -25,12 +26,11 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
               willGems: const drift.Value(500),
               experience: const drift.Value(0),
               str: const drift.Value(0),
-              vit: const drift.Value(0),
               intellect: const drift.Value(0),
               luck: const drift.Value(0),
               cha: const drift.Value(0),
-              createdAt: drift.Value(DateTime.now()),
-              updatedAt: drift.Value(DateTime.now()),
+              vit: const drift.Value(0),
+              lastLoginAt: drift.Value(DateTime.now()),
             ),
           );
       print('✅ プレイヤーデータ(ID:1)を作成しました！');
@@ -42,6 +42,11 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     final titleRepo = ref.read(titleRepositoryProvider);
     await titleRepo.initMasterData();
     print('✅ 称号データチェック完了');
+
+    // 3. 設定データの初期化
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+    await settingsRepo.getSettings();
+    print('✅ 設定データチェック完了');
   } catch (e, stack) {
     print('❌ 初期化エラー発生: $e');
     print(stack);
@@ -61,18 +66,40 @@ class OshiQuestApp extends ConsumerWidget {
     // 初期化処理を監視
     final initAsync = ref.watch(appInitializationProvider);
 
+    // ✅ テーマカラーを監視 (変更があればリビルドされる)
+    final themeColor = ref.watch(currentThemeColorProvider);
+
     return MaterialApp(
       title: 'OshiQuest',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.pink,
+        primarySwatch: themeColor, // ✅ ここに適用
+        // Material3の色設定も連動させる
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: themeColor,
+          brightness: Brightness.dark,
+          primary: themeColor, // 明示的に指定
+          secondary: themeColor.shade200, // アクセントカラーも連動
+        ),
         scaffoldBackgroundColor: const Color(0xFF1A1A2E),
         useMaterial3: true,
+        // AppBarのテーマも連動させる
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: IconThemeData(color: themeColor.shade100),
+          titleTextStyle: TextStyle(
+            color: themeColor.shade100,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            shadows: const [Shadow(color: Colors.black, blurRadius: 4)],
+          ),
+        ),
       ),
       // 初期化状態に応じて画面を切り替え
       home: initAsync.when(
-        data: (_) => const MainScreen(), // 完了したらメイン画面へ
+        data: (_) => const MainScreen(),
         loading: () => const Scaffold(
           body: Center(
             child: Column(

@@ -21,7 +21,7 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
     super.dispose();
   }
 
-  // --- 画像追加ロジック (移植) ---
+  // --- 画像追加ロジック ---
   Future<void> _pickAndSaveImage() async {
     final title = await showDialog<String>(
       context: context,
@@ -64,38 +64,47 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ガチャBOXに追加しました！'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('ガチャBOXに追加しました！'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('エラー: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラー: $e'), backgroundColor: Colors.red),
+        );
       }
     } finally {
       _titleController.clear();
     }
   }
 
-  // --- ガチャ実行ロジック (移植) ---
+  // --- ガチャ実行ロジック ---
   void _pullGacha() async {
     try {
       final resultItem = await ref.read(gachaControllerProvider.notifier).pullGacha();
-
+      
       if (resultItem != null && mounted) {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => GachaAnimationDialog(item: resultItem, onAnimationComplete: () {}),
+          builder: (context) => GachaAnimationDialog(
+            item: resultItem,
+            onAnimationComplete: () {},
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         final errorMsg = e.toString().replaceAll('Exception: ', '');
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(errorMsg), backgroundColor: Colors.redAccent));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       }
     }
   }
@@ -104,12 +113,16 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
     final gachaState = ref.watch(gachaControllerProvider);
+    
+    // テーマカラー情報を取得
+    final colorScheme = Theme.of(context).colorScheme;
+    final primaryColor = colorScheme.primary;
+    final onPrimaryColor = colorScheme.onPrimary; // ✅ 背景色に合う文字色（白or黒）
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('召喚の間'),
         actions: [
-          // ジェム表示
           playerAsync.when(
             data: (player) => Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -124,7 +137,10 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
                   children: [
                     const Icon(Icons.diamond, color: Colors.cyanAccent, size: 16),
                     const SizedBox(width: 4),
-                    Text('${player.willGems}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      '${player.willGems}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
               ),
@@ -140,10 +156,13 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // ガチャ演出用アイコン（装飾）
-              const Icon(Icons.auto_awesome, size: 80, color: Colors.pinkAccent),
+              Icon(Icons.auto_awesome, size: 80, color: primaryColor),
+              
               const SizedBox(height: 24),
-              const Text('運命の推しを召喚せよ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                '運命の推しを召喚せよ',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 48),
 
               // 1. 召喚ボタン
@@ -153,15 +172,12 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
                 child: FilledButton.icon(
                   onPressed: gachaState.isLoading ? null : _pullGacha,
                   icon: gachaState.isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
+                      ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: onPrimaryColor))
                       : const Icon(Icons.stars),
                   label: Text(gachaState.isLoading ? '召喚中...' : '1回召喚 (100💎)'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.pinkAccent,
+                    backgroundColor: primaryColor,
+                    foregroundColor: onPrimaryColor, // ✅ 文字色を自動調整
                     textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
