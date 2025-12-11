@@ -9,81 +9,99 @@ class CharacterDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
-      appBar: AppBar(title: Text(item.title)),
+      // 画像を大きく見せるため、AppBarを透過させて重ねるスタイルもアリですが、
+      // 今回は視認性重視で通常のAppBarにします（色は黒系で統一）
+      appBar: AppBar(
+        title: Text(item.title),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      backgroundColor: const Color(0xFF1A1A2E), // 全体の背景色
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        // ✅ 修正: ここでの padding を削除（画像を端まで広げるため）
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // --- キャラ画像 ---
-            Center(
-              child: Container(
-                height: screenSize.height*0.6,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _getRarityColor(item.rarity), width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _getRarityColor(item.rarity).withOpacity(0.3),
-                      blurRadius: 10,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    File(item.imagePath),
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.broken_image, size: 64, color: Colors.grey),
-                  ),
+            // --- キャラ画像 (アスペクト比固定・余白なし) ---
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.black,
+                // 下側にレアリティ色のボーダーラインを入れる
+                border: Border.all(color: _getRarityColor(item.rarity), width: 4),
+              ),
+              child: AspectRatio(
+                aspectRatio: 9 / 16, // ✅ ガチャのトリミング比率に合わせる
+                child: Image.file(
+                  File(item.imagePath),
+                  fit: BoxFit.cover, // 枠いっぱいに表示
+                  errorBuilder: (_, __, ___) =>
+                      const Center(child: Icon(Icons.broken_image, size: 64, color: Colors.grey)),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
 
-            // --- 基本情報 ---
-            _buildInfoCard('基本情報', [
-              _buildRow('レアリティ', item.rarity.name.toUpperCase()),
-              _buildRow('Bond Level', '${item.bondLevel}'),
-            ], Colors.blueGrey),
-            const SizedBox(height: 12),
+            // --- 詳細情報エリア (ここから余白を入れる) ---
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  // --- 基本情報 ---
+                  _buildInfoCard('基本情報', [
+                    _buildRow('レアリティ', item.rarity.name.toUpperCase()),
+                    _buildRow('Bond Level', '${item.bondLevel}'),
+                  ], Colors.blueGrey),
+                  const SizedBox(height: 12),
 
-            // --- ステータス補正 ---
-            _buildInfoCard('ステータス補正', [
-              _buildRow('STR (筋力)', '+${item.strBonus}', color: Colors.redAccent),
-              _buildRow('INT (知力)', '+${item.intBonus}', color: Colors.blueAccent),
-              _buildRow('VIT (体力)', '+${item.vitBonus}', color: Colors.green),
-              _buildRow('LUK (幸運)', '+${item.luckBonus}', color: Colors.purpleAccent),
-              _buildRow('CHA (魅力)', '+${item.chaBonus}', color: Colors.pinkAccent),
-            ], Colors.indigo),
-            const SizedBox(height: 12),
+                  // --- ステータス補正 ---
+                  _buildInfoCard('ステータス補正', [
+                    _buildRow('STR (筋力)', '+${item.strBonus}', color: Colors.redAccent),
+                    _buildRow('INT (知力)', '+${item.intBonus}', color: Colors.blueAccent),
+                    _buildRow('VIT (体力)', '+${item.vitBonus}', color: Colors.green),
+                    _buildRow('LUK (幸運)', '+${item.luckBonus}', color: Colors.purpleAccent),
+                    _buildRow('CHA (魅力)', '+${item.chaBonus}', color: Colors.pinkAccent),
+                  ], Colors.indigo),
+                  const SizedBox(height: 12),
 
-            // --- スキル情報 ---
-            if (item.skillType != SkillType.none)
-              _buildInfoCard('保有スキル', [
-                _buildRow('スキル名', _getSkillName(item.skillType)),
-                _buildRow('効果', _getSkillEffect(item.skillType, item.skillValue)),
-                _buildRow('効果時間', '${item.skillDuration ~/ 60}分'),
-                _buildRow('クールタイム', '${item.skillCooldown ~/ 60}分'),
-              ], Colors.orange),
+                  // --- スキル情報 ---
+                  if (item.skillType != SkillType.none)
+                    _buildInfoCard('保有スキル', [
+                      _buildRow('スキル名', _getSkillName(item.skillType)),
+                      _buildRow('効果', _getSkillEffect(item.skillType, item.skillValue)),
+                      _buildRow('効果時間', '${item.skillDuration ~/ 60}分'),
+                      _buildRow('クールタイム', '${item.skillCooldown ~/ 60}分'),
+                    ], Colors.orange),
 
-            if (item.skillType != SkillType.none) const SizedBox(height: 12),
+                  if (item.skillType != SkillType.none) const SizedBox(height: 12),
 
-            // --- シリーズ情報 ---
-            if (item.seriesId != SeriesType.none)
-              _buildInfoCard('シリーズ装備', [
-                _buildRow('シリーズ名', _getSeriesName(item.seriesId)),
-                const Text(
-                  '※同じシリーズを揃えると追加ボーナスが発生します',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ], Colors.teal),
+                  // --- シリーズ情報 ---
+                  if (item.seriesId != SeriesType.none)
+                    _buildInfoCard('シリーズ装備', [
+                      _buildRow('シリーズ名', _getSeriesName(item.seriesId)),
+                      const Text(
+                        '※同じシリーズを揃えると追加ボーナスが発生します',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ], Colors.teal),
+
+                  // 下部の余白確保
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
           ],
         ),
       ),
