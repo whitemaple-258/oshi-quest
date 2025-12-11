@@ -1,14 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluttericon/rpg_awesome_icons.dart';
+import '../../data/database/database.dart'; // GachaItem型のため
 import '../../data/providers.dart';
+import '../../logic/settings_controller.dart'; // 設定（表示ON/OFF）のため
 import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'party_edit_screen.dart';
 import 'title_list_screen.dart';
-import 'settings_screen.dart'; // ✅ 設定画面
-import 'boss_battle_screen.dart';
+import 'settings_screen.dart';
+
+// currentPartnerProvider
+final currentPartnerProvider = StreamProvider<GachaItem?>((ref) {
+  final repository = ref.watch(partyRepositoryProvider);
+  return repository.watchMainPartner();
+});
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -65,6 +71,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   }
 }
 
+// --- HomeTab (パートナー & フレーム表示) ---
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
 
@@ -73,10 +80,16 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
+  
   @override
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
     final partnerAsync = ref.watch(currentPartnerProvider);
+
+    // フレームと設定の監視
+    final frameAsync = ref.watch(equippedFrameProvider);
+    final settingsAsync = ref.watch(settingsControllerProvider);
+    final showFrame = settingsAsync.value?.showMainFrame ?? true;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -87,41 +100,21 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Row(
-          // ✅ leadingをRowにしてボタンを2つ並べる（設定ボタン + ボスボタン）
-          children: [
-            // 設定ボタン
-            IconButton(
-              icon: const Icon(Icons.settings),
-              tooltip: '設定',
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black45,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              ),
-            ),
-            // ✅ ボス戦ボタン
-            IconButton(
-              icon: const Icon(RpgAwesome.crossed_swords), // 剣アイコン
-              tooltip: 'ボスバトル',
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const BossBattleScreen()),
-              ),
-            ),
-          ],
+        leading: IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: '設定',
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.black45,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+            );
+          },
         ),
-        leadingWidth: 100, // 幅を広げる
-        // ✅ 右側のボタン群
         actions: [
-          // 称号ボタン
           IconButton(
             icon: const Icon(Icons.emoji_events),
             tooltip: '称号コレクション',
@@ -138,7 +131,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
           ),
           const SizedBox(width: 8),
 
-          // ジェム表示
           playerAsync.when(
             data: (player) => Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -166,7 +158,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // --- パートナー画像 ---
+          // 1. パートナー画像 (一番下)
           partnerAsync.when(
             data: (partner) {
               if (partner == null) {
@@ -203,7 +195,25 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             error: (_, __) => const Center(child: Text('エラーが発生しました')),
           ),
 
-          // --- ステータス表示 ---
+          // ✅ 2. フレーム画像 (パートナーの上、ステータスの下)
+          if (showFrame)
+            frameAsync.when(
+              data: (frame) {
+                if (frame == null) return const SizedBox.shrink();
+                return IgnorePointer(
+                  // タップを透過させる（下の画像のタップ判定を邪魔しない）
+                  child: Image.file(
+                    File(frame.imagePath),
+                    fit: BoxFit.cover, // 画面いっぱいに広げる
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                );
+              },
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+
+          // 3. ステータス表示 (一番上)
           Positioned(
             top: 100,
             left: 16,
@@ -216,6 +226,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 final bonusCha = partner?.chaBonus ?? 0;
                 final bonusVit = partner?.vitBonus ?? 0;
 
+                // final nextLevelExp = player.level * 100;
                 final currentLevelStartExp = (player.level - 1) * 100;
                 final currentProgressExp = player.experience - currentLevelStartExp;
                 final requiredExpForNext = 100;
@@ -303,7 +314,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                     const SizedBox(height: 4),
                     _buildStatRow('INT', player.intellect, bonusInt, Colors.blueAccent),
                     const SizedBox(height: 4),
-                    _buildStatRow('LUK', player.luck, bonusLuck, Colors.purpleAccent),
+                    _buildStatRow('LUCK', player.luck, bonusLuck, Colors.purpleAccent),
                     const SizedBox(height: 4),
                     _buildStatRow('CHA', player.cha, bonusCha, Colors.pinkAccent),
                   ],

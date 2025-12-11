@@ -142,6 +142,38 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<SkillType?, int> activeSkillType =
+      GeneratedColumn<int>(
+        'active_skill_type',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<SkillType?>($PlayersTable.$converteractiveSkillTypen);
+  static const VerificationMeta _activeSkillValueMeta = const VerificationMeta(
+    'activeSkillValue',
+  );
+  @override
+  late final GeneratedColumn<int> activeSkillValue = GeneratedColumn<int>(
+    'active_skill_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _skillExpiresAtMeta = const VerificationMeta(
+    'skillExpiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> skillExpiresAt =
+      GeneratedColumn<DateTime>(
+        'skill_expires_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -180,6 +212,9 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     currentDebuff,
     debuffExpiresAt,
     lastLoginAt,
+    activeSkillType,
+    activeSkillValue,
+    skillExpiresAt,
     createdAt,
     updatedAt,
   ];
@@ -273,6 +308,24 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         ),
       );
     }
+    if (data.containsKey('active_skill_value')) {
+      context.handle(
+        _activeSkillValueMeta,
+        activeSkillValue.isAcceptableOrUnknown(
+          data['active_skill_value']!,
+          _activeSkillValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('skill_expires_at')) {
+      context.handle(
+        _skillExpiresAtMeta,
+        skillExpiresAt.isAcceptableOrUnknown(
+          data['skill_expires_at']!,
+          _skillExpiresAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -342,6 +395,20 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_login_at'],
       )!,
+      activeSkillType: $PlayersTable.$converteractiveSkillTypen.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}active_skill_type'],
+        ),
+      ),
+      activeSkillValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}active_skill_value'],
+      ),
+      skillExpiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}skill_expires_at'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -357,6 +424,11 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
   $PlayersTable createAlias(String alias) {
     return $PlayersTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SkillType, int, int> $converteractiveSkillType =
+      const EnumIndexConverter<SkillType>(SkillType.values);
+  static JsonTypeConverter2<SkillType?, int?, int?> $converteractiveSkillTypen =
+      JsonTypeConverter2.asNullable($converteractiveSkillType);
 }
 
 class Player extends DataClass implements Insertable<Player> {
@@ -372,6 +444,9 @@ class Player extends DataClass implements Insertable<Player> {
   final String? currentDebuff;
   final DateTime? debuffExpiresAt;
   final DateTime lastLoginAt;
+  final SkillType? activeSkillType;
+  final int? activeSkillValue;
+  final DateTime? skillExpiresAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Player({
@@ -387,6 +462,9 @@ class Player extends DataClass implements Insertable<Player> {
     this.currentDebuff,
     this.debuffExpiresAt,
     required this.lastLoginAt,
+    this.activeSkillType,
+    this.activeSkillValue,
+    this.skillExpiresAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -409,6 +487,17 @@ class Player extends DataClass implements Insertable<Player> {
       map['debuff_expires_at'] = Variable<DateTime>(debuffExpiresAt);
     }
     map['last_login_at'] = Variable<DateTime>(lastLoginAt);
+    if (!nullToAbsent || activeSkillType != null) {
+      map['active_skill_type'] = Variable<int>(
+        $PlayersTable.$converteractiveSkillTypen.toSql(activeSkillType),
+      );
+    }
+    if (!nullToAbsent || activeSkillValue != null) {
+      map['active_skill_value'] = Variable<int>(activeSkillValue);
+    }
+    if (!nullToAbsent || skillExpiresAt != null) {
+      map['skill_expires_at'] = Variable<DateTime>(skillExpiresAt);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -432,6 +521,15 @@ class Player extends DataClass implements Insertable<Player> {
           ? const Value.absent()
           : Value(debuffExpiresAt),
       lastLoginAt: Value(lastLoginAt),
+      activeSkillType: activeSkillType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(activeSkillType),
+      activeSkillValue: activeSkillValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(activeSkillValue),
+      skillExpiresAt: skillExpiresAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(skillExpiresAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -455,6 +553,11 @@ class Player extends DataClass implements Insertable<Player> {
       currentDebuff: serializer.fromJson<String?>(json['currentDebuff']),
       debuffExpiresAt: serializer.fromJson<DateTime?>(json['debuffExpiresAt']),
       lastLoginAt: serializer.fromJson<DateTime>(json['lastLoginAt']),
+      activeSkillType: $PlayersTable.$converteractiveSkillTypen.fromJson(
+        serializer.fromJson<int?>(json['activeSkillType']),
+      ),
+      activeSkillValue: serializer.fromJson<int?>(json['activeSkillValue']),
+      skillExpiresAt: serializer.fromJson<DateTime?>(json['skillExpiresAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -475,6 +578,11 @@ class Player extends DataClass implements Insertable<Player> {
       'currentDebuff': serializer.toJson<String?>(currentDebuff),
       'debuffExpiresAt': serializer.toJson<DateTime?>(debuffExpiresAt),
       'lastLoginAt': serializer.toJson<DateTime>(lastLoginAt),
+      'activeSkillType': serializer.toJson<int?>(
+        $PlayersTable.$converteractiveSkillTypen.toJson(activeSkillType),
+      ),
+      'activeSkillValue': serializer.toJson<int?>(activeSkillValue),
+      'skillExpiresAt': serializer.toJson<DateTime?>(skillExpiresAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -493,6 +601,9 @@ class Player extends DataClass implements Insertable<Player> {
     Value<String?> currentDebuff = const Value.absent(),
     Value<DateTime?> debuffExpiresAt = const Value.absent(),
     DateTime? lastLoginAt,
+    Value<SkillType?> activeSkillType = const Value.absent(),
+    Value<int?> activeSkillValue = const Value.absent(),
+    Value<DateTime?> skillExpiresAt = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Player(
@@ -512,6 +623,15 @@ class Player extends DataClass implements Insertable<Player> {
         ? debuffExpiresAt.value
         : this.debuffExpiresAt,
     lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+    activeSkillType: activeSkillType.present
+        ? activeSkillType.value
+        : this.activeSkillType,
+    activeSkillValue: activeSkillValue.present
+        ? activeSkillValue.value
+        : this.activeSkillValue,
+    skillExpiresAt: skillExpiresAt.present
+        ? skillExpiresAt.value
+        : this.skillExpiresAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -537,6 +657,15 @@ class Player extends DataClass implements Insertable<Player> {
       lastLoginAt: data.lastLoginAt.present
           ? data.lastLoginAt.value
           : this.lastLoginAt,
+      activeSkillType: data.activeSkillType.present
+          ? data.activeSkillType.value
+          : this.activeSkillType,
+      activeSkillValue: data.activeSkillValue.present
+          ? data.activeSkillValue.value
+          : this.activeSkillValue,
+      skillExpiresAt: data.skillExpiresAt.present
+          ? data.skillExpiresAt.value
+          : this.skillExpiresAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -557,6 +686,9 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
           ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('activeSkillType: $activeSkillType, ')
+          ..write('activeSkillValue: $activeSkillValue, ')
+          ..write('skillExpiresAt: $skillExpiresAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -577,6 +709,9 @@ class Player extends DataClass implements Insertable<Player> {
     currentDebuff,
     debuffExpiresAt,
     lastLoginAt,
+    activeSkillType,
+    activeSkillValue,
+    skillExpiresAt,
     createdAt,
     updatedAt,
   );
@@ -596,6 +731,9 @@ class Player extends DataClass implements Insertable<Player> {
           other.currentDebuff == this.currentDebuff &&
           other.debuffExpiresAt == this.debuffExpiresAt &&
           other.lastLoginAt == this.lastLoginAt &&
+          other.activeSkillType == this.activeSkillType &&
+          other.activeSkillValue == this.activeSkillValue &&
+          other.skillExpiresAt == this.skillExpiresAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -613,6 +751,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<String?> currentDebuff;
   final Value<DateTime?> debuffExpiresAt;
   final Value<DateTime> lastLoginAt;
+  final Value<SkillType?> activeSkillType;
+  final Value<int?> activeSkillValue;
+  final Value<DateTime?> skillExpiresAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const PlayersCompanion({
@@ -628,6 +769,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
     this.lastLoginAt = const Value.absent(),
+    this.activeSkillType = const Value.absent(),
+    this.activeSkillValue = const Value.absent(),
+    this.skillExpiresAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -644,6 +788,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
     this.lastLoginAt = const Value.absent(),
+    this.activeSkillType = const Value.absent(),
+    this.activeSkillValue = const Value.absent(),
+    this.skillExpiresAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -660,6 +807,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<String>? currentDebuff,
     Expression<DateTime>? debuffExpiresAt,
     Expression<DateTime>? lastLoginAt,
+    Expression<int>? activeSkillType,
+    Expression<int>? activeSkillValue,
+    Expression<DateTime>? skillExpiresAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -676,6 +826,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (currentDebuff != null) 'current_debuff': currentDebuff,
       if (debuffExpiresAt != null) 'debuff_expires_at': debuffExpiresAt,
       if (lastLoginAt != null) 'last_login_at': lastLoginAt,
+      if (activeSkillType != null) 'active_skill_type': activeSkillType,
+      if (activeSkillValue != null) 'active_skill_value': activeSkillValue,
+      if (skillExpiresAt != null) 'skill_expires_at': skillExpiresAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -694,6 +847,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<String?>? currentDebuff,
     Value<DateTime?>? debuffExpiresAt,
     Value<DateTime>? lastLoginAt,
+    Value<SkillType?>? activeSkillType,
+    Value<int?>? activeSkillValue,
+    Value<DateTime?>? skillExpiresAt,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -710,6 +866,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       currentDebuff: currentDebuff ?? this.currentDebuff,
       debuffExpiresAt: debuffExpiresAt ?? this.debuffExpiresAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      activeSkillType: activeSkillType ?? this.activeSkillType,
+      activeSkillValue: activeSkillValue ?? this.activeSkillValue,
+      skillExpiresAt: skillExpiresAt ?? this.skillExpiresAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -754,6 +913,17 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     if (lastLoginAt.present) {
       map['last_login_at'] = Variable<DateTime>(lastLoginAt.value);
     }
+    if (activeSkillType.present) {
+      map['active_skill_type'] = Variable<int>(
+        $PlayersTable.$converteractiveSkillTypen.toSql(activeSkillType.value),
+      );
+    }
+    if (activeSkillValue.present) {
+      map['active_skill_value'] = Variable<int>(activeSkillValue.value);
+    }
+    if (skillExpiresAt.present) {
+      map['skill_expires_at'] = Variable<DateTime>(skillExpiresAt.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -778,6 +948,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
           ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('activeSkillType: $activeSkillType, ')
+          ..write('activeSkillValue: $activeSkillValue, ')
+          ..write('skillExpiresAt: $skillExpiresAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -824,6 +997,16 @@ class $GachaItemsTable extends GachaItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<GachaItemType, int> type =
+      GeneratedColumn<int>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<GachaItemType>($GachaItemsTable.$convertertype);
   @override
   late final GeneratedColumnWithTypeConverter<Rarity, int> rarity =
       GeneratedColumn<int>(
@@ -921,6 +1104,100 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<SkillType, int> skillType =
+      GeneratedColumn<int>(
+        'skill_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SkillType>($GachaItemsTable.$converterskillType);
+  static const VerificationMeta _skillValueMeta = const VerificationMeta(
+    'skillValue',
+  );
+  @override
+  late final GeneratedColumn<int> skillValue = GeneratedColumn<int>(
+    'skill_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _skillDurationMeta = const VerificationMeta(
+    'skillDuration',
+  );
+  @override
+  late final GeneratedColumn<int> skillDuration = GeneratedColumn<int>(
+    'skill_duration',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _skillCooldownMeta = const VerificationMeta(
+    'skillCooldown',
+  );
+  @override
+  late final GeneratedColumn<int> skillCooldown = GeneratedColumn<int>(
+    'skill_cooldown',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastSkillUsedAtMeta = const VerificationMeta(
+    'lastSkillUsedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSkillUsedAt =
+      GeneratedColumn<DateTime>(
+        'last_skill_used_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<SeriesType, int> seriesId =
+      GeneratedColumn<int>(
+        'series_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<SeriesType>($GachaItemsTable.$converterseriesId);
+  static const VerificationMeta _isSourceMeta = const VerificationMeta(
+    'isSource',
+  );
+  @override
+  late final GeneratedColumn<bool> isSource = GeneratedColumn<bool>(
+    'is_source',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_source" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _sourceIdMeta = const VerificationMeta(
+    'sourceId',
+  );
+  @override
+  late final GeneratedColumn<int> sourceId = GeneratedColumn<int>(
+    'source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -949,6 +1226,7 @@ class $GachaItemsTable extends GachaItems
     id,
     imagePath,
     title,
+    type,
     rarity,
     isUnlocked,
     strBonus,
@@ -957,6 +1235,14 @@ class $GachaItemsTable extends GachaItems
     chaBonus,
     vitBonus,
     bondLevel,
+    skillType,
+    skillValue,
+    skillDuration,
+    skillCooldown,
+    lastSkillUsedAt,
+    seriesId,
+    isSource,
+    sourceId,
     createdAt,
     unlockedAt,
   ];
@@ -1033,6 +1319,51 @@ class $GachaItemsTable extends GachaItems
         bondLevel.isAcceptableOrUnknown(data['bond_level']!, _bondLevelMeta),
       );
     }
+    if (data.containsKey('skill_value')) {
+      context.handle(
+        _skillValueMeta,
+        skillValue.isAcceptableOrUnknown(data['skill_value']!, _skillValueMeta),
+      );
+    }
+    if (data.containsKey('skill_duration')) {
+      context.handle(
+        _skillDurationMeta,
+        skillDuration.isAcceptableOrUnknown(
+          data['skill_duration']!,
+          _skillDurationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('skill_cooldown')) {
+      context.handle(
+        _skillCooldownMeta,
+        skillCooldown.isAcceptableOrUnknown(
+          data['skill_cooldown']!,
+          _skillCooldownMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_skill_used_at')) {
+      context.handle(
+        _lastSkillUsedAtMeta,
+        lastSkillUsedAt.isAcceptableOrUnknown(
+          data['last_skill_used_at']!,
+          _lastSkillUsedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_source')) {
+      context.handle(
+        _isSourceMeta,
+        isSource.isAcceptableOrUnknown(data['is_source']!, _isSourceMeta),
+      );
+    }
+    if (data.containsKey('source_id')) {
+      context.handle(
+        _sourceIdMeta,
+        sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1066,6 +1397,12 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.string,
         data['${effectivePrefix}title'],
       )!,
+      type: $GachaItemsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       rarity: $GachaItemsTable.$converterrarity.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -1100,6 +1437,42 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}bond_level'],
       )!,
+      skillType: $GachaItemsTable.$converterskillType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}skill_type'],
+        )!,
+      ),
+      skillValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}skill_value'],
+      )!,
+      skillDuration: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}skill_duration'],
+      )!,
+      skillCooldown: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}skill_cooldown'],
+      )!,
+      lastSkillUsedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_skill_used_at'],
+      ),
+      seriesId: $GachaItemsTable.$converterseriesId.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}series_id'],
+        )!,
+      ),
+      isSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_source'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}source_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1116,14 +1489,21 @@ class $GachaItemsTable extends GachaItems
     return $GachaItemsTable(attachedDatabase, alias);
   }
 
+  static JsonTypeConverter2<GachaItemType, int, int> $convertertype =
+      const EnumIndexConverter<GachaItemType>(GachaItemType.values);
   static JsonTypeConverter2<Rarity, int, int> $converterrarity =
       const EnumIndexConverter<Rarity>(Rarity.values);
+  static JsonTypeConverter2<SkillType, int, int> $converterskillType =
+      const EnumIndexConverter<SkillType>(SkillType.values);
+  static JsonTypeConverter2<SeriesType, int, int> $converterseriesId =
+      const EnumIndexConverter<SeriesType>(SeriesType.values);
 }
 
 class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int id;
   final String imagePath;
   final String title;
+  final GachaItemType type;
   final Rarity rarity;
   final bool isUnlocked;
   final int strBonus;
@@ -1132,12 +1512,21 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int chaBonus;
   final int vitBonus;
   final int bondLevel;
+  final SkillType skillType;
+  final int skillValue;
+  final int skillDuration;
+  final int skillCooldown;
+  final DateTime? lastSkillUsedAt;
+  final SeriesType seriesId;
+  final bool isSource;
+  final int? sourceId;
   final DateTime createdAt;
   final DateTime? unlockedAt;
   const GachaItem({
     required this.id,
     required this.imagePath,
     required this.title,
+    required this.type,
     required this.rarity,
     required this.isUnlocked,
     required this.strBonus,
@@ -1146,6 +1535,14 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.chaBonus,
     required this.vitBonus,
     required this.bondLevel,
+    required this.skillType,
+    required this.skillValue,
+    required this.skillDuration,
+    required this.skillCooldown,
+    this.lastSkillUsedAt,
+    required this.seriesId,
+    required this.isSource,
+    this.sourceId,
     required this.createdAt,
     this.unlockedAt,
   });
@@ -1155,6 +1552,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['id'] = Variable<int>(id);
     map['image_path'] = Variable<String>(imagePath);
     map['title'] = Variable<String>(title);
+    {
+      map['type'] = Variable<int>($GachaItemsTable.$convertertype.toSql(type));
+    }
     {
       map['rarity'] = Variable<int>(
         $GachaItemsTable.$converterrarity.toSql(rarity),
@@ -1167,6 +1567,26 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['cha_bonus'] = Variable<int>(chaBonus);
     map['vit_bonus'] = Variable<int>(vitBonus);
     map['bond_level'] = Variable<int>(bondLevel);
+    {
+      map['skill_type'] = Variable<int>(
+        $GachaItemsTable.$converterskillType.toSql(skillType),
+      );
+    }
+    map['skill_value'] = Variable<int>(skillValue);
+    map['skill_duration'] = Variable<int>(skillDuration);
+    map['skill_cooldown'] = Variable<int>(skillCooldown);
+    if (!nullToAbsent || lastSkillUsedAt != null) {
+      map['last_skill_used_at'] = Variable<DateTime>(lastSkillUsedAt);
+    }
+    {
+      map['series_id'] = Variable<int>(
+        $GachaItemsTable.$converterseriesId.toSql(seriesId),
+      );
+    }
+    map['is_source'] = Variable<bool>(isSource);
+    if (!nullToAbsent || sourceId != null) {
+      map['source_id'] = Variable<int>(sourceId);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || unlockedAt != null) {
       map['unlocked_at'] = Variable<DateTime>(unlockedAt);
@@ -1179,6 +1599,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       id: Value(id),
       imagePath: Value(imagePath),
       title: Value(title),
+      type: Value(type),
       rarity: Value(rarity),
       isUnlocked: Value(isUnlocked),
       strBonus: Value(strBonus),
@@ -1187,6 +1608,18 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       chaBonus: Value(chaBonus),
       vitBonus: Value(vitBonus),
       bondLevel: Value(bondLevel),
+      skillType: Value(skillType),
+      skillValue: Value(skillValue),
+      skillDuration: Value(skillDuration),
+      skillCooldown: Value(skillCooldown),
+      lastSkillUsedAt: lastSkillUsedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSkillUsedAt),
+      seriesId: Value(seriesId),
+      isSource: Value(isSource),
+      sourceId: sourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceId),
       createdAt: Value(createdAt),
       unlockedAt: unlockedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1203,6 +1636,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       id: serializer.fromJson<int>(json['id']),
       imagePath: serializer.fromJson<String>(json['imagePath']),
       title: serializer.fromJson<String>(json['title']),
+      type: $GachaItemsTable.$convertertype.fromJson(
+        serializer.fromJson<int>(json['type']),
+      ),
       rarity: $GachaItemsTable.$converterrarity.fromJson(
         serializer.fromJson<int>(json['rarity']),
       ),
@@ -1213,6 +1649,18 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       chaBonus: serializer.fromJson<int>(json['chaBonus']),
       vitBonus: serializer.fromJson<int>(json['vitBonus']),
       bondLevel: serializer.fromJson<int>(json['bondLevel']),
+      skillType: $GachaItemsTable.$converterskillType.fromJson(
+        serializer.fromJson<int>(json['skillType']),
+      ),
+      skillValue: serializer.fromJson<int>(json['skillValue']),
+      skillDuration: serializer.fromJson<int>(json['skillDuration']),
+      skillCooldown: serializer.fromJson<int>(json['skillCooldown']),
+      lastSkillUsedAt: serializer.fromJson<DateTime?>(json['lastSkillUsedAt']),
+      seriesId: $GachaItemsTable.$converterseriesId.fromJson(
+        serializer.fromJson<int>(json['seriesId']),
+      ),
+      isSource: serializer.fromJson<bool>(json['isSource']),
+      sourceId: serializer.fromJson<int?>(json['sourceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       unlockedAt: serializer.fromJson<DateTime?>(json['unlockedAt']),
     );
@@ -1224,6 +1672,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'id': serializer.toJson<int>(id),
       'imagePath': serializer.toJson<String>(imagePath),
       'title': serializer.toJson<String>(title),
+      'type': serializer.toJson<int>(
+        $GachaItemsTable.$convertertype.toJson(type),
+      ),
       'rarity': serializer.toJson<int>(
         $GachaItemsTable.$converterrarity.toJson(rarity),
       ),
@@ -1234,6 +1685,18 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'chaBonus': serializer.toJson<int>(chaBonus),
       'vitBonus': serializer.toJson<int>(vitBonus),
       'bondLevel': serializer.toJson<int>(bondLevel),
+      'skillType': serializer.toJson<int>(
+        $GachaItemsTable.$converterskillType.toJson(skillType),
+      ),
+      'skillValue': serializer.toJson<int>(skillValue),
+      'skillDuration': serializer.toJson<int>(skillDuration),
+      'skillCooldown': serializer.toJson<int>(skillCooldown),
+      'lastSkillUsedAt': serializer.toJson<DateTime?>(lastSkillUsedAt),
+      'seriesId': serializer.toJson<int>(
+        $GachaItemsTable.$converterseriesId.toJson(seriesId),
+      ),
+      'isSource': serializer.toJson<bool>(isSource),
+      'sourceId': serializer.toJson<int?>(sourceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'unlockedAt': serializer.toJson<DateTime?>(unlockedAt),
     };
@@ -1243,6 +1706,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     int? id,
     String? imagePath,
     String? title,
+    GachaItemType? type,
     Rarity? rarity,
     bool? isUnlocked,
     int? strBonus,
@@ -1251,12 +1715,21 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     int? chaBonus,
     int? vitBonus,
     int? bondLevel,
+    SkillType? skillType,
+    int? skillValue,
+    int? skillDuration,
+    int? skillCooldown,
+    Value<DateTime?> lastSkillUsedAt = const Value.absent(),
+    SeriesType? seriesId,
+    bool? isSource,
+    Value<int?> sourceId = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> unlockedAt = const Value.absent(),
   }) => GachaItem(
     id: id ?? this.id,
     imagePath: imagePath ?? this.imagePath,
     title: title ?? this.title,
+    type: type ?? this.type,
     rarity: rarity ?? this.rarity,
     isUnlocked: isUnlocked ?? this.isUnlocked,
     strBonus: strBonus ?? this.strBonus,
@@ -1265,6 +1738,16 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     chaBonus: chaBonus ?? this.chaBonus,
     vitBonus: vitBonus ?? this.vitBonus,
     bondLevel: bondLevel ?? this.bondLevel,
+    skillType: skillType ?? this.skillType,
+    skillValue: skillValue ?? this.skillValue,
+    skillDuration: skillDuration ?? this.skillDuration,
+    skillCooldown: skillCooldown ?? this.skillCooldown,
+    lastSkillUsedAt: lastSkillUsedAt.present
+        ? lastSkillUsedAt.value
+        : this.lastSkillUsedAt,
+    seriesId: seriesId ?? this.seriesId,
+    isSource: isSource ?? this.isSource,
+    sourceId: sourceId.present ? sourceId.value : this.sourceId,
     createdAt: createdAt ?? this.createdAt,
     unlockedAt: unlockedAt.present ? unlockedAt.value : this.unlockedAt,
   );
@@ -1273,6 +1756,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       id: data.id.present ? data.id.value : this.id,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       title: data.title.present ? data.title.value : this.title,
+      type: data.type.present ? data.type.value : this.type,
       rarity: data.rarity.present ? data.rarity.value : this.rarity,
       isUnlocked: data.isUnlocked.present
           ? data.isUnlocked.value
@@ -1283,6 +1767,22 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       chaBonus: data.chaBonus.present ? data.chaBonus.value : this.chaBonus,
       vitBonus: data.vitBonus.present ? data.vitBonus.value : this.vitBonus,
       bondLevel: data.bondLevel.present ? data.bondLevel.value : this.bondLevel,
+      skillType: data.skillType.present ? data.skillType.value : this.skillType,
+      skillValue: data.skillValue.present
+          ? data.skillValue.value
+          : this.skillValue,
+      skillDuration: data.skillDuration.present
+          ? data.skillDuration.value
+          : this.skillDuration,
+      skillCooldown: data.skillCooldown.present
+          ? data.skillCooldown.value
+          : this.skillCooldown,
+      lastSkillUsedAt: data.lastSkillUsedAt.present
+          ? data.lastSkillUsedAt.value
+          : this.lastSkillUsedAt,
+      seriesId: data.seriesId.present ? data.seriesId.value : this.seriesId,
+      isSource: data.isSource.present ? data.isSource.value : this.isSource,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       unlockedAt: data.unlockedAt.present
           ? data.unlockedAt.value
@@ -1296,6 +1796,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('id: $id, ')
           ..write('imagePath: $imagePath, ')
           ..write('title: $title, ')
+          ..write('type: $type, ')
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
@@ -1304,6 +1805,14 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('chaBonus: $chaBonus, ')
           ..write('vitBonus: $vitBonus, ')
           ..write('bondLevel: $bondLevel, ')
+          ..write('skillType: $skillType, ')
+          ..write('skillValue: $skillValue, ')
+          ..write('skillDuration: $skillDuration, ')
+          ..write('skillCooldown: $skillCooldown, ')
+          ..write('lastSkillUsedAt: $lastSkillUsedAt, ')
+          ..write('seriesId: $seriesId, ')
+          ..write('isSource: $isSource, ')
+          ..write('sourceId: $sourceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('unlockedAt: $unlockedAt')
           ..write(')'))
@@ -1311,10 +1820,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     imagePath,
     title,
+    type,
     rarity,
     isUnlocked,
     strBonus,
@@ -1323,9 +1833,17 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     chaBonus,
     vitBonus,
     bondLevel,
+    skillType,
+    skillValue,
+    skillDuration,
+    skillCooldown,
+    lastSkillUsedAt,
+    seriesId,
+    isSource,
+    sourceId,
     createdAt,
     unlockedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1333,6 +1851,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.id == this.id &&
           other.imagePath == this.imagePath &&
           other.title == this.title &&
+          other.type == this.type &&
           other.rarity == this.rarity &&
           other.isUnlocked == this.isUnlocked &&
           other.strBonus == this.strBonus &&
@@ -1341,6 +1860,14 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.chaBonus == this.chaBonus &&
           other.vitBonus == this.vitBonus &&
           other.bondLevel == this.bondLevel &&
+          other.skillType == this.skillType &&
+          other.skillValue == this.skillValue &&
+          other.skillDuration == this.skillDuration &&
+          other.skillCooldown == this.skillCooldown &&
+          other.lastSkillUsedAt == this.lastSkillUsedAt &&
+          other.seriesId == this.seriesId &&
+          other.isSource == this.isSource &&
+          other.sourceId == this.sourceId &&
           other.createdAt == this.createdAt &&
           other.unlockedAt == this.unlockedAt);
 }
@@ -1349,6 +1876,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int> id;
   final Value<String> imagePath;
   final Value<String> title;
+  final Value<GachaItemType> type;
   final Value<Rarity> rarity;
   final Value<bool> isUnlocked;
   final Value<int> strBonus;
@@ -1357,12 +1885,21 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int> chaBonus;
   final Value<int> vitBonus;
   final Value<int> bondLevel;
+  final Value<SkillType> skillType;
+  final Value<int> skillValue;
+  final Value<int> skillDuration;
+  final Value<int> skillCooldown;
+  final Value<DateTime?> lastSkillUsedAt;
+  final Value<SeriesType> seriesId;
+  final Value<bool> isSource;
+  final Value<int?> sourceId;
   final Value<DateTime> createdAt;
   final Value<DateTime?> unlockedAt;
   const GachaItemsCompanion({
     this.id = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.title = const Value.absent(),
+    this.type = const Value.absent(),
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
@@ -1371,6 +1908,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.chaBonus = const Value.absent(),
     this.vitBonus = const Value.absent(),
     this.bondLevel = const Value.absent(),
+    this.skillType = const Value.absent(),
+    this.skillValue = const Value.absent(),
+    this.skillDuration = const Value.absent(),
+    this.skillCooldown = const Value.absent(),
+    this.lastSkillUsedAt = const Value.absent(),
+    this.seriesId = const Value.absent(),
+    this.isSource = const Value.absent(),
+    this.sourceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
   });
@@ -1378,6 +1923,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.id = const Value.absent(),
     required String imagePath,
     required String title,
+    this.type = const Value.absent(),
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
@@ -1386,6 +1932,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.chaBonus = const Value.absent(),
     this.vitBonus = const Value.absent(),
     this.bondLevel = const Value.absent(),
+    this.skillType = const Value.absent(),
+    this.skillValue = const Value.absent(),
+    this.skillDuration = const Value.absent(),
+    this.skillCooldown = const Value.absent(),
+    this.lastSkillUsedAt = const Value.absent(),
+    this.seriesId = const Value.absent(),
+    this.isSource = const Value.absent(),
+    this.sourceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
   }) : imagePath = Value(imagePath),
@@ -1394,6 +1948,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<int>? id,
     Expression<String>? imagePath,
     Expression<String>? title,
+    Expression<int>? type,
     Expression<int>? rarity,
     Expression<bool>? isUnlocked,
     Expression<int>? strBonus,
@@ -1402,6 +1957,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<int>? chaBonus,
     Expression<int>? vitBonus,
     Expression<int>? bondLevel,
+    Expression<int>? skillType,
+    Expression<int>? skillValue,
+    Expression<int>? skillDuration,
+    Expression<int>? skillCooldown,
+    Expression<DateTime>? lastSkillUsedAt,
+    Expression<int>? seriesId,
+    Expression<bool>? isSource,
+    Expression<int>? sourceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? unlockedAt,
   }) {
@@ -1409,6 +1972,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (id != null) 'id': id,
       if (imagePath != null) 'image_path': imagePath,
       if (title != null) 'title': title,
+      if (type != null) 'type': type,
       if (rarity != null) 'rarity': rarity,
       if (isUnlocked != null) 'is_unlocked': isUnlocked,
       if (strBonus != null) 'str_bonus': strBonus,
@@ -1417,6 +1981,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (chaBonus != null) 'cha_bonus': chaBonus,
       if (vitBonus != null) 'vit_bonus': vitBonus,
       if (bondLevel != null) 'bond_level': bondLevel,
+      if (skillType != null) 'skill_type': skillType,
+      if (skillValue != null) 'skill_value': skillValue,
+      if (skillDuration != null) 'skill_duration': skillDuration,
+      if (skillCooldown != null) 'skill_cooldown': skillCooldown,
+      if (lastSkillUsedAt != null) 'last_skill_used_at': lastSkillUsedAt,
+      if (seriesId != null) 'series_id': seriesId,
+      if (isSource != null) 'is_source': isSource,
+      if (sourceId != null) 'source_id': sourceId,
       if (createdAt != null) 'created_at': createdAt,
       if (unlockedAt != null) 'unlocked_at': unlockedAt,
     });
@@ -1426,6 +1998,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<int>? id,
     Value<String>? imagePath,
     Value<String>? title,
+    Value<GachaItemType>? type,
     Value<Rarity>? rarity,
     Value<bool>? isUnlocked,
     Value<int>? strBonus,
@@ -1434,6 +2007,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<int>? chaBonus,
     Value<int>? vitBonus,
     Value<int>? bondLevel,
+    Value<SkillType>? skillType,
+    Value<int>? skillValue,
+    Value<int>? skillDuration,
+    Value<int>? skillCooldown,
+    Value<DateTime?>? lastSkillUsedAt,
+    Value<SeriesType>? seriesId,
+    Value<bool>? isSource,
+    Value<int?>? sourceId,
     Value<DateTime>? createdAt,
     Value<DateTime?>? unlockedAt,
   }) {
@@ -1441,6 +2022,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       id: id ?? this.id,
       imagePath: imagePath ?? this.imagePath,
       title: title ?? this.title,
+      type: type ?? this.type,
       rarity: rarity ?? this.rarity,
       isUnlocked: isUnlocked ?? this.isUnlocked,
       strBonus: strBonus ?? this.strBonus,
@@ -1449,6 +2031,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       chaBonus: chaBonus ?? this.chaBonus,
       vitBonus: vitBonus ?? this.vitBonus,
       bondLevel: bondLevel ?? this.bondLevel,
+      skillType: skillType ?? this.skillType,
+      skillValue: skillValue ?? this.skillValue,
+      skillDuration: skillDuration ?? this.skillDuration,
+      skillCooldown: skillCooldown ?? this.skillCooldown,
+      lastSkillUsedAt: lastSkillUsedAt ?? this.lastSkillUsedAt,
+      seriesId: seriesId ?? this.seriesId,
+      isSource: isSource ?? this.isSource,
+      sourceId: sourceId ?? this.sourceId,
       createdAt: createdAt ?? this.createdAt,
       unlockedAt: unlockedAt ?? this.unlockedAt,
     );
@@ -1465,6 +2055,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<int>(
+        $GachaItemsTable.$convertertype.toSql(type.value),
+      );
     }
     if (rarity.present) {
       map['rarity'] = Variable<int>(
@@ -1492,6 +2087,34 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (bondLevel.present) {
       map['bond_level'] = Variable<int>(bondLevel.value);
     }
+    if (skillType.present) {
+      map['skill_type'] = Variable<int>(
+        $GachaItemsTable.$converterskillType.toSql(skillType.value),
+      );
+    }
+    if (skillValue.present) {
+      map['skill_value'] = Variable<int>(skillValue.value);
+    }
+    if (skillDuration.present) {
+      map['skill_duration'] = Variable<int>(skillDuration.value);
+    }
+    if (skillCooldown.present) {
+      map['skill_cooldown'] = Variable<int>(skillCooldown.value);
+    }
+    if (lastSkillUsedAt.present) {
+      map['last_skill_used_at'] = Variable<DateTime>(lastSkillUsedAt.value);
+    }
+    if (seriesId.present) {
+      map['series_id'] = Variable<int>(
+        $GachaItemsTable.$converterseriesId.toSql(seriesId.value),
+      );
+    }
+    if (isSource.present) {
+      map['is_source'] = Variable<bool>(isSource.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<int>(sourceId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1507,6 +2130,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('id: $id, ')
           ..write('imagePath: $imagePath, ')
           ..write('title: $title, ')
+          ..write('type: $type, ')
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
@@ -1515,6 +2139,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('chaBonus: $chaBonus, ')
           ..write('vitBonus: $vitBonus, ')
           ..write('bondLevel: $bondLevel, ')
+          ..write('skillType: $skillType, ')
+          ..write('skillValue: $skillValue, ')
+          ..write('skillDuration: $skillDuration, ')
+          ..write('skillCooldown: $skillCooldown, ')
+          ..write('lastSkillUsedAt: $lastSkillUsedAt, ')
+          ..write('seriesId: $seriesId, ')
+          ..write('isSource: $isSource, ')
+          ..write('sourceId: $sourceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('unlockedAt: $unlockedAt')
           ..write(')'))
@@ -2809,6 +3441,20 @@ class $PartyDecksTable extends PartyDecks
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _equippedFrameIdMeta = const VerificationMeta(
+    'equippedFrameId',
+  );
+  @override
+  late final GeneratedColumn<int> equippedFrameId = GeneratedColumn<int>(
+    'equipped_frame_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES gacha_items (id)',
+    ),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2838,6 +3484,7 @@ class $PartyDecksTable extends PartyDecks
     id,
     name,
     isActive,
+    equippedFrameId,
     createdAt,
     updatedAt,
   ];
@@ -2868,6 +3515,15 @@ class $PartyDecksTable extends PartyDecks
       context.handle(
         _isActiveMeta,
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('equipped_frame_id')) {
+      context.handle(
+        _equippedFrameIdMeta,
+        equippedFrameId.isAcceptableOrUnknown(
+          data['equipped_frame_id']!,
+          _equippedFrameIdMeta,
+        ),
       );
     }
     if (data.containsKey('created_at')) {
@@ -2903,6 +3559,10 @@ class $PartyDecksTable extends PartyDecks
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      equippedFrameId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}equipped_frame_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2924,12 +3584,14 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
   final int id;
   final String name;
   final bool isActive;
+  final int? equippedFrameId;
   final DateTime createdAt;
   final DateTime updatedAt;
   const PartyDeck({
     required this.id,
     required this.name,
     required this.isActive,
+    this.equippedFrameId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -2939,6 +3601,9 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['is_active'] = Variable<bool>(isActive);
+    if (!nullToAbsent || equippedFrameId != null) {
+      map['equipped_frame_id'] = Variable<int>(equippedFrameId);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -2949,6 +3614,9 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
       id: Value(id),
       name: Value(name),
       isActive: Value(isActive),
+      equippedFrameId: equippedFrameId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equippedFrameId),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2963,6 +3631,7 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      equippedFrameId: serializer.fromJson<int?>(json['equippedFrameId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -2974,6 +3643,7 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'isActive': serializer.toJson<bool>(isActive),
+      'equippedFrameId': serializer.toJson<int?>(equippedFrameId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -2983,12 +3653,16 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
     int? id,
     String? name,
     bool? isActive,
+    Value<int?> equippedFrameId = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => PartyDeck(
     id: id ?? this.id,
     name: name ?? this.name,
     isActive: isActive ?? this.isActive,
+    equippedFrameId: equippedFrameId.present
+        ? equippedFrameId.value
+        : this.equippedFrameId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2997,6 +3671,9 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      equippedFrameId: data.equippedFrameId.present
+          ? data.equippedFrameId.value
+          : this.equippedFrameId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -3008,6 +3685,7 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('isActive: $isActive, ')
+          ..write('equippedFrameId: $equippedFrameId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3015,7 +3693,8 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
   }
 
   @override
-  int get hashCode => Object.hash(id, name, isActive, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(id, name, isActive, equippedFrameId, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3023,6 +3702,7 @@ class PartyDeck extends DataClass implements Insertable<PartyDeck> {
           other.id == this.id &&
           other.name == this.name &&
           other.isActive == this.isActive &&
+          other.equippedFrameId == this.equippedFrameId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -3031,12 +3711,14 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
   final Value<int> id;
   final Value<String> name;
   final Value<bool> isActive;
+  final Value<int?> equippedFrameId;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const PartyDecksCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.equippedFrameId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -3044,6 +3726,7 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
     this.id = const Value.absent(),
     required String name,
     this.isActive = const Value.absent(),
+    this.equippedFrameId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : name = Value(name);
@@ -3051,6 +3734,7 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
     Expression<int>? id,
     Expression<String>? name,
     Expression<bool>? isActive,
+    Expression<int>? equippedFrameId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -3058,6 +3742,7 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (isActive != null) 'is_active': isActive,
+      if (equippedFrameId != null) 'equipped_frame_id': equippedFrameId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -3067,6 +3752,7 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
     Value<int>? id,
     Value<String>? name,
     Value<bool>? isActive,
+    Value<int?>? equippedFrameId,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -3074,6 +3760,7 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
       id: id ?? this.id,
       name: name ?? this.name,
       isActive: isActive ?? this.isActive,
+      equippedFrameId: equippedFrameId ?? this.equippedFrameId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -3091,6 +3778,9 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (equippedFrameId.present) {
+      map['equipped_frame_id'] = Variable<int>(equippedFrameId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3106,6 +3796,7 @@ class PartyDecksCompanion extends UpdateCompanion<PartyDeck> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('isActive: $isActive, ')
+          ..write('equippedFrameId: $equippedFrameId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3557,6 +4248,21 @@ class $UserSettingsTable extends UserSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _showMainFrameMeta = const VerificationMeta(
+    'showMainFrame',
+  );
+  @override
+  late final GeneratedColumn<bool> showMainFrame = GeneratedColumn<bool>(
+    'show_main_frame',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("show_main_frame" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3589,6 +4295,7 @@ class $UserSettingsTable extends UserSettings
     maxGachaItems,
     maxDecks,
     themeColor,
+    showMainFrame,
     createdAt,
     updatedAt,
   ];
@@ -3640,6 +4347,15 @@ class $UserSettingsTable extends UserSettings
         themeColor.isAcceptableOrUnknown(data['theme_color']!, _themeColorMeta),
       );
     }
+    if (data.containsKey('show_main_frame')) {
+      context.handle(
+        _showMainFrameMeta,
+        showMainFrame.isAcceptableOrUnknown(
+          data['show_main_frame']!,
+          _showMainFrameMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3685,6 +4401,10 @@ class $UserSettingsTable extends UserSettings
         DriftSqlType.string,
         data['${effectivePrefix}theme_color'],
       ),
+      showMainFrame: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}show_main_frame'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3710,6 +4430,7 @@ class UserSettingsData extends DataClass
   final int maxGachaItems;
   final int maxDecks;
   final String? themeColor;
+  final bool showMainFrame;
   final DateTime createdAt;
   final DateTime updatedAt;
   const UserSettingsData({
@@ -3719,6 +4440,7 @@ class UserSettingsData extends DataClass
     required this.maxGachaItems,
     required this.maxDecks,
     this.themeColor,
+    required this.showMainFrame,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -3733,6 +4455,7 @@ class UserSettingsData extends DataClass
     if (!nullToAbsent || themeColor != null) {
       map['theme_color'] = Variable<String>(themeColor);
     }
+    map['show_main_frame'] = Variable<bool>(showMainFrame);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -3748,6 +4471,7 @@ class UserSettingsData extends DataClass
       themeColor: themeColor == null && nullToAbsent
           ? const Value.absent()
           : Value(themeColor),
+      showMainFrame: Value(showMainFrame),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -3765,6 +4489,7 @@ class UserSettingsData extends DataClass
       maxGachaItems: serializer.fromJson<int>(json['maxGachaItems']),
       maxDecks: serializer.fromJson<int>(json['maxDecks']),
       themeColor: serializer.fromJson<String?>(json['themeColor']),
+      showMainFrame: serializer.fromJson<bool>(json['showMainFrame']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -3779,6 +4504,7 @@ class UserSettingsData extends DataClass
       'maxGachaItems': serializer.toJson<int>(maxGachaItems),
       'maxDecks': serializer.toJson<int>(maxDecks),
       'themeColor': serializer.toJson<String?>(themeColor),
+      'showMainFrame': serializer.toJson<bool>(showMainFrame),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -3791,6 +4517,7 @@ class UserSettingsData extends DataClass
     int? maxGachaItems,
     int? maxDecks,
     Value<String?> themeColor = const Value.absent(),
+    bool? showMainFrame,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => UserSettingsData(
@@ -3800,6 +4527,7 @@ class UserSettingsData extends DataClass
     maxGachaItems: maxGachaItems ?? this.maxGachaItems,
     maxDecks: maxDecks ?? this.maxDecks,
     themeColor: themeColor.present ? themeColor.value : this.themeColor,
+    showMainFrame: showMainFrame ?? this.showMainFrame,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -3815,6 +4543,9 @@ class UserSettingsData extends DataClass
       themeColor: data.themeColor.present
           ? data.themeColor.value
           : this.themeColor,
+      showMainFrame: data.showMainFrame.present
+          ? data.showMainFrame.value
+          : this.showMainFrame,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -3829,6 +4560,7 @@ class UserSettingsData extends DataClass
           ..write('maxGachaItems: $maxGachaItems, ')
           ..write('maxDecks: $maxDecks, ')
           ..write('themeColor: $themeColor, ')
+          ..write('showMainFrame: $showMainFrame, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -3843,6 +4575,7 @@ class UserSettingsData extends DataClass
     maxGachaItems,
     maxDecks,
     themeColor,
+    showMainFrame,
     createdAt,
     updatedAt,
   );
@@ -3856,6 +4589,7 @@ class UserSettingsData extends DataClass
           other.maxGachaItems == this.maxGachaItems &&
           other.maxDecks == this.maxDecks &&
           other.themeColor == this.themeColor &&
+          other.showMainFrame == this.showMainFrame &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -3867,6 +4601,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
   final Value<int> maxGachaItems;
   final Value<int> maxDecks;
   final Value<String?> themeColor;
+  final Value<bool> showMainFrame;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const UserSettingsCompanion({
@@ -3876,6 +4611,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     this.maxGachaItems = const Value.absent(),
     this.maxDecks = const Value.absent(),
     this.themeColor = const Value.absent(),
+    this.showMainFrame = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -3886,6 +4622,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     this.maxGachaItems = const Value.absent(),
     this.maxDecks = const Value.absent(),
     this.themeColor = const Value.absent(),
+    this.showMainFrame = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -3896,6 +4633,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     Expression<int>? maxGachaItems,
     Expression<int>? maxDecks,
     Expression<String>? themeColor,
+    Expression<bool>? showMainFrame,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -3906,6 +4644,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
       if (maxGachaItems != null) 'max_gacha_items': maxGachaItems,
       if (maxDecks != null) 'max_decks': maxDecks,
       if (themeColor != null) 'theme_color': themeColor,
+      if (showMainFrame != null) 'show_main_frame': showMainFrame,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -3918,6 +4657,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     Value<int>? maxGachaItems,
     Value<int>? maxDecks,
     Value<String?>? themeColor,
+    Value<bool>? showMainFrame,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -3928,6 +4668,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
       maxGachaItems: maxGachaItems ?? this.maxGachaItems,
       maxDecks: maxDecks ?? this.maxDecks,
       themeColor: themeColor ?? this.themeColor,
+      showMainFrame: showMainFrame ?? this.showMainFrame,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -3954,6 +4695,9 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     if (themeColor.present) {
       map['theme_color'] = Variable<String>(themeColor.value);
     }
+    if (showMainFrame.present) {
+      map['show_main_frame'] = Variable<bool>(showMainFrame.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3972,6 +4716,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
           ..write('maxGachaItems: $maxGachaItems, ')
           ..write('maxDecks: $maxDecks, ')
           ..write('themeColor: $themeColor, ')
+          ..write('showMainFrame: $showMainFrame, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -4500,6 +5245,9 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
       Value<DateTime> lastLoginAt,
+      Value<SkillType?> activeSkillType,
+      Value<int?> activeSkillValue,
+      Value<DateTime?> skillExpiresAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -4517,6 +5265,9 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
       Value<DateTime> lastLoginAt,
+      Value<SkillType?> activeSkillType,
+      Value<int?> activeSkillValue,
+      Value<DateTime?> skillExpiresAt,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -4587,6 +5338,22 @@ class $$PlayersTableFilterComposer
 
   ColumnFilters<DateTime> get lastLoginAt => $composableBuilder(
     column: $table.lastLoginAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SkillType?, SkillType, int>
+  get activeSkillType => $composableBuilder(
+    column: $table.activeSkillType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get activeSkillValue => $composableBuilder(
+    column: $table.activeSkillValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get skillExpiresAt => $composableBuilder(
+    column: $table.skillExpiresAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4670,6 +5437,21 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get activeSkillType => $composableBuilder(
+    column: $table.activeSkillType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get activeSkillValue => $composableBuilder(
+    column: $table.activeSkillValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get skillExpiresAt => $composableBuilder(
+    column: $table.skillExpiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4734,6 +5516,22 @@ class $$PlayersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<SkillType?, int> get activeSkillType =>
+      $composableBuilder(
+        column: $table.activeSkillType,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<int> get activeSkillValue => $composableBuilder(
+    column: $table.activeSkillValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get skillExpiresAt => $composableBuilder(
+    column: $table.skillExpiresAt,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -4781,6 +5579,9 @@ class $$PlayersTableTableManager
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
                 Value<DateTime> lastLoginAt = const Value.absent(),
+                Value<SkillType?> activeSkillType = const Value.absent(),
+                Value<int?> activeSkillValue = const Value.absent(),
+                Value<DateTime?> skillExpiresAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PlayersCompanion(
@@ -4796,6 +5597,9 @@ class $$PlayersTableTableManager
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
                 lastLoginAt: lastLoginAt,
+                activeSkillType: activeSkillType,
+                activeSkillValue: activeSkillValue,
+                skillExpiresAt: skillExpiresAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -4813,6 +5617,9 @@ class $$PlayersTableTableManager
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
                 Value<DateTime> lastLoginAt = const Value.absent(),
+                Value<SkillType?> activeSkillType = const Value.absent(),
+                Value<int?> activeSkillValue = const Value.absent(),
+                Value<DateTime?> skillExpiresAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PlayersCompanion.insert(
@@ -4828,6 +5635,9 @@ class $$PlayersTableTableManager
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
                 lastLoginAt: lastLoginAt,
+                activeSkillType: activeSkillType,
+                activeSkillValue: activeSkillValue,
+                skillExpiresAt: skillExpiresAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -4858,6 +5668,7 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<int> id,
       required String imagePath,
       required String title,
+      Value<GachaItemType> type,
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
@@ -4866,6 +5677,14 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<int> chaBonus,
       Value<int> vitBonus,
       Value<int> bondLevel,
+      Value<SkillType> skillType,
+      Value<int> skillValue,
+      Value<int> skillDuration,
+      Value<int> skillCooldown,
+      Value<DateTime?> lastSkillUsedAt,
+      Value<SeriesType> seriesId,
+      Value<bool> isSource,
+      Value<int?> sourceId,
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
     });
@@ -4874,6 +5693,7 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> imagePath,
       Value<String> title,
+      Value<GachaItemType> type,
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
@@ -4882,6 +5702,14 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<int> chaBonus,
       Value<int> vitBonus,
       Value<int> bondLevel,
+      Value<SkillType> skillType,
+      Value<int> skillValue,
+      Value<int> skillDuration,
+      Value<int> skillCooldown,
+      Value<DateTime?> lastSkillUsedAt,
+      Value<SeriesType> seriesId,
+      Value<bool> isSource,
+      Value<int?> sourceId,
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
     });
@@ -4889,6 +5717,27 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
 final class $$GachaItemsTableReferences
     extends BaseReferences<_$AppDatabase, $GachaItemsTable, GachaItem> {
   $$GachaItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PartyDecksTable, List<PartyDeck>>
+  _partyDecksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.partyDecks,
+    aliasName: $_aliasNameGenerator(
+      db.gachaItems.id,
+      db.partyDecks.equippedFrameId,
+    ),
+  );
+
+  $$PartyDecksTableProcessedTableManager get partyDecksRefs {
+    final manager = $$PartyDecksTableTableManager(
+      $_db,
+      $_db.partyDecks,
+    ).filter((f) => f.equippedFrameId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_partyDecksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 
   static MultiTypedResultKey<$PartyMembersTable, List<PartyMember>>
   _partyMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -4936,6 +5785,12 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<GachaItemType, GachaItemType, int> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
   ColumnWithTypeConverterFilters<Rarity, Rarity, int> get rarity =>
       $composableBuilder(
         column: $table.rarity,
@@ -4977,6 +5832,48 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<SkillType, SkillType, int> get skillType =>
+      $composableBuilder(
+        column: $table.skillType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get skillValue => $composableBuilder(
+    column: $table.skillValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get skillDuration => $composableBuilder(
+    column: $table.skillDuration,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get skillCooldown => $composableBuilder(
+    column: $table.skillCooldown,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSkillUsedAt => $composableBuilder(
+    column: $table.lastSkillUsedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SeriesType, SeriesType, int> get seriesId =>
+      $composableBuilder(
+        column: $table.seriesId,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<bool> get isSource => $composableBuilder(
+    column: $table.isSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -4986,6 +5883,31 @@ class $$GachaItemsTableFilterComposer
     column: $table.unlockedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> partyDecksRefs(
+    Expression<bool> Function($$PartyDecksTableFilterComposer f) f,
+  ) {
+    final $$PartyDecksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.partyDecks,
+      getReferencedColumn: (t) => t.equippedFrameId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyDecksTableFilterComposer(
+            $db: $db,
+            $table: $db.partyDecks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> partyMembersRefs(
     Expression<bool> Function($$PartyMembersTableFilterComposer f) f,
@@ -5037,6 +5959,11 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get rarity => $composableBuilder(
     column: $table.rarity,
     builder: (column) => ColumnOrderings(column),
@@ -5077,6 +6004,46 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get skillType => $composableBuilder(
+    column: $table.skillType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get skillValue => $composableBuilder(
+    column: $table.skillValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get skillDuration => $composableBuilder(
+    column: $table.skillDuration,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get skillCooldown => $composableBuilder(
+    column: $table.skillCooldown,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSkillUsedAt => $composableBuilder(
+    column: $table.lastSkillUsedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seriesId => $composableBuilder(
+    column: $table.seriesId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSource => $composableBuilder(
+    column: $table.isSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sourceId => $composableBuilder(
+    column: $table.sourceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -5106,6 +6073,9 @@ class $$GachaItemsTableAnnotationComposer
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
   GeneratedColumnWithTypeConverter<Rarity, int> get rarity =>
       $composableBuilder(column: $table.rarity, builder: (column) => column);
 
@@ -5132,6 +6102,38 @@ class $$GachaItemsTableAnnotationComposer
   GeneratedColumn<int> get bondLevel =>
       $composableBuilder(column: $table.bondLevel, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<SkillType, int> get skillType =>
+      $composableBuilder(column: $table.skillType, builder: (column) => column);
+
+  GeneratedColumn<int> get skillValue => $composableBuilder(
+    column: $table.skillValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get skillDuration => $composableBuilder(
+    column: $table.skillDuration,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get skillCooldown => $composableBuilder(
+    column: $table.skillCooldown,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSkillUsedAt => $composableBuilder(
+    column: $table.lastSkillUsedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SeriesType, int> get seriesId =>
+      $composableBuilder(column: $table.seriesId, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSource =>
+      $composableBuilder(column: $table.isSource, builder: (column) => column);
+
+  GeneratedColumn<int> get sourceId =>
+      $composableBuilder(column: $table.sourceId, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -5139,6 +6141,31 @@ class $$GachaItemsTableAnnotationComposer
     column: $table.unlockedAt,
     builder: (column) => column,
   );
+
+  Expression<T> partyDecksRefs<T extends Object>(
+    Expression<T> Function($$PartyDecksTableAnnotationComposer a) f,
+  ) {
+    final $$PartyDecksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.partyDecks,
+      getReferencedColumn: (t) => t.equippedFrameId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PartyDecksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.partyDecks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<T> partyMembersRefs<T extends Object>(
     Expression<T> Function($$PartyMembersTableAnnotationComposer a) f,
@@ -5179,7 +6206,7 @@ class $$GachaItemsTableTableManager
           $$GachaItemsTableUpdateCompanionBuilder,
           (GachaItem, $$GachaItemsTableReferences),
           GachaItem,
-          PrefetchHooks Function({bool partyMembersRefs})
+          PrefetchHooks Function({bool partyDecksRefs, bool partyMembersRefs})
         > {
   $$GachaItemsTableTableManager(_$AppDatabase db, $GachaItemsTable table)
     : super(
@@ -5197,6 +6224,7 @@ class $$GachaItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> imagePath = const Value.absent(),
                 Value<String> title = const Value.absent(),
+                Value<GachaItemType> type = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
@@ -5205,12 +6233,21 @@ class $$GachaItemsTableTableManager
                 Value<int> chaBonus = const Value.absent(),
                 Value<int> vitBonus = const Value.absent(),
                 Value<int> bondLevel = const Value.absent(),
+                Value<SkillType> skillType = const Value.absent(),
+                Value<int> skillValue = const Value.absent(),
+                Value<int> skillDuration = const Value.absent(),
+                Value<int> skillCooldown = const Value.absent(),
+                Value<DateTime?> lastSkillUsedAt = const Value.absent(),
+                Value<SeriesType> seriesId = const Value.absent(),
+                Value<bool> isSource = const Value.absent(),
+                Value<int?> sourceId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
               }) => GachaItemsCompanion(
                 id: id,
                 imagePath: imagePath,
                 title: title,
+                type: type,
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
@@ -5219,6 +6256,14 @@ class $$GachaItemsTableTableManager
                 chaBonus: chaBonus,
                 vitBonus: vitBonus,
                 bondLevel: bondLevel,
+                skillType: skillType,
+                skillValue: skillValue,
+                skillDuration: skillDuration,
+                skillCooldown: skillCooldown,
+                lastSkillUsedAt: lastSkillUsedAt,
+                seriesId: seriesId,
+                isSource: isSource,
+                sourceId: sourceId,
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
               ),
@@ -5227,6 +6272,7 @@ class $$GachaItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String imagePath,
                 required String title,
+                Value<GachaItemType> type = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
@@ -5235,12 +6281,21 @@ class $$GachaItemsTableTableManager
                 Value<int> chaBonus = const Value.absent(),
                 Value<int> vitBonus = const Value.absent(),
                 Value<int> bondLevel = const Value.absent(),
+                Value<SkillType> skillType = const Value.absent(),
+                Value<int> skillValue = const Value.absent(),
+                Value<int> skillDuration = const Value.absent(),
+                Value<int> skillCooldown = const Value.absent(),
+                Value<DateTime?> lastSkillUsedAt = const Value.absent(),
+                Value<SeriesType> seriesId = const Value.absent(),
+                Value<bool> isSource = const Value.absent(),
+                Value<int?> sourceId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
               }) => GachaItemsCompanion.insert(
                 id: id,
                 imagePath: imagePath,
                 title: title,
+                type: type,
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
@@ -5249,6 +6304,14 @@ class $$GachaItemsTableTableManager
                 chaBonus: chaBonus,
                 vitBonus: vitBonus,
                 bondLevel: bondLevel,
+                skillType: skillType,
+                skillValue: skillValue,
+                skillDuration: skillDuration,
+                skillCooldown: skillCooldown,
+                lastSkillUsedAt: lastSkillUsedAt,
+                seriesId: seriesId,
+                isSource: isSource,
+                sourceId: sourceId,
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
               ),
@@ -5260,38 +6323,63 @@ class $$GachaItemsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({partyMembersRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (partyMembersRefs) db.partyMembers],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (partyMembersRefs)
-                    await $_getPrefetchedData<
-                      GachaItem,
-                      $GachaItemsTable,
-                      PartyMember
-                    >(
-                      currentTable: table,
-                      referencedTable: $$GachaItemsTableReferences
-                          ._partyMembersRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$GachaItemsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).partyMembersRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.gachaItemId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({partyDecksRefs = false, partyMembersRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (partyDecksRefs) db.partyDecks,
+                    if (partyMembersRefs) db.partyMembers,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (partyDecksRefs)
+                        await $_getPrefetchedData<
+                          GachaItem,
+                          $GachaItemsTable,
+                          PartyDeck
+                        >(
+                          currentTable: table,
+                          referencedTable: $$GachaItemsTableReferences
+                              ._partyDecksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$GachaItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).partyDecksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.equippedFrameId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (partyMembersRefs)
+                        await $_getPrefetchedData<
+                          GachaItem,
+                          $GachaItemsTable,
+                          PartyMember
+                        >(
+                          currentTable: table,
+                          referencedTable: $$GachaItemsTableReferences
+                              ._partyMembersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$GachaItemsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).partyMembersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.gachaItemId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -5308,7 +6396,7 @@ typedef $$GachaItemsTableProcessedTableManager =
       $$GachaItemsTableUpdateCompanionBuilder,
       (GachaItem, $$GachaItemsTableReferences),
       GachaItem,
-      PrefetchHooks Function({bool partyMembersRefs})
+      PrefetchHooks Function({bool partyDecksRefs, bool partyMembersRefs})
     >;
 typedef $$HabitsTableCreateCompanionBuilder =
     HabitsCompanion Function({
@@ -5904,6 +6992,7 @@ typedef $$PartyDecksTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       Value<bool> isActive,
+      Value<int?> equippedFrameId,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -5912,6 +7001,7 @@ typedef $$PartyDecksTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> name,
       Value<bool> isActive,
+      Value<int?> equippedFrameId,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -5919,6 +7009,25 @@ typedef $$PartyDecksTableUpdateCompanionBuilder =
 final class $$PartyDecksTableReferences
     extends BaseReferences<_$AppDatabase, $PartyDecksTable, PartyDeck> {
   $$PartyDecksTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $GachaItemsTable _equippedFrameIdTable(_$AppDatabase db) =>
+      db.gachaItems.createAlias(
+        $_aliasNameGenerator(db.partyDecks.equippedFrameId, db.gachaItems.id),
+      );
+
+  $$GachaItemsTableProcessedTableManager? get equippedFrameId {
+    final $_column = $_itemColumn<int>('equipped_frame_id');
+    if ($_column == null) return null;
+    final manager = $$GachaItemsTableTableManager(
+      $_db,
+      $_db.gachaItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_equippedFrameIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static MultiTypedResultKey<$PartyMembersTable, List<PartyMember>>
   _partyMembersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -5972,6 +7081,29 @@ class $$PartyDecksTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$GachaItemsTableFilterComposer get equippedFrameId {
+    final $$GachaItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.equippedFrameId,
+      referencedTable: $db.gachaItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GachaItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.gachaItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<bool> partyMembersRefs(
     Expression<bool> Function($$PartyMembersTableFilterComposer f) f,
@@ -6032,6 +7164,29 @@ class $$PartyDecksTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$GachaItemsTableOrderingComposer get equippedFrameId {
+    final $$GachaItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.equippedFrameId,
+      referencedTable: $db.gachaItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GachaItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.gachaItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$PartyDecksTableAnnotationComposer
@@ -6057,6 +7212,29 @@ class $$PartyDecksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  $$GachaItemsTableAnnotationComposer get equippedFrameId {
+    final $$GachaItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.equippedFrameId,
+      referencedTable: $db.gachaItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$GachaItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.gachaItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<T> partyMembersRefs<T extends Object>(
     Expression<T> Function($$PartyMembersTableAnnotationComposer a) f,
@@ -6097,7 +7275,7 @@ class $$PartyDecksTableTableManager
           $$PartyDecksTableUpdateCompanionBuilder,
           (PartyDeck, $$PartyDecksTableReferences),
           PartyDeck,
-          PrefetchHooks Function({bool partyMembersRefs})
+          PrefetchHooks Function({bool equippedFrameId, bool partyMembersRefs})
         > {
   $$PartyDecksTableTableManager(_$AppDatabase db, $PartyDecksTable table)
     : super(
@@ -6115,12 +7293,14 @@ class $$PartyDecksTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<int?> equippedFrameId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PartyDecksCompanion(
                 id: id,
                 name: name,
                 isActive: isActive,
+                equippedFrameId: equippedFrameId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -6129,12 +7309,14 @@ class $$PartyDecksTableTableManager
                 Value<int> id = const Value.absent(),
                 required String name,
                 Value<bool> isActive = const Value.absent(),
+                Value<int?> equippedFrameId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => PartyDecksCompanion.insert(
                 id: id,
                 name: name,
                 isActive: isActive,
+                equippedFrameId: equippedFrameId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -6146,36 +7328,73 @@ class $$PartyDecksTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({partyMembersRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (partyMembersRefs) db.partyMembers],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (partyMembersRefs)
-                    await $_getPrefetchedData<
-                      PartyDeck,
-                      $PartyDecksTable,
-                      PartyMember
-                    >(
-                      currentTable: table,
-                      referencedTable: $$PartyDecksTableReferences
-                          ._partyMembersRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$PartyDecksTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).partyMembersRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.deckId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({equippedFrameId = false, partyMembersRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (partyMembersRefs) db.partyMembers,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (equippedFrameId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.equippedFrameId,
+                                    referencedTable: $$PartyDecksTableReferences
+                                        ._equippedFrameIdTable(db),
+                                    referencedColumn:
+                                        $$PartyDecksTableReferences
+                                            ._equippedFrameIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (partyMembersRefs)
+                        await $_getPrefetchedData<
+                          PartyDeck,
+                          $PartyDecksTable,
+                          PartyMember
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PartyDecksTableReferences
+                              ._partyMembersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PartyDecksTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).partyMembersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.deckId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6192,7 +7411,7 @@ typedef $$PartyDecksTableProcessedTableManager =
       $$PartyDecksTableUpdateCompanionBuilder,
       (PartyDeck, $$PartyDecksTableReferences),
       PartyDeck,
-      PrefetchHooks Function({bool partyMembersRefs})
+      PrefetchHooks Function({bool equippedFrameId, bool partyMembersRefs})
     >;
 typedef $$PartyMembersTableCreateCompanionBuilder =
     PartyMembersCompanion Function({
@@ -6605,6 +7824,7 @@ typedef $$UserSettingsTableCreateCompanionBuilder =
       Value<int> maxGachaItems,
       Value<int> maxDecks,
       Value<String?> themeColor,
+      Value<bool> showMainFrame,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -6616,6 +7836,7 @@ typedef $$UserSettingsTableUpdateCompanionBuilder =
       Value<int> maxGachaItems,
       Value<int> maxDecks,
       Value<String?> themeColor,
+      Value<bool> showMainFrame,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -6656,6 +7877,11 @@ class $$UserSettingsTableFilterComposer
 
   ColumnFilters<String> get themeColor => $composableBuilder(
     column: $table.themeColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get showMainFrame => $composableBuilder(
+    column: $table.showMainFrame,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6709,6 +7935,11 @@ class $$UserSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get showMainFrame => $composableBuilder(
+    column: $table.showMainFrame,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -6748,6 +7979,11 @@ class $$UserSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get themeColor => $composableBuilder(
     column: $table.themeColor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get showMainFrame => $composableBuilder(
+    column: $table.showMainFrame,
     builder: (column) => column,
   );
 
@@ -6795,6 +8031,7 @@ class $$UserSettingsTableTableManager
                 Value<int> maxGachaItems = const Value.absent(),
                 Value<int> maxDecks = const Value.absent(),
                 Value<String?> themeColor = const Value.absent(),
+                Value<bool> showMainFrame = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserSettingsCompanion(
@@ -6804,6 +8041,7 @@ class $$UserSettingsTableTableManager
                 maxGachaItems: maxGachaItems,
                 maxDecks: maxDecks,
                 themeColor: themeColor,
+                showMainFrame: showMainFrame,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -6815,6 +8053,7 @@ class $$UserSettingsTableTableManager
                 Value<int> maxGachaItems = const Value.absent(),
                 Value<int> maxDecks = const Value.absent(),
                 Value<String?> themeColor = const Value.absent(),
+                Value<bool> showMainFrame = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserSettingsCompanion.insert(
@@ -6824,6 +8063,7 @@ class $$UserSettingsTableTableManager
                 maxGachaItems: maxGachaItems,
                 maxDecks: maxDecks,
                 themeColor: themeColor,
+                showMainFrame: showMainFrame,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),

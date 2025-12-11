@@ -2,8 +2,8 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/database/database.dart';
-import 'data/providers.dart'; // ✅ ここに集約したプロバイダーを使用
-import 'logic/settings_controller.dart'; // ✅ テーマカラー用
+import 'data/providers.dart';
+import 'logic/settings_controller.dart';
 import 'ui/screens/main_screen.dart';
 
 /// アプリの初期化処理を行うプロバイダー
@@ -52,6 +52,11 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     print(stack);
     rethrow;
   }
+
+  // 4. ✅ 追加: デフォルトフレームの登録
+  final gachaRepo = ref.read(gachaItemRepositoryProvider);
+  await gachaRepo.seedFramesFromMasterData();
+  print('✅ 初期データ準備完了');
 });
 
 void main() {

@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 振動用
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/party_controller.dart';
+import '../../logic/gacha_controller.dart';
+import 'character_detail_screen.dart';
 
 class PartyEditScreen extends ConsumerStatefulWidget {
   const PartyEditScreen({super.key});
@@ -14,17 +16,14 @@ class PartyEditScreen extends ConsumerStatefulWidget {
 }
 
 class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
-  // 現在選択中のスロットID（デフォルトはメイン:0）
   int _selectedSlotId = 0;
 
   @override
   Widget build(BuildContext context) {
     final activePartyAsync = ref.watch(activePartyProvider);
-    final allItemsAsync = ref.watch(gachaItemsProvider);
-
+    final allItemsAsync = ref.watch(myItemsProvider);
     final partyState = ref.watch(partyControllerProvider);
 
-    // エラーハンドリング
     ref.listen(partyControllerProvider, (previous, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(
@@ -34,84 +33,104 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('パーティ編成')),
+      appBar: AppBar(
+        title: const Text('パーティ編成'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline),
+            onPressed: () {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('キャラを長押しで詳細確認・換金ができます')));
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
-          // --- 上部: ステータス & スロットエリア ---
+          // --- 上部: ステータス & スロット ---
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.black26,
             child: activePartyAsync.when(
               data: (partyMap) => Column(
                 children: [
-                  // 合計ステータス
                   _buildTotalBonus(partyMap),
                   const SizedBox(height: 16),
-
-                  // ✅ レイアウト変更: 左メイン、右サブ2列
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 左側: メインスロット (縦長)
-                      Expanded(
-                        flex: 4, // 左側を広めに
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'MAIN PARTNER',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.pinkAccent,
-                                fontWeight: FontWeight.bold,
+                  SizedBox(
+                    height: 250,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'MAIN PARTNER',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.pinkAccent,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            // メインスロットの高さを指定（例: 250px）
-                            SizedBox(height: 250, child: _buildMainSlot(0, partyMap[0])),
-                          ],
+                              const SizedBox(height: 4),
+                              Expanded(child: _buildMainSlot(0, partyMap[0])),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12), // 左右の間隔
-                      // 右側: サブスロット (2列x2行)
-                      Expanded(
-                        flex: 4, // 右側も広めに確保
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'SUPPORTERS',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'SUPPORTERS',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.blueAccent,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            GridView.count(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 2, // 2列
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 8,
-                              childAspectRatio: 0.7, // 正方形に近い比率
-                              children: [
-                                _buildSmallSlot(1, partyMap[1]), // Slot 1
-                                _buildSmallSlot(2, partyMap[2]), // Slot 2
-                                _buildSmallSlot(3, partyMap[3]), // Slot 3
-                                _buildSmallSlot(4, partyMap[4]), // Slot 4
-                              ],
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Expanded(child: _buildSmallSlot(1, partyMap[1])),
+                                          const SizedBox(width: 8),
+                                          Expanded(child: _buildSmallSlot(2, partyMap[2])),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Expanded(child: _buildSmallSlot(3, partyMap[3])),
+                                          const SizedBox(width: 8),
+                                          Expanded(child: _buildSmallSlot(4, partyMap[4])),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
               loading: () =>
-                  const SizedBox(height: 250, child: Center(child: CircularProgressIndicator())),
-              error: (_, __) => const SizedBox(height: 250, child: Center(child: Text('エラー'))),
+                  const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+              error: (_, __) => const SizedBox(height: 200, child: Center(child: Text('エラー'))),
             ),
           ),
 
@@ -122,10 +141,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
             child: allItemsAsync.when(
               data: (items) {
                 final unlockedItems = items.where((i) => i.isUnlocked).toList();
-
-                if (unlockedItems.isEmpty) {
-                  return const Center(child: Text('所持している推しがいません'));
-                }
+                if (unlockedItems.isEmpty) return const Center(child: Text('所持している推しがいません'));
 
                 final partyMap = activePartyAsync.value ?? {};
 
@@ -137,11 +153,8 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
 
                     int? equippedAt;
                     partyMap.forEach((slot, equippedItem) {
-                      if (equippedItem.id == item.id) {
-                        equippedAt = slot;
-                      }
+                      if (equippedItem.id == item.id) equippedAt = slot;
                     });
-
                     final isEquippedInCurrentSlot = equippedAt == _selectedSlotId;
 
                     return Card(
@@ -167,7 +180,8 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                           ),
                         ),
                         subtitle: Text(
-                          'STR:${item.strBonus} VIT:${item.vitBonus} INT:${item.intBonus} LUCK:${item.luckBonus} CHA:${item.chaBonus}',
+                          'STR:${item.strBonus} INT:${item.intBonus} VIT:${item.vitBonus} LUK:${item.luckBonus} CHA:${item.chaBonus}',
+                          style: const TextStyle(fontSize: 11),
                         ),
                         trailing: equippedAt != null
                             ? Chip(
@@ -178,16 +192,31 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                                 labelStyle: const TextStyle(fontSize: 10, color: Colors.white),
                               )
                             : null,
-                        // 処理中はタップ無効化
                         enabled: !partyState.isLoading,
+
+                        // ✅ 変更: タップ時の挙動（トグル）
                         onTap: partyState.isLoading
                             ? null
                             : () {
                                 HapticFeedback.selectionClick();
-                                ref
-                                    .read(partyControllerProvider.notifier)
-                                    .equipItem(_selectedSlotId, item.id);
+
+                                if (isEquippedInCurrentSlot) {
+                                  // 既にこのスロットに装備中なら解除
+                                  ref
+                                      .read(partyControllerProvider.notifier)
+                                      .unequipItem(_selectedSlotId);
+                                } else {
+                                  // それ以外なら装備（上書き/移動）
+                                  ref
+                                      .read(partyControllerProvider.notifier)
+                                      .equipItem(_selectedSlotId, item.id);
+                                }
                               },
+
+                        onLongPress: () {
+                          HapticFeedback.mediumImpact();
+                          _showCharacterMenu(context, ref, item);
+                        },
                       ),
                     );
                   },
@@ -202,25 +231,109 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
     );
   }
 
-  // --- Widgets ---
+  // --- メニュー表示 ---
+  void _showCharacterMenu(BuildContext context, WidgetRef ref, GachaItem item) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.info_outline, color: Colors.blue),
+              title: const Text('詳細を見る'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CharacterDetailScreen(item: item)),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.monetization_on, color: Colors.amber),
+              title: const Text('換金する (お別れ)'),
+              subtitle: Text(_getSellPriceText(item.rarity)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _confirmSell(context, ref, item);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getSellPriceText(Rarity rarity) {
+    switch (rarity) {
+      case Rarity.n:
+        return '売却額: 50 Gems';
+      case Rarity.r:
+        return '売却額: 150 Gems';
+      case Rarity.sr:
+        return '売却額: 500 Gems';
+      case Rarity.ssr:
+        return '売却額: 2000 Gems';
+    }
+  }
+
+  Future<void> _confirmSell(BuildContext context, WidgetRef ref, GachaItem item) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('換金確認'),
+        content: Text('「${item.title}」とお別れしてジェムに換えますか？\n\n※この操作は取り消せません。\n※装備中のキャラは売却できません。'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('キャンセル')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              '換金する',
+              style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await ref.read(gachaControllerProvider.notifier).sellItem(item);
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('換金しました！'), backgroundColor: Colors.amber));
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString().replaceAll('Exception: ', '')),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
 
   Widget _buildTotalBonus(Map<int, GachaItem> partyMap) {
-    int str = 0, vit = 0, intellect = 0, luck = 0, cha = 0;
+    int str = 0, intellect = 0, luck = 0, cha = 0, vit = 0;
     for (var item in partyMap.values) {
       str += item.strBonus;
-      vit += item.vitBonus;
       intellect += item.intBonus;
       luck += item.luckBonus;
       cha += item.chaBonus;
+      vit += item.vitBonus;
     }
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatValue('STR', str, Colors.redAccent),
-        _buildStatValue('VIT', vit, Colors.amber),
         _buildStatValue('INT', intellect, Colors.blueAccent),
-        _buildStatValue('LUCK', luck, Colors.purple),
+        _buildStatValue('VIT', vit, Colors.orange),
+        _buildStatValue('LUCK', luck, Colors.purpleAccent),
         _buildStatValue('CHA', cha, Colors.pinkAccent),
       ],
     );
@@ -240,14 +353,23 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
 
   Widget _buildSmallSlot(int slotId, GachaItem? item) {
     final isSelected = _selectedSlotId == slotId;
-
     return GestureDetector(
       onTap: () {
         setState(() => _selectedSlotId = slotId);
         HapticFeedback.selectionClick();
       },
+      onLongPress: item == null
+          ? null
+          : () {
+              HapticFeedback.mediumImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CharacterDetailScreen(item: item)),
+              );
+            },
       child: Container(
-        // 高さは GridView の aspect ratio で決まるので指定しない
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey[900],
           borderRadius: BorderRadius.circular(8),
@@ -266,15 +388,23 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
 
   Widget _buildMainSlot(int slotId, GachaItem? item) {
     final isSelected = _selectedSlotId == slotId;
-
     return GestureDetector(
       onTap: () {
         setState(() => _selectedSlotId = slotId);
         HapticFeedback.selectionClick();
       },
+      onLongPress: item == null
+          ? null
+          : () {
+              HapticFeedback.mediumImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CharacterDetailScreen(item: item)),
+              );
+            },
       child: Container(
-        // 高さは親の SizedBox で指定
         width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey[900],
           borderRadius: BorderRadius.circular(12),
@@ -325,6 +455,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                 left: 0,
                 right: 0,
                 child: Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),

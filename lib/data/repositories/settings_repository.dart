@@ -62,4 +62,10 @@ class SettingsRepository {
           );
     });
   }
+
+  Future<void> toggleShowFrame(bool show) async {
+    await (_db.update(_db.userSettings)..where((s) => s.id.equals(1))).write(
+      UserSettingsCompanion(showMainFrame: Value(show), updatedAt: Value(DateTime.now())),
+    );
+  }
 }

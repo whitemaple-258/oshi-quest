@@ -4,14 +4,15 @@ import 'package:flutter/services.dart'; // 振動用
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
-import '../../logic/gacha_controller.dart'; // ✅ 追加
+import '../../logic/gacha_controller.dart';
 
 class GachaLineupScreen extends ConsumerWidget {
   const GachaLineupScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allItemsAsync = ref.watch(gachaItemsProvider);
+    // ✅ 修正: ラインナップ用のプロバイダーを監視する
+    final allItemsAsync = ref.watch(lineupItemsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('ガチャ提供割合')),
@@ -45,24 +46,19 @@ class GachaLineupScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if (item.isUnlocked)
-                      Text(
-                        'Bond Lv.${item.bondLevel}',
-                        style: const TextStyle(
-                          color: Colors.pinkAccent,
+                    if (item.type == GachaItemType.frame)
+                      const Text(
+                        'FRAME',
+                        style: TextStyle(
+                          color: Colors.cyanAccent,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    Text(
-                      item.isUnlocked ? '所持済み' : '未所持',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: item.isUnlocked ? Colors.grey : Colors.white,
-                      ),
-                    ),
+                    const Text('提供中', style: TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
-                // ✅ 追加: 長押しで編集メニュー表示
+                // 長押しで編集メニュー表示
                 onLongPress: () {
                   HapticFeedback.selectionClick();
                   _showEditMenu(context, ref, item);
@@ -77,7 +73,7 @@ class GachaLineupScreen extends ConsumerWidget {
     );
   }
 
-  // --- 編集・削除メニュー (RegisteredItemsScreenから移植) ---
+  // --- 編集・削除メニュー ---
 
   void _showEditMenu(BuildContext context, WidgetRef ref, GachaItem item) {
     showModalBottomSheet(
@@ -163,7 +159,7 @@ class GachaLineupScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('削除確認'),
-        content: Text('「${item.title}」を削除しますか？\n※この操作は取り消せません。'),
+        content: Text('「${item.title}」をラインナップから削除しますか？\n※既に獲得済みのキャラ（個体）は消えません。'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('キャンセル')),
           TextButton(

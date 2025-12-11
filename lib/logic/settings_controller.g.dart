@@ -24,7 +24,7 @@ final currentThemeColorProvider = AutoDisposeProvider<MaterialColor>.internal(
 // ignore: unused_element
 typedef CurrentThemeColorRef = AutoDisposeProviderRef<MaterialColor>;
 String _$settingsControllerHash() =>
-    r'd877b10e4d4585d49852a824ae4a8ca3e0431b47';
+    r'f23952eb4ab8b5e67a3bddc60ee1543f377edf13';
 
 /// See also [SettingsController].
 @ProviderFor(SettingsController)

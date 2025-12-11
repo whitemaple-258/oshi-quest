@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../logic/settings_controller.dart';
+import 'debug_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -8,6 +9,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeColor = ref.watch(currentThemeColorProvider);
+    final settingsAsync = ref.watch(settingsControllerProvider);
+    final settings = settingsAsync.value;
 
     return Scaffold(
       appBar: AppBar(title: const Text('設定')),
@@ -81,6 +84,24 @@ class SettingsScreen extends ConsumerWidget {
                   ).showSnackBar(const SnackBar(content: Text('データを初期化しました。')));
                 }
               }
+            },
+          ),
+          SwitchListTile(
+            title: const Text('パートナーフレームを表示'),
+            subtitle: const Text('OFFにすると、能力はそのままで見た目だけ外せます'),
+            value: settings?.showMainFrame ?? true,
+            onChanged: (val) {
+              ref.read(settingsControllerProvider.notifier).toggleShowFrame(val);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.bug_report, color: Colors.grey),
+            title: const Text('デバッグメニュー', style: TextStyle(color: Colors.grey)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DebugScreen()),
+              );
             },
           ),
         ],

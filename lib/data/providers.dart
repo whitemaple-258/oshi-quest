@@ -4,25 +4,37 @@ import 'repositories/gacha_item_repository.dart';
 import 'repositories/habit_repository.dart';
 import 'repositories/party_repository.dart';
 import 'repositories/title_repository.dart';
-import 'repositories/settings_repository.dart'; // ✅ 追加
+import 'repositories/settings_repository.dart';
 import 'repositories/boss_repository.dart';
+
+// ============================================================================
+// Global Providers
+// ============================================================================
 
 // Database
 final databaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
 });
 
-// Gacha
+// --- Gacha (推し画像) ---
 final gachaItemRepositoryProvider = Provider<GachaItemRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return GachaItemRepository(db);
 });
-final gachaItemsProvider = StreamProvider<List<GachaItem>>((ref) {
+
+// ✅ 所持品リスト (編成・一覧用)
+final myItemsProvider = StreamProvider<List<GachaItem>>((ref) {
   final repository = ref.watch(gachaItemRepositoryProvider);
-  return repository.watchAllItems();
+  return repository.watchMyItems();
 });
 
-// Habit
+// ✅ ラインナップ (ガチャ画面・登録用)
+final lineupItemsProvider = StreamProvider<List<GachaItem>>((ref) {
+  final repository = ref.watch(gachaItemRepositoryProvider);
+  return repository.watchLineupItems();
+});
+
+// --- Habits (習慣) ---
 final habitRepositoryProvider = Provider<HabitRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return HabitRepository(db);
@@ -32,7 +44,7 @@ final habitsProvider = StreamProvider<List<Habit>>((ref) {
   return repository.watchAllHabits();
 });
 
-// Player
+// --- Player (ステータス) ---
 final playerProvider = StreamProvider<Player>((ref) async* {
   final db = ref.watch(databaseProvider);
   await for (final players in (db.select(db.players)..where((p) => p.id.equals(1))).watch()) {
@@ -40,21 +52,28 @@ final playerProvider = StreamProvider<Player>((ref) async* {
   }
 });
 
-// Party
+// --- Party (編成) ---
 final partyRepositoryProvider = Provider<PartyRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return PartyRepository(db);
-});
-final currentPartnerProvider = StreamProvider<GachaItem?>((ref) {
-  final repository = ref.watch(partyRepositoryProvider);
-  return repository.watchMainPartner();
 });
 final activePartyProvider = StreamProvider<Map<int, GachaItem>>((ref) {
   final repository = ref.watch(partyRepositoryProvider);
   return repository.watchActiveParty();
 });
+// ✅ 装備中フレーム
+final equippedFrameProvider = StreamProvider<GachaItem?>((ref) {
+  final repository = ref.watch(partyRepositoryProvider);
+  return repository.watchEquippedFrame();
+});
 
-// Title
+// --- Boss (ボス) ---
+final bossRepositoryProvider = Provider<BossRepository>((ref) {
+  final db = ref.watch(databaseProvider);
+  return BossRepository(db);
+});
+
+// --- Title (称号) ---
 final titleRepositoryProvider = Provider<TitleRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return TitleRepository(db);
@@ -64,14 +83,8 @@ final titlesProvider = StreamProvider<List<Title>>((ref) {
   return repository.watchAllTitles();
 });
 
-// Settings 
+// --- Settings (設定) ---
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return SettingsRepository(db);
-});
-
-// --- Boss (ボス戦) ---
-final bossRepositoryProvider = Provider<BossRepository>((ref) {
-  final db = ref.watch(databaseProvider);
-  return BossRepository(db);
 });

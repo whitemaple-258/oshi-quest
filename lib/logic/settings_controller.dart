@@ -38,6 +38,12 @@ class SettingsController extends _$SettingsController {
       state = AsyncValue.error(e, stack);
     }
   }
+
+Future<void> toggleShowFrame(bool show) async {
+    final repository = ref.read(settingsRepositoryProvider);
+    await repository.toggleShowFrame(show);
+    state = AsyncValue.data(await repository.getSettings());
+  }
 }
 
 @riverpod

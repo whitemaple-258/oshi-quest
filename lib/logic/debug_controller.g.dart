@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'gacha_controller.dart';
+part of 'debug_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$gachaControllerHash() => r'b853597b815e8626e6478d96779db5f38ce9bf1a';
+String _$debugControllerHash() => r'249cb13ec73d5fdc7521168fa6e8aa6e323bdba1';
 
-/// See also [GachaController].
-@ProviderFor(GachaController)
-final gachaControllerProvider =
-    AutoDisposeAsyncNotifierProvider<GachaController, void>.internal(
-      GachaController.new,
-      name: r'gachaControllerProvider',
+/// See also [DebugController].
+@ProviderFor(DebugController)
+final debugControllerProvider =
+    AutoDisposeNotifierProvider<DebugController, void>.internal(
+      DebugController.new,
+      name: r'debugControllerProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$gachaControllerHash,
+          : _$debugControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$GachaController = AutoDisposeAsyncNotifier<void>;
+typedef _$DebugController = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -6,10 +6,7 @@ import 'package:path/path.dart' as p;
 
 part 'database.g.dart';
 
-// ============================================================================
-// Enums
-// ============================================================================
-
+// --- Enums ---
 enum TaskType {
   strength(0),
   intelligence(1),
@@ -40,7 +37,6 @@ enum TaskDifficulty {
   final int value;
 }
 
-// ✅ 追加: ボスの種類
 enum BossType {
   weekly(0),
   monthly(1),
@@ -50,10 +46,37 @@ enum BossType {
   final int value;
 }
 
-// ============================================================================
-// Tables
-// ============================================================================
+enum SkillType {
+  none(0),
+  gemBoost(1),
+  xpBoost(2),
+  strBoost(3),
+  luckBoost(4);
 
+  const SkillType(this.value);
+  final int value;
+}
+
+enum SeriesType {
+  none(0),
+  crimson(1),
+  azure(2),
+  golden(3),
+  phantom(4);
+
+  const SeriesType(this.value);
+  final int value;
+}
+
+enum GachaItemType {
+  character(0),
+  frame(1);
+
+  const GachaItemType(this.value);
+  final int value;
+}
+
+// --- Tables ---
 class Players extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get level => integer().withDefault(const Constant(1))();
@@ -64,11 +87,12 @@ class Players extends Table {
   IntColumn get cha => integer().withDefault(const Constant(0))();
   IntColumn get vit => integer().withDefault(const Constant(0))();
   IntColumn get willGems => integer().withDefault(const Constant(500))();
-
   TextColumn get currentDebuff => text().nullable()();
   DateTimeColumn get debuffExpiresAt => dateTime().nullable()();
   DateTimeColumn get lastLoginAt => dateTime().withDefault(currentDateAndTime)();
-
+  IntColumn get activeSkillType => intEnum<SkillType>().nullable()();
+  IntColumn get activeSkillValue => integer().nullable()();
+  DateTimeColumn get skillExpiresAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -77,6 +101,7 @@ class GachaItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get imagePath => text()();
   TextColumn get title => text()();
+  IntColumn get type => intEnum<GachaItemType>().withDefault(const Constant(0))();
   IntColumn get rarity => intEnum<Rarity>().withDefault(Constant(Rarity.n.value))();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
@@ -85,6 +110,14 @@ class GachaItems extends Table {
   IntColumn get chaBonus => integer().withDefault(const Constant(0))();
   IntColumn get vitBonus => integer().withDefault(const Constant(0))();
   IntColumn get bondLevel => integer().withDefault(const Constant(0))();
+  IntColumn get skillType => intEnum<SkillType>().withDefault(const Constant(0))();
+  IntColumn get skillValue => integer().withDefault(const Constant(0))();
+  IntColumn get skillDuration => integer().withDefault(const Constant(0))();
+  IntColumn get skillCooldown => integer().withDefault(const Constant(0))();
+  DateTimeColumn get lastSkillUsedAt => dateTime().nullable()();
+  IntColumn get seriesId => intEnum<SeriesType>().withDefault(const Constant(0))();
+  BoolColumn get isSource => boolean().withDefault(const Constant(false))();
+  IntColumn get sourceId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get unlockedAt => dateTime().nullable()();
 }
@@ -120,6 +153,7 @@ class PartyDecks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   BoolColumn get isActive => boolean().withDefault(const Constant(false))();
+  IntColumn get equippedFrameId => integer().nullable().references(GachaItems, #id)();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
@@ -141,29 +175,22 @@ class UserSettings extends Table {
   IntColumn get maxGachaItems => integer().withDefault(const Constant(5))();
   IntColumn get maxDecks => integer().withDefault(const Constant(1))();
   TextColumn get themeColor => text().nullable()();
+  BoolColumn get showMainFrame => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-// ✅ 追加: ボス戦の戦歴テーブル
 class BossResults extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get bossType => intEnum<BossType>()(); // 0: Weekly, 1: Monthly, 2: Yearly
-  TextColumn get periodKey => text()(); // 期間ID (例: "2025-W40", "2025-10")
-  BoolColumn get isWin => boolean()(); // 勝敗
-  IntColumn get playerPower => integer()(); // 挑んだ時の戦力
-  IntColumn get bossPower => integer()(); // ボスの強さ
+  IntColumn get bossType => intEnum<BossType>()();
+  TextColumn get periodKey => text()();
+  BoolColumn get isWin => boolean()();
+  IntColumn get playerPower => integer()();
+  IntColumn get bossPower => integer()();
   DateTimeColumn get battledAt => dateTime().withDefault(currentDateAndTime)();
-
   @override
-  List<String> get customConstraints => [
-    'UNIQUE(boss_type, period_key)', // 同じ期間のボスには1回しか勝敗がつかない（再戦ロジック次第で調整可）
-  ];
+  List<String> get customConstraints => ['UNIQUE(boss_type, period_key)'];
 }
-
-// ============================================================================
-// Database
-// ============================================================================
 
 @DriftDatabase(
   tables: [
@@ -174,52 +201,32 @@ class BossResults extends Table {
     PartyDecks,
     PartyMembers,
     UserSettings,
-    BossResults, // ✅ 追加
+    BossResults,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  // ✅ バージョンを 4 に更新
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
-        // 初期プレイヤー作成
         await into(players).insert(
           PlayersCompanion.insert(
             id: const Value(1),
             level: const Value(1),
             willGems: const Value(500),
-            experience: const Value(0),
-            str: const Value(0),
-            intellect: const Value(0),
-            luck: const Value(0),
-            cha: const Value(0),
-            vit: const Value(0),
             lastLoginAt: Value(DateTime.now()),
           ),
         );
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await m.addColumn(players, players.vit);
-          await m.addColumn(gachaItems, gachaItems.vitBonus);
-        }
-        if (from < 3) {
-          await m.addColumn(players, players.lastLoginAt);
-          await m.addColumn(players, players.currentDebuff);
-          await m.addColumn(players, players.debuffExpiresAt);
-          await m.createTable(userSettings);
-        }
-        // ✅ v4: ボス戦テーブル追加
-        if (from < 4) {
-          await m.createTable(bossResults);
-        }
+        // v7までのマイグレーションは複雑なので、開発中は再インストール推奨
+        await m.createAll();
       },
     );
   }

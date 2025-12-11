@@ -52,4 +52,35 @@ class GachaController extends _$GachaController {
       state = AsyncValue.error(e, stack);
     }
   }
+
+  // 👇 追加: 売却アクション
+  Future<void> sellItem(GachaItem item) async {
+    state = const AsyncValue.loading();
+    try {
+      // レアリティごとの売却額設定
+      int price = 0;
+      switch (item.rarity) {
+        case Rarity.n:
+          price = 50;
+          break;
+        case Rarity.r:
+          price = 150;
+          break;
+        case Rarity.sr:
+          price = 500;
+          break;
+        case Rarity.ssr:
+          price = 2000;
+          break;
+      }
+
+      final repository = ref.read(gachaItemRepositoryProvider);
+      await repository.sellItem(item.id, price);
+      
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow; // UI側でエラーメッセージを出すために再スロー
+    }
+  }
 }
