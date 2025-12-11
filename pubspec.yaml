@@ -52,7 +52,14 @@ dependencies:
   # Image Picker
   image_picker: ^1.1.2
   image_cropper: ^11.0.0
+
+  # audioplayer
   audioplayers: ^6.5.1
+
+  #icons
+  font_awesome_flutter: ^10.12.0
+  fluttericon: ^2.0.0
+
 
 dev_dependencies:
   flutter_test:

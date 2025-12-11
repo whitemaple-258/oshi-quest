@@ -3979,6 +3979,469 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
   }
 }
 
+class $BossResultsTable extends BossResults
+    with TableInfo<$BossResultsTable, BossResult> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BossResultsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<BossType, int> bossType =
+      GeneratedColumn<int>(
+        'boss_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<BossType>($BossResultsTable.$converterbossType);
+  static const VerificationMeta _periodKeyMeta = const VerificationMeta(
+    'periodKey',
+  );
+  @override
+  late final GeneratedColumn<String> periodKey = GeneratedColumn<String>(
+    'period_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isWinMeta = const VerificationMeta('isWin');
+  @override
+  late final GeneratedColumn<bool> isWin = GeneratedColumn<bool>(
+    'is_win',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_win" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _playerPowerMeta = const VerificationMeta(
+    'playerPower',
+  );
+  @override
+  late final GeneratedColumn<int> playerPower = GeneratedColumn<int>(
+    'player_power',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bossPowerMeta = const VerificationMeta(
+    'bossPower',
+  );
+  @override
+  late final GeneratedColumn<int> bossPower = GeneratedColumn<int>(
+    'boss_power',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _battledAtMeta = const VerificationMeta(
+    'battledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> battledAt = GeneratedColumn<DateTime>(
+    'battled_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    bossType,
+    periodKey,
+    isWin,
+    playerPower,
+    bossPower,
+    battledAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'boss_results';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BossResult> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('period_key')) {
+      context.handle(
+        _periodKeyMeta,
+        periodKey.isAcceptableOrUnknown(data['period_key']!, _periodKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_periodKeyMeta);
+    }
+    if (data.containsKey('is_win')) {
+      context.handle(
+        _isWinMeta,
+        isWin.isAcceptableOrUnknown(data['is_win']!, _isWinMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isWinMeta);
+    }
+    if (data.containsKey('player_power')) {
+      context.handle(
+        _playerPowerMeta,
+        playerPower.isAcceptableOrUnknown(
+          data['player_power']!,
+          _playerPowerMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_playerPowerMeta);
+    }
+    if (data.containsKey('boss_power')) {
+      context.handle(
+        _bossPowerMeta,
+        bossPower.isAcceptableOrUnknown(data['boss_power']!, _bossPowerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bossPowerMeta);
+    }
+    if (data.containsKey('battled_at')) {
+      context.handle(
+        _battledAtMeta,
+        battledAt.isAcceptableOrUnknown(data['battled_at']!, _battledAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BossResult map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BossResult(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      bossType: $BossResultsTable.$converterbossType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}boss_type'],
+        )!,
+      ),
+      periodKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period_key'],
+      )!,
+      isWin: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_win'],
+      )!,
+      playerPower: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}player_power'],
+      )!,
+      bossPower: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}boss_power'],
+      )!,
+      battledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}battled_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BossResultsTable createAlias(String alias) {
+    return $BossResultsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<BossType, int, int> $converterbossType =
+      const EnumIndexConverter<BossType>(BossType.values);
+}
+
+class BossResult extends DataClass implements Insertable<BossResult> {
+  final int id;
+  final BossType bossType;
+  final String periodKey;
+  final bool isWin;
+  final int playerPower;
+  final int bossPower;
+  final DateTime battledAt;
+  const BossResult({
+    required this.id,
+    required this.bossType,
+    required this.periodKey,
+    required this.isWin,
+    required this.playerPower,
+    required this.bossPower,
+    required this.battledAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    {
+      map['boss_type'] = Variable<int>(
+        $BossResultsTable.$converterbossType.toSql(bossType),
+      );
+    }
+    map['period_key'] = Variable<String>(periodKey);
+    map['is_win'] = Variable<bool>(isWin);
+    map['player_power'] = Variable<int>(playerPower);
+    map['boss_power'] = Variable<int>(bossPower);
+    map['battled_at'] = Variable<DateTime>(battledAt);
+    return map;
+  }
+
+  BossResultsCompanion toCompanion(bool nullToAbsent) {
+    return BossResultsCompanion(
+      id: Value(id),
+      bossType: Value(bossType),
+      periodKey: Value(periodKey),
+      isWin: Value(isWin),
+      playerPower: Value(playerPower),
+      bossPower: Value(bossPower),
+      battledAt: Value(battledAt),
+    );
+  }
+
+  factory BossResult.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BossResult(
+      id: serializer.fromJson<int>(json['id']),
+      bossType: $BossResultsTable.$converterbossType.fromJson(
+        serializer.fromJson<int>(json['bossType']),
+      ),
+      periodKey: serializer.fromJson<String>(json['periodKey']),
+      isWin: serializer.fromJson<bool>(json['isWin']),
+      playerPower: serializer.fromJson<int>(json['playerPower']),
+      bossPower: serializer.fromJson<int>(json['bossPower']),
+      battledAt: serializer.fromJson<DateTime>(json['battledAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'bossType': serializer.toJson<int>(
+        $BossResultsTable.$converterbossType.toJson(bossType),
+      ),
+      'periodKey': serializer.toJson<String>(periodKey),
+      'isWin': serializer.toJson<bool>(isWin),
+      'playerPower': serializer.toJson<int>(playerPower),
+      'bossPower': serializer.toJson<int>(bossPower),
+      'battledAt': serializer.toJson<DateTime>(battledAt),
+    };
+  }
+
+  BossResult copyWith({
+    int? id,
+    BossType? bossType,
+    String? periodKey,
+    bool? isWin,
+    int? playerPower,
+    int? bossPower,
+    DateTime? battledAt,
+  }) => BossResult(
+    id: id ?? this.id,
+    bossType: bossType ?? this.bossType,
+    periodKey: periodKey ?? this.periodKey,
+    isWin: isWin ?? this.isWin,
+    playerPower: playerPower ?? this.playerPower,
+    bossPower: bossPower ?? this.bossPower,
+    battledAt: battledAt ?? this.battledAt,
+  );
+  BossResult copyWithCompanion(BossResultsCompanion data) {
+    return BossResult(
+      id: data.id.present ? data.id.value : this.id,
+      bossType: data.bossType.present ? data.bossType.value : this.bossType,
+      periodKey: data.periodKey.present ? data.periodKey.value : this.periodKey,
+      isWin: data.isWin.present ? data.isWin.value : this.isWin,
+      playerPower: data.playerPower.present
+          ? data.playerPower.value
+          : this.playerPower,
+      bossPower: data.bossPower.present ? data.bossPower.value : this.bossPower,
+      battledAt: data.battledAt.present ? data.battledAt.value : this.battledAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BossResult(')
+          ..write('id: $id, ')
+          ..write('bossType: $bossType, ')
+          ..write('periodKey: $periodKey, ')
+          ..write('isWin: $isWin, ')
+          ..write('playerPower: $playerPower, ')
+          ..write('bossPower: $bossPower, ')
+          ..write('battledAt: $battledAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    bossType,
+    periodKey,
+    isWin,
+    playerPower,
+    bossPower,
+    battledAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BossResult &&
+          other.id == this.id &&
+          other.bossType == this.bossType &&
+          other.periodKey == this.periodKey &&
+          other.isWin == this.isWin &&
+          other.playerPower == this.playerPower &&
+          other.bossPower == this.bossPower &&
+          other.battledAt == this.battledAt);
+}
+
+class BossResultsCompanion extends UpdateCompanion<BossResult> {
+  final Value<int> id;
+  final Value<BossType> bossType;
+  final Value<String> periodKey;
+  final Value<bool> isWin;
+  final Value<int> playerPower;
+  final Value<int> bossPower;
+  final Value<DateTime> battledAt;
+  const BossResultsCompanion({
+    this.id = const Value.absent(),
+    this.bossType = const Value.absent(),
+    this.periodKey = const Value.absent(),
+    this.isWin = const Value.absent(),
+    this.playerPower = const Value.absent(),
+    this.bossPower = const Value.absent(),
+    this.battledAt = const Value.absent(),
+  });
+  BossResultsCompanion.insert({
+    this.id = const Value.absent(),
+    required BossType bossType,
+    required String periodKey,
+    required bool isWin,
+    required int playerPower,
+    required int bossPower,
+    this.battledAt = const Value.absent(),
+  }) : bossType = Value(bossType),
+       periodKey = Value(periodKey),
+       isWin = Value(isWin),
+       playerPower = Value(playerPower),
+       bossPower = Value(bossPower);
+  static Insertable<BossResult> custom({
+    Expression<int>? id,
+    Expression<int>? bossType,
+    Expression<String>? periodKey,
+    Expression<bool>? isWin,
+    Expression<int>? playerPower,
+    Expression<int>? bossPower,
+    Expression<DateTime>? battledAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (bossType != null) 'boss_type': bossType,
+      if (periodKey != null) 'period_key': periodKey,
+      if (isWin != null) 'is_win': isWin,
+      if (playerPower != null) 'player_power': playerPower,
+      if (bossPower != null) 'boss_power': bossPower,
+      if (battledAt != null) 'battled_at': battledAt,
+    });
+  }
+
+  BossResultsCompanion copyWith({
+    Value<int>? id,
+    Value<BossType>? bossType,
+    Value<String>? periodKey,
+    Value<bool>? isWin,
+    Value<int>? playerPower,
+    Value<int>? bossPower,
+    Value<DateTime>? battledAt,
+  }) {
+    return BossResultsCompanion(
+      id: id ?? this.id,
+      bossType: bossType ?? this.bossType,
+      periodKey: periodKey ?? this.periodKey,
+      isWin: isWin ?? this.isWin,
+      playerPower: playerPower ?? this.playerPower,
+      bossPower: bossPower ?? this.bossPower,
+      battledAt: battledAt ?? this.battledAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (bossType.present) {
+      map['boss_type'] = Variable<int>(
+        $BossResultsTable.$converterbossType.toSql(bossType.value),
+      );
+    }
+    if (periodKey.present) {
+      map['period_key'] = Variable<String>(periodKey.value);
+    }
+    if (isWin.present) {
+      map['is_win'] = Variable<bool>(isWin.value);
+    }
+    if (playerPower.present) {
+      map['player_power'] = Variable<int>(playerPower.value);
+    }
+    if (bossPower.present) {
+      map['boss_power'] = Variable<int>(bossPower.value);
+    }
+    if (battledAt.present) {
+      map['battled_at'] = Variable<DateTime>(battledAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BossResultsCompanion(')
+          ..write('id: $id, ')
+          ..write('bossType: $bossType, ')
+          ..write('periodKey: $periodKey, ')
+          ..write('isWin: $isWin, ')
+          ..write('playerPower: $playerPower, ')
+          ..write('bossPower: $bossPower, ')
+          ..write('battledAt: $battledAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3989,6 +4452,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PartyDecksTable partyDecks = $PartyDecksTable(this);
   late final $PartyMembersTable partyMembers = $PartyMembersTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
+  late final $BossResultsTable bossResults = $BossResultsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4001,6 +4465,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     partyDecks,
     partyMembers,
     userSettings,
+    bossResults,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6387,6 +6852,241 @@ typedef $$UserSettingsTableProcessedTableManager =
       UserSettingsData,
       PrefetchHooks Function()
     >;
+typedef $$BossResultsTableCreateCompanionBuilder =
+    BossResultsCompanion Function({
+      Value<int> id,
+      required BossType bossType,
+      required String periodKey,
+      required bool isWin,
+      required int playerPower,
+      required int bossPower,
+      Value<DateTime> battledAt,
+    });
+typedef $$BossResultsTableUpdateCompanionBuilder =
+    BossResultsCompanion Function({
+      Value<int> id,
+      Value<BossType> bossType,
+      Value<String> periodKey,
+      Value<bool> isWin,
+      Value<int> playerPower,
+      Value<int> bossPower,
+      Value<DateTime> battledAt,
+    });
+
+class $$BossResultsTableFilterComposer
+    extends Composer<_$AppDatabase, $BossResultsTable> {
+  $$BossResultsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<BossType, BossType, int> get bossType =>
+      $composableBuilder(
+        column: $table.bossType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get periodKey => $composableBuilder(
+    column: $table.periodKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isWin => $composableBuilder(
+    column: $table.isWin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get playerPower => $composableBuilder(
+    column: $table.playerPower,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get bossPower => $composableBuilder(
+    column: $table.bossPower,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get battledAt => $composableBuilder(
+    column: $table.battledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BossResultsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BossResultsTable> {
+  $$BossResultsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get bossType => $composableBuilder(
+    column: $table.bossType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get periodKey => $composableBuilder(
+    column: $table.periodKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isWin => $composableBuilder(
+    column: $table.isWin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get playerPower => $composableBuilder(
+    column: $table.playerPower,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get bossPower => $composableBuilder(
+    column: $table.bossPower,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get battledAt => $composableBuilder(
+    column: $table.battledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BossResultsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BossResultsTable> {
+  $$BossResultsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<BossType, int> get bossType =>
+      $composableBuilder(column: $table.bossType, builder: (column) => column);
+
+  GeneratedColumn<String> get periodKey =>
+      $composableBuilder(column: $table.periodKey, builder: (column) => column);
+
+  GeneratedColumn<bool> get isWin =>
+      $composableBuilder(column: $table.isWin, builder: (column) => column);
+
+  GeneratedColumn<int> get playerPower => $composableBuilder(
+    column: $table.playerPower,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get bossPower =>
+      $composableBuilder(column: $table.bossPower, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get battledAt =>
+      $composableBuilder(column: $table.battledAt, builder: (column) => column);
+}
+
+class $$BossResultsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BossResultsTable,
+          BossResult,
+          $$BossResultsTableFilterComposer,
+          $$BossResultsTableOrderingComposer,
+          $$BossResultsTableAnnotationComposer,
+          $$BossResultsTableCreateCompanionBuilder,
+          $$BossResultsTableUpdateCompanionBuilder,
+          (
+            BossResult,
+            BaseReferences<_$AppDatabase, $BossResultsTable, BossResult>,
+          ),
+          BossResult,
+          PrefetchHooks Function()
+        > {
+  $$BossResultsTableTableManager(_$AppDatabase db, $BossResultsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BossResultsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BossResultsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BossResultsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<BossType> bossType = const Value.absent(),
+                Value<String> periodKey = const Value.absent(),
+                Value<bool> isWin = const Value.absent(),
+                Value<int> playerPower = const Value.absent(),
+                Value<int> bossPower = const Value.absent(),
+                Value<DateTime> battledAt = const Value.absent(),
+              }) => BossResultsCompanion(
+                id: id,
+                bossType: bossType,
+                periodKey: periodKey,
+                isWin: isWin,
+                playerPower: playerPower,
+                bossPower: bossPower,
+                battledAt: battledAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required BossType bossType,
+                required String periodKey,
+                required bool isWin,
+                required int playerPower,
+                required int bossPower,
+                Value<DateTime> battledAt = const Value.absent(),
+              }) => BossResultsCompanion.insert(
+                id: id,
+                bossType: bossType,
+                periodKey: periodKey,
+                isWin: isWin,
+                playerPower: playerPower,
+                bossPower: bossPower,
+                battledAt: battledAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BossResultsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BossResultsTable,
+      BossResult,
+      $$BossResultsTableFilterComposer,
+      $$BossResultsTableOrderingComposer,
+      $$BossResultsTableAnnotationComposer,
+      $$BossResultsTableCreateCompanionBuilder,
+      $$BossResultsTableUpdateCompanionBuilder,
+      (
+        BossResult,
+        BaseReferences<_$AppDatabase, $BossResultsTable, BossResult>,
+      ),
+      BossResult,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6405,4 +7105,6 @@ class $AppDatabaseManager {
       $$PartyMembersTableTableManager(_db, _db.partyMembers);
   $$UserSettingsTableTableManager get userSettings =>
       $$UserSettingsTableTableManager(_db, _db.userSettings);
+  $$BossResultsTableTableManager get bossResults =>
+      $$BossResultsTableTableManager(_db, _db.bossResults);
 }

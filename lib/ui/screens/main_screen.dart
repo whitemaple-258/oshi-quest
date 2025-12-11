@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttericon/rpg_awesome_icons.dart';
 import '../../data/providers.dart';
 import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'party_edit_screen.dart';
 import 'title_list_screen.dart';
 import 'settings_screen.dart'; // ✅ 設定画面
+import 'boss_battle_screen.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -85,21 +87,38 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // ✅ 修正ポイント: leading は actions の外に書く
-        leading: IconButton(
-          icon: const Icon(Icons.settings),
-          tooltip: '設定',
-          style: IconButton.styleFrom(
-            backgroundColor: Colors.black45,
-            foregroundColor: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsScreen()),
-            );
-          },
+        leading: Row(
+          // ✅ leadingをRowにしてボタンを2つ並べる（設定ボタン + ボスボタン）
+          children: [
+            // 設定ボタン
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: '設定',
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black45,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              ),
+            ),
+            // ✅ ボス戦ボタン
+            IconButton(
+              icon: const Icon(RpgAwesome.crossed_swords), // 剣アイコン
+              tooltip: 'ボスバトル',
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BossBattleScreen()),
+              ),
+            ),
+          ],
         ),
+        leadingWidth: 100, // 幅を広げる
         // ✅ 右側のボタン群
         actions: [
           // 称号ボタン

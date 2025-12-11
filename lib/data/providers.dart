@@ -5,6 +5,7 @@ import 'repositories/habit_repository.dart';
 import 'repositories/party_repository.dart';
 import 'repositories/title_repository.dart';
 import 'repositories/settings_repository.dart'; // ✅ 追加
+import 'repositories/boss_repository.dart';
 
 // Database
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -63,8 +64,14 @@ final titlesProvider = StreamProvider<List<Title>>((ref) {
   return repository.watchAllTitles();
 });
 
-// Settings ✅ 追加
+// Settings 
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return SettingsRepository(db);
+});
+
+// --- Boss (ボス戦) ---
+final bossRepositoryProvider = Provider<BossRepository>((ref) {
+  final db = ref.watch(databaseProvider);
+  return BossRepository(db);
 });

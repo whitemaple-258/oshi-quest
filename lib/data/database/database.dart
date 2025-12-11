@@ -15,7 +15,7 @@ enum TaskType {
   intelligence(1),
   luck(2),
   charm(3),
-  vitality(4); // ✅ VIT追加
+  vitality(4);
 
   const TaskType(this.value);
   final int value;
@@ -40,6 +40,16 @@ enum TaskDifficulty {
   final int value;
 }
 
+// ✅ 追加: ボスの種類
+enum BossType {
+  weekly(0),
+  monthly(1),
+  yearly(2);
+
+  const BossType(this.value);
+  final int value;
+}
+
 // ============================================================================
 // Tables
 // ============================================================================
@@ -52,10 +62,9 @@ class Players extends Table {
   IntColumn get intellect => integer().withDefault(const Constant(0))();
   IntColumn get luck => integer().withDefault(const Constant(0))();
   IntColumn get cha => integer().withDefault(const Constant(0))();
-  IntColumn get vit => integer().withDefault(const Constant(0))(); // ✅ VIT
+  IntColumn get vit => integer().withDefault(const Constant(0))();
   IntColumn get willGems => integer().withDefault(const Constant(500))();
 
-  // ✅ サボり判定用
   TextColumn get currentDebuff => text().nullable()();
   DateTimeColumn get debuffExpiresAt => dateTime().nullable()();
   DateTimeColumn get lastLoginAt => dateTime().withDefault(currentDateAndTime)();
@@ -74,7 +83,7 @@ class GachaItems extends Table {
   IntColumn get intBonus => integer().withDefault(const Constant(0))();
   IntColumn get luckBonus => integer().withDefault(const Constant(0))();
   IntColumn get chaBonus => integer().withDefault(const Constant(0))();
-  IntColumn get vitBonus => integer().withDefault(const Constant(0))(); // ✅ VIT
+  IntColumn get vitBonus => integer().withDefault(const Constant(0))();
   IntColumn get bondLevel => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get unlockedAt => dateTime().nullable()();
@@ -124,7 +133,6 @@ class PartyMembers extends Table {
   Set<Column> get uniqueKey => {deckId, slotPosition};
 }
 
-// ✅ 重要: クラス名を明示的に指定
 @DataClassName('UserSettingsData')
 class UserSettings extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -137,19 +145,44 @@ class UserSettings extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// ✅ 追加: ボス戦の戦歴テーブル
+class BossResults extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get bossType => intEnum<BossType>()(); // 0: Weekly, 1: Monthly, 2: Yearly
+  TextColumn get periodKey => text()(); // 期間ID (例: "2025-W40", "2025-10")
+  BoolColumn get isWin => boolean()(); // 勝敗
+  IntColumn get playerPower => integer()(); // 挑んだ時の戦力
+  IntColumn get bossPower => integer()(); // ボスの強さ
+  DateTimeColumn get battledAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  List<String> get customConstraints => [
+    'UNIQUE(boss_type, period_key)', // 同じ期間のボスには1回しか勝敗がつかない（再戦ロジック次第で調整可）
+  ];
+}
+
 // ============================================================================
 // Database
 // ============================================================================
 
 @DriftDatabase(
-  tables: [Players, GachaItems, Habits, Titles, PartyDecks, PartyMembers, UserSettings],
+  tables: [
+    Players,
+    GachaItems,
+    Habits,
+    Titles,
+    PartyDecks,
+    PartyMembers,
+    UserSettings,
+    BossResults, // ✅ 追加
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  // ✅ バージョンを 3 に設定
+  // ✅ バージョンを 4 に更新
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -181,7 +214,11 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(players, players.lastLoginAt);
           await m.addColumn(players, players.currentDebuff);
           await m.addColumn(players, players.debuffExpiresAt);
-          await m.createTable(userSettings); // 新規テーブル作成
+          await m.createTable(userSettings);
+        }
+        // ✅ v4: ボス戦テーブル追加
+        if (from < 4) {
+          await m.createTable(bossResults);
         }
       },
     );
