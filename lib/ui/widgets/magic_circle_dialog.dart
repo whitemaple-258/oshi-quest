@@ -1,12 +1,11 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../logic/audio_controller.dart';
+import 'sparkle_effect_overlay.dart'; // ✅ 追加: これがないとエラーになる
 
-// ConsumerStatefulWidget に変更して Riverpod を使えるようにする
 class GachaAnimationDialog extends ConsumerStatefulWidget {
   final GachaItem item;
   final VoidCallback onAnimationComplete;
@@ -22,7 +21,6 @@ class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
   late final AnimationController _rotationController;
   late final AnimationController _scaleController;
 
-  // ドラムロールの長さに合わせて調整 (例: 4秒)
   final Duration _drumDuration = const Duration(seconds: 4);
 
   bool _showResult = false;
@@ -31,39 +29,24 @@ class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
   void initState() {
     super.initState();
 
-    // 魔法陣のアニメーション
     _rotationController = AnimationController(vsync: this, duration: const Duration(seconds: 1))
       ..repeat();
 
-    // 出現アニメーション
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
 
-    // 開始シーケンスを実行
     _startSequence();
   }
 
   void _startSequence() async {
-    // 1. ドラムロール再生開始
-    // (AudioController経由で再生。エラー時はログ出力のみで進行)
     ref.read(audioControllerProvider.notifier).playGachaDrum();
 
-    // 2. 演出時間分だけ待機
     await Future.delayed(_drumDuration);
 
     if (mounted) {
-      // 3. 結果表示へ切り替え
-      // ドラムロールを停止して結果音を再生
       ref.read(audioControllerProvider.notifier).playGachaResult();
-
-      //結果表示の瞬間に振動
-      if (widget.item.rarity == Rarity.ssr) {
-        HapticFeedback.heavyImpact();
-      } else {
-        HapticFeedback.mediumImpact();
-      }
 
       setState(() {
         _showResult = true;
@@ -71,7 +54,6 @@ class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
       _rotationController.stop();
       _scaleController.forward();
 
-      // 完了コールバック
       widget.onAnimationComplete();
     }
   }
@@ -83,7 +65,6 @@ class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
     super.dispose();
   }
 
-  // SSR判定（DriftのEnumを使用）
   bool get _isSSR {
     return widget.item.rarity == Rarity.ssr;
   }
@@ -153,6 +134,7 @@ class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
                         ),
                       ),
                       const SizedBox(height: 20),
+
                       // 画像カード
                       Container(
                         width: 280,
@@ -173,18 +155,27 @@ class _GachaAnimationDialogState extends ConsumerState<GachaAnimationDialog>
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          // ✅ 修正: Image.file を使用
-                          child: Image.file(
-                            File(widget.item.imagePath),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey[300],
-                                child: const Center(
-                                  child: Icon(Icons.broken_image, size: 64, color: Colors.grey),
-                                ),
-                              );
-                            },
+                          // ✅ Stackで画像の上にエフェクトを重ねる
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // 1. 画像
+                              Image.file(
+                                File(widget.item.imagePath),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[300],
+                                    child: const Center(
+                                      child: Icon(Icons.broken_image, size: 64, color: Colors.grey),
+                                    ),
+                                  );
+                                },
+                              ),
+
+                              // 2. エフェクト (重ねる)
+                              SparkleEffectOverlay(effectType: widget.item.effectType),
+                            ],
                           ),
                         ),
                       ),

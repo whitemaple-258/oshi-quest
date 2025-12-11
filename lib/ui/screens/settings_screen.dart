@@ -87,11 +87,12 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           SwitchListTile(
-            title: const Text('パートナーフレームを表示'),
-            subtitle: const Text('OFFにすると、能力はそのままで見た目だけ外せます'),
-            value: settings?.showMainFrame ?? true,
+            title: const Text('エフェクトを表示'),
+            subtitle: const Text('OFFにすると、エフェクトを非表示にします'),
+            value: settings?.showEffect ?? true,
+            activeThumbColor: themeColor,
             onChanged: (val) {
-              ref.read(settingsControllerProvider.notifier).toggleShowFrame(val);
+              ref.read(settingsControllerProvider.notifier).toggleShowEffect(val);
             },
           ),
           ListTile(

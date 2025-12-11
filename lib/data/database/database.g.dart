@@ -1008,6 +1008,16 @@ class $GachaItemsTable extends GachaItems
         defaultValue: const Constant(0),
       ).withConverter<GachaItemType>($GachaItemsTable.$convertertype);
   @override
+  late final GeneratedColumnWithTypeConverter<EffectType, int> effectType =
+      GeneratedColumn<int>(
+        'effect_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<EffectType>($GachaItemsTable.$convertereffectType);
+  @override
   late final GeneratedColumnWithTypeConverter<Rarity, int> rarity =
       GeneratedColumn<int>(
         'rarity',
@@ -1227,6 +1237,7 @@ class $GachaItemsTable extends GachaItems
     imagePath,
     title,
     type,
+    effectType,
     rarity,
     isUnlocked,
     strBonus,
@@ -1403,6 +1414,12 @@ class $GachaItemsTable extends GachaItems
           data['${effectivePrefix}type'],
         )!,
       ),
+      effectType: $GachaItemsTable.$convertereffectType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}effect_type'],
+        )!,
+      ),
       rarity: $GachaItemsTable.$converterrarity.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -1491,6 +1508,8 @@ class $GachaItemsTable extends GachaItems
 
   static JsonTypeConverter2<GachaItemType, int, int> $convertertype =
       const EnumIndexConverter<GachaItemType>(GachaItemType.values);
+  static JsonTypeConverter2<EffectType, int, int> $convertereffectType =
+      const EnumIndexConverter<EffectType>(EffectType.values);
   static JsonTypeConverter2<Rarity, int, int> $converterrarity =
       const EnumIndexConverter<Rarity>(Rarity.values);
   static JsonTypeConverter2<SkillType, int, int> $converterskillType =
@@ -1504,6 +1523,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final String imagePath;
   final String title;
   final GachaItemType type;
+  final EffectType effectType;
   final Rarity rarity;
   final bool isUnlocked;
   final int strBonus;
@@ -1527,6 +1547,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.imagePath,
     required this.title,
     required this.type,
+    required this.effectType,
     required this.rarity,
     required this.isUnlocked,
     required this.strBonus,
@@ -1554,6 +1575,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['title'] = Variable<String>(title);
     {
       map['type'] = Variable<int>($GachaItemsTable.$convertertype.toSql(type));
+    }
+    {
+      map['effect_type'] = Variable<int>(
+        $GachaItemsTable.$convertereffectType.toSql(effectType),
+      );
     }
     {
       map['rarity'] = Variable<int>(
@@ -1600,6 +1626,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       imagePath: Value(imagePath),
       title: Value(title),
       type: Value(type),
+      effectType: Value(effectType),
       rarity: Value(rarity),
       isUnlocked: Value(isUnlocked),
       strBonus: Value(strBonus),
@@ -1639,6 +1666,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       type: $GachaItemsTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
       ),
+      effectType: $GachaItemsTable.$convertereffectType.fromJson(
+        serializer.fromJson<int>(json['effectType']),
+      ),
       rarity: $GachaItemsTable.$converterrarity.fromJson(
         serializer.fromJson<int>(json['rarity']),
       ),
@@ -1675,6 +1705,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'type': serializer.toJson<int>(
         $GachaItemsTable.$convertertype.toJson(type),
       ),
+      'effectType': serializer.toJson<int>(
+        $GachaItemsTable.$convertereffectType.toJson(effectType),
+      ),
       'rarity': serializer.toJson<int>(
         $GachaItemsTable.$converterrarity.toJson(rarity),
       ),
@@ -1707,6 +1740,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     String? imagePath,
     String? title,
     GachaItemType? type,
+    EffectType? effectType,
     Rarity? rarity,
     bool? isUnlocked,
     int? strBonus,
@@ -1730,6 +1764,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     imagePath: imagePath ?? this.imagePath,
     title: title ?? this.title,
     type: type ?? this.type,
+    effectType: effectType ?? this.effectType,
     rarity: rarity ?? this.rarity,
     isUnlocked: isUnlocked ?? this.isUnlocked,
     strBonus: strBonus ?? this.strBonus,
@@ -1757,6 +1792,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       title: data.title.present ? data.title.value : this.title,
       type: data.type.present ? data.type.value : this.type,
+      effectType: data.effectType.present
+          ? data.effectType.value
+          : this.effectType,
       rarity: data.rarity.present ? data.rarity.value : this.rarity,
       isUnlocked: data.isUnlocked.present
           ? data.isUnlocked.value
@@ -1797,6 +1835,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('imagePath: $imagePath, ')
           ..write('title: $title, ')
           ..write('type: $type, ')
+          ..write('effectType: $effectType, ')
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
@@ -1825,6 +1864,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     imagePath,
     title,
     type,
+    effectType,
     rarity,
     isUnlocked,
     strBonus,
@@ -1852,6 +1892,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.imagePath == this.imagePath &&
           other.title == this.title &&
           other.type == this.type &&
+          other.effectType == this.effectType &&
           other.rarity == this.rarity &&
           other.isUnlocked == this.isUnlocked &&
           other.strBonus == this.strBonus &&
@@ -1877,6 +1918,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<String> imagePath;
   final Value<String> title;
   final Value<GachaItemType> type;
+  final Value<EffectType> effectType;
   final Value<Rarity> rarity;
   final Value<bool> isUnlocked;
   final Value<int> strBonus;
@@ -1900,6 +1942,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.imagePath = const Value.absent(),
     this.title = const Value.absent(),
     this.type = const Value.absent(),
+    this.effectType = const Value.absent(),
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
@@ -1924,6 +1967,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     required String imagePath,
     required String title,
     this.type = const Value.absent(),
+    this.effectType = const Value.absent(),
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
@@ -1949,6 +1993,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<String>? imagePath,
     Expression<String>? title,
     Expression<int>? type,
+    Expression<int>? effectType,
     Expression<int>? rarity,
     Expression<bool>? isUnlocked,
     Expression<int>? strBonus,
@@ -1973,6 +2018,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (imagePath != null) 'image_path': imagePath,
       if (title != null) 'title': title,
       if (type != null) 'type': type,
+      if (effectType != null) 'effect_type': effectType,
       if (rarity != null) 'rarity': rarity,
       if (isUnlocked != null) 'is_unlocked': isUnlocked,
       if (strBonus != null) 'str_bonus': strBonus,
@@ -1999,6 +2045,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<String>? imagePath,
     Value<String>? title,
     Value<GachaItemType>? type,
+    Value<EffectType>? effectType,
     Value<Rarity>? rarity,
     Value<bool>? isUnlocked,
     Value<int>? strBonus,
@@ -2023,6 +2070,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       imagePath: imagePath ?? this.imagePath,
       title: title ?? this.title,
       type: type ?? this.type,
+      effectType: effectType ?? this.effectType,
       rarity: rarity ?? this.rarity,
       isUnlocked: isUnlocked ?? this.isUnlocked,
       strBonus: strBonus ?? this.strBonus,
@@ -2059,6 +2107,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (type.present) {
       map['type'] = Variable<int>(
         $GachaItemsTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (effectType.present) {
+      map['effect_type'] = Variable<int>(
+        $GachaItemsTable.$convertereffectType.toSql(effectType.value),
       );
     }
     if (rarity.present) {
@@ -2131,6 +2184,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('imagePath: $imagePath, ')
           ..write('title: $title, ')
           ..write('type: $type, ')
+          ..write('effectType: $effectType, ')
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
@@ -4248,6 +4302,21 @@ class $UserSettingsTable extends UserSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _showEffectMeta = const VerificationMeta(
+    'showEffect',
+  );
+  @override
+  late final GeneratedColumn<bool> showEffect = GeneratedColumn<bool>(
+    'show_effect',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("show_effect" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _showMainFrameMeta = const VerificationMeta(
     'showMainFrame',
   );
@@ -4295,6 +4364,7 @@ class $UserSettingsTable extends UserSettings
     maxGachaItems,
     maxDecks,
     themeColor,
+    showEffect,
     showMainFrame,
     createdAt,
     updatedAt,
@@ -4345,6 +4415,12 @@ class $UserSettingsTable extends UserSettings
       context.handle(
         _themeColorMeta,
         themeColor.isAcceptableOrUnknown(data['theme_color']!, _themeColorMeta),
+      );
+    }
+    if (data.containsKey('show_effect')) {
+      context.handle(
+        _showEffectMeta,
+        showEffect.isAcceptableOrUnknown(data['show_effect']!, _showEffectMeta),
       );
     }
     if (data.containsKey('show_main_frame')) {
@@ -4401,6 +4477,10 @@ class $UserSettingsTable extends UserSettings
         DriftSqlType.string,
         data['${effectivePrefix}theme_color'],
       ),
+      showEffect: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}show_effect'],
+      )!,
       showMainFrame: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}show_main_frame'],
@@ -4430,6 +4510,7 @@ class UserSettingsData extends DataClass
   final int maxGachaItems;
   final int maxDecks;
   final String? themeColor;
+  final bool showEffect;
   final bool showMainFrame;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -4440,6 +4521,7 @@ class UserSettingsData extends DataClass
     required this.maxGachaItems,
     required this.maxDecks,
     this.themeColor,
+    required this.showEffect,
     required this.showMainFrame,
     required this.createdAt,
     required this.updatedAt,
@@ -4455,6 +4537,7 @@ class UserSettingsData extends DataClass
     if (!nullToAbsent || themeColor != null) {
       map['theme_color'] = Variable<String>(themeColor);
     }
+    map['show_effect'] = Variable<bool>(showEffect);
     map['show_main_frame'] = Variable<bool>(showMainFrame);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -4471,6 +4554,7 @@ class UserSettingsData extends DataClass
       themeColor: themeColor == null && nullToAbsent
           ? const Value.absent()
           : Value(themeColor),
+      showEffect: Value(showEffect),
       showMainFrame: Value(showMainFrame),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -4489,6 +4573,7 @@ class UserSettingsData extends DataClass
       maxGachaItems: serializer.fromJson<int>(json['maxGachaItems']),
       maxDecks: serializer.fromJson<int>(json['maxDecks']),
       themeColor: serializer.fromJson<String?>(json['themeColor']),
+      showEffect: serializer.fromJson<bool>(json['showEffect']),
       showMainFrame: serializer.fromJson<bool>(json['showMainFrame']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -4504,6 +4589,7 @@ class UserSettingsData extends DataClass
       'maxGachaItems': serializer.toJson<int>(maxGachaItems),
       'maxDecks': serializer.toJson<int>(maxDecks),
       'themeColor': serializer.toJson<String?>(themeColor),
+      'showEffect': serializer.toJson<bool>(showEffect),
       'showMainFrame': serializer.toJson<bool>(showMainFrame),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -4517,6 +4603,7 @@ class UserSettingsData extends DataClass
     int? maxGachaItems,
     int? maxDecks,
     Value<String?> themeColor = const Value.absent(),
+    bool? showEffect,
     bool? showMainFrame,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -4527,6 +4614,7 @@ class UserSettingsData extends DataClass
     maxGachaItems: maxGachaItems ?? this.maxGachaItems,
     maxDecks: maxDecks ?? this.maxDecks,
     themeColor: themeColor.present ? themeColor.value : this.themeColor,
+    showEffect: showEffect ?? this.showEffect,
     showMainFrame: showMainFrame ?? this.showMainFrame,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -4543,6 +4631,9 @@ class UserSettingsData extends DataClass
       themeColor: data.themeColor.present
           ? data.themeColor.value
           : this.themeColor,
+      showEffect: data.showEffect.present
+          ? data.showEffect.value
+          : this.showEffect,
       showMainFrame: data.showMainFrame.present
           ? data.showMainFrame.value
           : this.showMainFrame,
@@ -4560,6 +4651,7 @@ class UserSettingsData extends DataClass
           ..write('maxGachaItems: $maxGachaItems, ')
           ..write('maxDecks: $maxDecks, ')
           ..write('themeColor: $themeColor, ')
+          ..write('showEffect: $showEffect, ')
           ..write('showMainFrame: $showMainFrame, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -4575,6 +4667,7 @@ class UserSettingsData extends DataClass
     maxGachaItems,
     maxDecks,
     themeColor,
+    showEffect,
     showMainFrame,
     createdAt,
     updatedAt,
@@ -4589,6 +4682,7 @@ class UserSettingsData extends DataClass
           other.maxGachaItems == this.maxGachaItems &&
           other.maxDecks == this.maxDecks &&
           other.themeColor == this.themeColor &&
+          other.showEffect == this.showEffect &&
           other.showMainFrame == this.showMainFrame &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -4601,6 +4695,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
   final Value<int> maxGachaItems;
   final Value<int> maxDecks;
   final Value<String?> themeColor;
+  final Value<bool> showEffect;
   final Value<bool> showMainFrame;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -4611,6 +4706,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     this.maxGachaItems = const Value.absent(),
     this.maxDecks = const Value.absent(),
     this.themeColor = const Value.absent(),
+    this.showEffect = const Value.absent(),
     this.showMainFrame = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4622,6 +4718,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     this.maxGachaItems = const Value.absent(),
     this.maxDecks = const Value.absent(),
     this.themeColor = const Value.absent(),
+    this.showEffect = const Value.absent(),
     this.showMainFrame = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4633,6 +4730,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     Expression<int>? maxGachaItems,
     Expression<int>? maxDecks,
     Expression<String>? themeColor,
+    Expression<bool>? showEffect,
     Expression<bool>? showMainFrame,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -4644,6 +4742,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
       if (maxGachaItems != null) 'max_gacha_items': maxGachaItems,
       if (maxDecks != null) 'max_decks': maxDecks,
       if (themeColor != null) 'theme_color': themeColor,
+      if (showEffect != null) 'show_effect': showEffect,
       if (showMainFrame != null) 'show_main_frame': showMainFrame,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -4657,6 +4756,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     Value<int>? maxGachaItems,
     Value<int>? maxDecks,
     Value<String?>? themeColor,
+    Value<bool>? showEffect,
     Value<bool>? showMainFrame,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -4668,6 +4768,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
       maxGachaItems: maxGachaItems ?? this.maxGachaItems,
       maxDecks: maxDecks ?? this.maxDecks,
       themeColor: themeColor ?? this.themeColor,
+      showEffect: showEffect ?? this.showEffect,
       showMainFrame: showMainFrame ?? this.showMainFrame,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -4695,6 +4796,9 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
     if (themeColor.present) {
       map['theme_color'] = Variable<String>(themeColor.value);
     }
+    if (showEffect.present) {
+      map['show_effect'] = Variable<bool>(showEffect.value);
+    }
     if (showMainFrame.present) {
       map['show_main_frame'] = Variable<bool>(showMainFrame.value);
     }
@@ -4716,6 +4820,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSettingsData> {
           ..write('maxGachaItems: $maxGachaItems, ')
           ..write('maxDecks: $maxDecks, ')
           ..write('themeColor: $themeColor, ')
+          ..write('showEffect: $showEffect, ')
           ..write('showMainFrame: $showMainFrame, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -5669,6 +5774,7 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       required String imagePath,
       required String title,
       Value<GachaItemType> type,
+      Value<EffectType> effectType,
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
@@ -5694,6 +5800,7 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<String> imagePath,
       Value<String> title,
       Value<GachaItemType> type,
+      Value<EffectType> effectType,
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
@@ -5788,6 +5895,12 @@ class $$GachaItemsTableFilterComposer
   ColumnWithTypeConverterFilters<GachaItemType, GachaItemType, int> get type =>
       $composableBuilder(
         column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<EffectType, EffectType, int> get effectType =>
+      $composableBuilder(
+        column: $table.effectType,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
@@ -5964,6 +6077,11 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get effectType => $composableBuilder(
+    column: $table.effectType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get rarity => $composableBuilder(
     column: $table.rarity,
     builder: (column) => ColumnOrderings(column),
@@ -6075,6 +6193,12 @@ class $$GachaItemsTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EffectType, int> get effectType =>
+      $composableBuilder(
+        column: $table.effectType,
+        builder: (column) => column,
+      );
 
   GeneratedColumnWithTypeConverter<Rarity, int> get rarity =>
       $composableBuilder(column: $table.rarity, builder: (column) => column);
@@ -6225,6 +6349,7 @@ class $$GachaItemsTableTableManager
                 Value<String> imagePath = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<GachaItemType> type = const Value.absent(),
+                Value<EffectType> effectType = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
@@ -6248,6 +6373,7 @@ class $$GachaItemsTableTableManager
                 imagePath: imagePath,
                 title: title,
                 type: type,
+                effectType: effectType,
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
@@ -6273,6 +6399,7 @@ class $$GachaItemsTableTableManager
                 required String imagePath,
                 required String title,
                 Value<GachaItemType> type = const Value.absent(),
+                Value<EffectType> effectType = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
@@ -6296,6 +6423,7 @@ class $$GachaItemsTableTableManager
                 imagePath: imagePath,
                 title: title,
                 type: type,
+                effectType: effectType,
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
@@ -7824,6 +7952,7 @@ typedef $$UserSettingsTableCreateCompanionBuilder =
       Value<int> maxGachaItems,
       Value<int> maxDecks,
       Value<String?> themeColor,
+      Value<bool> showEffect,
       Value<bool> showMainFrame,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -7836,6 +7965,7 @@ typedef $$UserSettingsTableUpdateCompanionBuilder =
       Value<int> maxGachaItems,
       Value<int> maxDecks,
       Value<String?> themeColor,
+      Value<bool> showEffect,
       Value<bool> showMainFrame,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -7877,6 +8007,11 @@ class $$UserSettingsTableFilterComposer
 
   ColumnFilters<String> get themeColor => $composableBuilder(
     column: $table.themeColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get showEffect => $composableBuilder(
+    column: $table.showEffect,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7935,6 +8070,11 @@ class $$UserSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get showEffect => $composableBuilder(
+    column: $table.showEffect,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get showMainFrame => $composableBuilder(
     column: $table.showMainFrame,
     builder: (column) => ColumnOrderings(column),
@@ -7979,6 +8119,11 @@ class $$UserSettingsTableAnnotationComposer
 
   GeneratedColumn<String> get themeColor => $composableBuilder(
     column: $table.themeColor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get showEffect => $composableBuilder(
+    column: $table.showEffect,
     builder: (column) => column,
   );
 
@@ -8031,6 +8176,7 @@ class $$UserSettingsTableTableManager
                 Value<int> maxGachaItems = const Value.absent(),
                 Value<int> maxDecks = const Value.absent(),
                 Value<String?> themeColor = const Value.absent(),
+                Value<bool> showEffect = const Value.absent(),
                 Value<bool> showMainFrame = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -8041,6 +8187,7 @@ class $$UserSettingsTableTableManager
                 maxGachaItems: maxGachaItems,
                 maxDecks: maxDecks,
                 themeColor: themeColor,
+                showEffect: showEffect,
                 showMainFrame: showMainFrame,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -8053,6 +8200,7 @@ class $$UserSettingsTableTableManager
                 Value<int> maxGachaItems = const Value.absent(),
                 Value<int> maxDecks = const Value.absent(),
                 Value<String?> themeColor = const Value.absent(),
+                Value<bool> showEffect = const Value.absent(),
                 Value<bool> showMainFrame = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -8063,6 +8211,7 @@ class $$UserSettingsTableTableManager
                 maxGachaItems: maxGachaItems,
                 maxDecks: maxDecks,
                 themeColor: themeColor,
+                showEffect: showEffect,
                 showMainFrame: showMainFrame,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

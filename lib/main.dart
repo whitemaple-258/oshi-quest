@@ -52,10 +52,6 @@ final appInitializationProvider = FutureProvider<void>((ref) async {
     print(stack);
     rethrow;
   }
-
-  // 4. ✅ 追加: デフォルトフレームの登録
-  final gachaRepo = ref.read(gachaItemRepositoryProvider);
-  await gachaRepo.seedFramesFromMasterData();
   print('✅ 初期データ準備完了');
 });
 
@@ -79,7 +75,7 @@ class OshiQuestApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: themeColor, // ✅ ここに適用
+        primarySwatch: themeColor,
         // Material3の色設定も連動させる
         colorScheme: ColorScheme.fromSeed(
           seedColor: themeColor,

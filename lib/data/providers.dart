@@ -19,7 +19,7 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 // --- Gacha (推し画像) ---
 final gachaItemRepositoryProvider = Provider<GachaItemRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return GachaItemRepository(db);
+  return GachaItemRepository(db, ref); // ✅ refを渡す
 });
 
 // ✅ 所持品リスト (編成・一覧用)

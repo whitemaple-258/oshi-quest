@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart'; // GachaItem型のため
 import '../../data/providers.dart';
 import '../../logic/settings_controller.dart'; // 設定（表示ON/OFF）のため
+import '../widgets/sparkle_effect_overlay.dart';
 import 'gacha_screen.dart';
 import 'habit_screen.dart';
 import 'party_edit_screen.dart';
@@ -80,16 +81,12 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
-  
   @override
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
     final partnerAsync = ref.watch(currentPartnerProvider);
-
-    // フレームと設定の監視
-    final frameAsync = ref.watch(equippedFrameProvider);
     final settingsAsync = ref.watch(settingsControllerProvider);
-    final showFrame = settingsAsync.value?.showMainFrame ?? true;
+    final showEffect = settingsAsync.value?.showEffect ?? true;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -195,19 +192,14 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             error: (_, __) => const Center(child: Text('エラーが発生しました')),
           ),
 
-          // ✅ 2. フレーム画像 (パートナーの上、ステータスの下)
-          if (showFrame)
-            frameAsync.when(
-              data: (frame) {
-                if (frame == null) return const SizedBox.shrink();
-                return IgnorePointer(
-                  // タップを透過させる（下の画像のタップ判定を邪魔しない）
-                  child: Image.file(
-                    File(frame.imagePath),
-                    fit: BoxFit.cover, // 画面いっぱいに広げる
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                  ),
-                );
+          // 2. エフェクト表示 (パートナーの上に重ねる)
+          if (showEffect)
+            partnerAsync.when(
+              data: (partner) {
+                if (partner == null || partner.effectType == EffectType.none) {
+                  return const SizedBox.shrink();
+                }
+                return SparkleEffectOverlay(effectType: partner.effectType);
               },
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
@@ -325,6 +317,41 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // エフェクト描画メソッド
+  Widget _buildEffectOverlay(EffectType type) {
+    Color color;
+    switch (type) {
+      case EffectType.fire:
+        color = Colors.red.withOpacity(0.3);
+        break;
+      case EffectType.water:
+        color = Colors.blue.withOpacity(0.3);
+        break;
+      case EffectType.thunder:
+        color = Colors.yellow.withOpacity(0.3);
+        break;
+      case EffectType.light:
+        color = Colors.white.withOpacity(0.3);
+        break;
+      case EffectType.dark:
+        color = Colors.purple.withOpacity(0.4);
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+
+    return IgnorePointer(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            colors: [Colors.transparent, color],
+            stops: const [0.5, 1.0], // 周囲をぼんやり光らせる
+          ),
+        ),
       ),
     );
   }

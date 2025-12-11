@@ -76,6 +76,19 @@ enum GachaItemType {
   final int value;
 }
 
+// エフェクトの種類
+enum EffectType {
+  none(0),
+  fire(1),    // 炎のオーラ
+  water(2),   // 水の泡
+  thunder(3), // 雷光
+  light(4),   // 神々しい光
+  dark(5);    // 闇の波動
+
+  const EffectType(this.value);
+  final int value;
+}
+
 // --- Tables ---
 class Players extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -102,6 +115,7 @@ class GachaItems extends Table {
   TextColumn get imagePath => text()();
   TextColumn get title => text()();
   IntColumn get type => intEnum<GachaItemType>().withDefault(const Constant(0))();
+  IntColumn get effectType => intEnum<EffectType>().withDefault(const Constant(0))();
   IntColumn get rarity => intEnum<Rarity>().withDefault(Constant(Rarity.n.value))();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
@@ -175,6 +189,7 @@ class UserSettings extends Table {
   IntColumn get maxGachaItems => integer().withDefault(const Constant(5))();
   IntColumn get maxDecks => integer().withDefault(const Constant(1))();
   TextColumn get themeColor => text().nullable()();
+  BoolColumn get showEffect => boolean().withDefault(const Constant(true))();
   BoolColumn get showMainFrame => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
@@ -208,7 +223,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {

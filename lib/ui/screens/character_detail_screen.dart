@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../data/database/database.dart';
+import '../widgets/sparkle_effect_overlay.dart';
 
 class CharacterDetailScreen extends StatelessWidget {
   final GachaItem item;
@@ -33,11 +34,20 @@ class CharacterDetailScreen extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 9 / 16, // ✅ ガチャのトリミング比率に合わせる
-                child: Image.file(
-                  File(item.imagePath),
-                  fit: BoxFit.cover, // 枠いっぱいに表示
-                  errorBuilder: (_, __, ___) =>
-                      const Center(child: Icon(Icons.broken_image, size: 64, color: Colors.grey)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.file(
+                      File(item.imagePath),
+                      fit: BoxFit.cover, // 枠いっぱいに表示
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(Icons.broken_image, size: 64, color: Colors.grey),
+                      ),
+                    ),
+                    
+                    // 2. エフェクト (画像の上に重ねる)
+                    SparkleEffectOverlay(effectType: item.effectType),
+                  ],
                 ),
               ),
             ),

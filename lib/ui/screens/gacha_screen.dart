@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
@@ -15,6 +16,7 @@ class GachaScreen extends ConsumerStatefulWidget {
 
 class _GachaScreenState extends ConsumerState<GachaScreen> {
   final TextEditingController _titleController = TextEditingController();
+  // 選択中のレアリティ（デフォルトN）
   Rarity _selectedRarity = Rarity.n;
 
   @override
@@ -23,26 +25,43 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
     super.dispose();
   }
 
+  // --- 画像追加ロジック ---
   Future<void> _pickAndSaveImage() async {
-    _selectedRarity = Rarity.n;
+    // 初期化
     _titleController.clear();
+    _selectedRarity = Rarity.n;
 
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('推しのタイトルを入力'),
-            content: Column(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('ガチャにアイテムを追加'),
+          content: SingleChildScrollView(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(hintText: '例: 推しの日常ショット'),
+                const Text(
+                  'あなたの推し画像を登録して、\nガチャのラインナップに追加します。',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                const Text('レアリティを選択', style: TextStyle(fontWeight: FontWeight.bold)),
+                TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'タイトル',
+                    hintText: '例: 推しの日常ショット',
+                    border: OutlineInputBorder(),
+                  ),
+                  autofocus: false,
+                ),
+                const SizedBox(height: 16),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('レアリティ', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
                 const SizedBox(height: 8),
+                // レアリティ選択
                 SegmentedButton<Rarity>(
                   segments: const [
                     ButtonSegment(value: Rarity.n, label: Text('N')),
@@ -52,52 +71,79 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
                   ],
                   selected: {_selectedRarity},
                   onSelectionChanged: (Set<Rarity> newSelection) {
-                    setState(() => _selectedRarity = newSelection.first);
+                    setState(() {
+                      _selectedRarity = newSelection.first;
+                    });
                   },
                 ),
               ],
             ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('キャンセル')),
-              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('OK')),
-            ],
-          );
-        },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (_titleController.text.trim().isNotEmpty) {
+                  Navigator.of(context).pop(true);
+                }
+              },
+              child: const Text('追加'),
+            ),
+          ],
+        ),
       ),
     );
 
-    if (result == true && _titleController.text.trim().isNotEmpty) {
-      try {
-        final repository = ref.read(gachaItemRepositoryProvider);
-        await repository.pickAndSaveItem(
-          _titleController.text.trim(),
-          rarity: _selectedRarity, // ✅ 引数を渡す
-        );
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('登録しました！')));
-      } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('エラー: $e')));
-      }
-    }
-  }
+    if (result != true) return;
 
-  void _pullGacha() async {
     try {
-      final resultItem = await ref.read(gachaControllerProvider.notifier).pullGacha();
-      if (resultItem != null && mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => GachaAnimationDialog(
-            item: resultItem,
-            onAnimationComplete: () {},
-          ),
+      final repository = ref.read(gachaItemRepositoryProvider);
+
+      // ✅ 修正: 名前付き引数で渡す
+      await repository.pickAndSaveItem(
+        _titleController.text.trim(),
+        rarity: _selectedRarity,
+        type: GachaItemType.character, // デフォルト
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('ガチャBOXに追加しました！'), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: Colors.redAccent),
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('エラー: $e'), backgroundColor: Colors.red));
+      }
+    } finally {
+      _titleController.clear();
+    }
+  }
+
+  // --- ガチャ実行ロジック ---
+  void _pullGacha() async {
+    try {
+      // コントローラー経由でガチャを実行
+      final resultItem = await ref.read(gachaControllerProvider.notifier).pullGacha();
+
+      if (resultItem != null && mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => GachaAnimationDialog(item: resultItem, onAnimationComplete: () {}),
         );
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMsg = e.toString().replaceAll('Exception: ', '');
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMsg), backgroundColor: Colors.redAccent));
       }
     }
   }
@@ -106,16 +152,35 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
     final gachaState = ref.watch(gachaControllerProvider);
+
+    // テーマカラーを取得
     final colorScheme = Theme.of(context).colorScheme;
+    final primaryColor = colorScheme.primary;
+    final onPrimaryColor = colorScheme.onPrimary;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('召喚の間'),
         actions: [
+          // ジェム表示
           playerAsync.when(
             data: (player) => Padding(
               padding: const EdgeInsets.only(right: 16),
-              child: Text('${player.willGems} 💎', style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.pinkAccent.withOpacity(0.5)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.diamond, color: Colors.cyanAccent, size: 16),
+                    const SizedBox(width: 4),
+                    Text('${player.willGems}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
             ),
             loading: () => const SizedBox.shrink(),
             error: (_, __) => const SizedBox.shrink(),
@@ -128,32 +193,61 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.auto_awesome, size: 80, color: colorScheme.primary),
+              // ガチャアイコン（テーマカラー適用）
+              Icon(Icons.auto_awesome, size: 80, color: primaryColor),
+
+              const SizedBox(height: 24),
+              const Text('運命の推しを召喚せよ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 48),
+
+              // 1. 召喚ボタン
               SizedBox(
                 width: double.infinity,
                 height: 60,
                 child: FilledButton.icon(
                   onPressed: gachaState.isLoading ? null : _pullGacha,
-                  icon: const Icon(Icons.stars),
+                  icon: gachaState.isLoading
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: onPrimaryColor),
+                        )
+                      : const Icon(Icons.stars),
                   label: Text(gachaState.isLoading ? '召喚中...' : '1回召喚 (100💎)'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
+                    backgroundColor: primaryColor,
+                    foregroundColor: onPrimaryColor,
+                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GachaLineupScreen())),
-                icon: const Icon(Icons.grid_view),
-                label: const Text('ラインナップ確認'),
+              const SizedBox(height: 24),
+
+              // 2. ラインナップ確認ボタン
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const GachaLineupScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.grid_view),
+                  label: const Text('提供割合・ラインナップ確認'),
+                ),
               ),
               const SizedBox(height: 16),
-              TextButton.icon(
-                onPressed: gachaState.isLoading ? null : _pickAndSaveImage,
-                icon: const Icon(Icons.add_photo_alternate),
-                label: const Text('画像を登録する'),
+
+              // 3. 画像追加ボタン（種）
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: gachaState.isLoading ? null : _pickAndSaveImage,
+                  icon: const Icon(Icons.add_photo_alternate),
+                  label: const Text('ガチャの種（画像）を追加する'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.grey),
+                ),
               ),
             ],
           ),

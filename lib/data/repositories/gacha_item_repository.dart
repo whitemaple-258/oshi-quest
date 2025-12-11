@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -11,13 +12,15 @@ import 'package:path/path.dart' as p;
 import '../database/database.dart';
 import '../master_data/gacha_logic_master.dart';
 import '../master_data/frame_master_data.dart';
+import '../../logic/gacha_config_controller.dart';
 
 class GachaItemRepository {
   final AppDatabase _db;
+  final Ref _ref;
   final ImagePicker _imagePicker = ImagePicker();
   final Random _random = Random();
 
-  GachaItemRepository(this._db);
+  GachaItemRepository(this._db, this._ref);
 
   // --- ヘルパー: 画像トリミング ---
   Future<String?> _cropImage(String sourcePath) async {
@@ -99,7 +102,7 @@ class GachaItemRepository {
     try {
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        imageQuality: 100, // 画質優先
+        imageQuality: 100,
       );
       if (pickedFile == null) return null;
 
@@ -140,33 +143,35 @@ class GachaItemRepository {
     }
   }
 
-  // --- 3. ガチャ実行 (個体生成・完全版) ---
+  // --- 3. ガチャ実行 (デバッグ反映版) ---
   Future<GachaItem> pullGacha(int gemCost) async {
+    // ✅ デバッグ設定を取得
+    final debugConfig = _ref.read(gachaConfigControllerProvider);
+
     return await _db.transaction(() async {
       final player = await (_db.select(_db.players)..where((p) => p.id.equals(1))).getSingle();
       if (player.willGems < gemCost) throw Exception('ジェムが足りません');
 
-      // 1. 元ネタ(isSource=true)を取得
       final candidates = await (_db.select(
         _db.gachaItems,
       )..where((t) => t.isSource.equals(true))).get();
 
-      if (candidates.isEmpty) throw Exception('ガチャから出る推しがいません！\nまずは画像を登録してください。');
+      if (candidates.isEmpty) throw Exception('ガチャから出る推しがいません！');
 
-      // ✅ LUCKによるレアリティ補正計算
-      // LUCK 1000で SSR/SR の重みが 2倍 になる
       final luckFactor = 1.0 + (player.luck / 1000.0);
 
-      // 抽選ロジック (重み付け抽選)
+      // ✅ 抽選ロジック (デバッグ倍率適用)
       GachaItem? sourceItem;
       double rarityTotalWeight = 0;
       final weights = <GachaItem, double>{};
 
       for (var item in candidates) {
-        double weight = 100.0; // Nの基本重み
+        double weight = 100.0;
         if (item.rarity == Rarity.r) weight = 30.0;
-        if (item.rarity == Rarity.sr) weight = 10.0 * luckFactor; // LUCK補正
-        if (item.rarity == Rarity.ssr) weight = 3.0 * luckFactor; // LUCK補正
+
+        // デバッグ倍率を適用
+        if (item.rarity == Rarity.sr) weight = 10.0 * luckFactor * debugConfig.srWeightMult;
+        if (item.rarity == Rarity.ssr) weight = 3.0 * luckFactor * debugConfig.ssrWeightMult;
 
         weights[item] = weight;
         rarityTotalWeight += weight;
@@ -181,38 +186,34 @@ class GachaItemRepository {
         randomPoint -= weights[item]!;
       }
 
-      // フォールバック（計算誤差対策）
       sourceItem ??= candidates.last;
-
       final now = DateTime.now();
 
-      // ジェム消費
       await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
         PlayersCompanion(willGems: Value(player.willGems - gemCost), updatedAt: Value(now)),
       );
 
-      // 2. パラメータ自動生成 (ハクスラ要素)
-      // レアリティごとの設定を取得
       final setting = raritySettings[sourceItem.rarity] ?? raritySettings[Rarity.n]!;
 
-      // ステータス生成
       final template = statTemplates[_random.nextInt(statTemplates.length)];
-      // 合計値を設定範囲内でランダム決定
+
+      // ✅ ステータスブースト適用
       final totalPoints =
           setting.minTotalStatus +
-          _random.nextInt(setting.maxTotalStatus - setting.minTotalStatus + 1);
+          _random.nextInt(setting.maxTotalStatus - setting.minTotalStatus + 1) +
+          debugConfig.statusBoost.round();
 
-      final totalWeight =
+      final statusTotalWeight =
           template.strWeight +
           template.intWeight +
           template.vitWeight +
           template.luckWeight +
           template.chaWeight;
 
-      int str = (totalPoints * (template.strWeight / totalWeight)).round();
-      int intellect = (totalPoints * (template.intWeight / totalWeight)).round();
-      int vit = (totalPoints * (template.vitWeight / totalWeight)).round();
-      int luck = (totalPoints * (template.luckWeight / totalWeight)).round();
+      int str = (totalPoints * (template.strWeight / statusTotalWeight)).round();
+      int intellect = (totalPoints * (template.intWeight / statusTotalWeight)).round();
+      int vit = (totalPoints * (template.vitWeight / statusTotalWeight)).round();
+      int luck = (totalPoints * (template.luckWeight / statusTotalWeight)).round();
       int cha = totalPoints - (str + intellect + vit + luck);
       if (cha < 0) cha = 0;
 
@@ -222,9 +223,8 @@ class GachaItemRepository {
       int cooldown = 0;
       int duration = 0;
 
-      // レアリティごとの確率でスキルが付くか判定
-      if (_random.nextDouble() < setting.skillProb) {
-        // 確率に基づいてスキルを選択
+      // ✅ スキル確率倍率適用
+      if (_random.nextDouble() < (setting.skillProb * debugConfig.skillProbMult)) {
         double totalSkillProb = 0;
         for (var def in skillDefinitions) totalSkillProb += def.probability;
 
@@ -232,7 +232,6 @@ class GachaItemRepository {
         for (final def in skillDefinitions) {
           if (skillRandom < def.probability) {
             skillType = def.type;
-            // 効果値にレアリティ倍率を適用
             skillVal =
                 ((def.minVal + _random.nextInt(def.maxVal - def.minVal + 1)) *
                         setting.skillPowerMult)
@@ -253,7 +252,6 @@ class GachaItemRepository {
       if (_random.nextDouble() < setting.seriesProb) {
         double totalSeriesProb = 0;
         for (var def in seriesDefinitions) totalSeriesProb += def.probability;
-
         double seriesRandom = _random.nextDouble() * totalSeriesProb;
         for (final def in seriesDefinitions) {
           if (seriesRandom < def.probability) {
@@ -264,7 +262,18 @@ class GachaItemRepository {
         }
       }
 
-      // 3. 新しい個体として登録 (isSource=false)
+      // エフェクト抽選
+      EffectType effectType = EffectType.none;
+      double effectProb = 0.05;
+      if (sourceItem.rarity == Rarity.sr) effectProb = 0.20;
+      if (sourceItem.rarity == Rarity.ssr) effectProb = 0.50;
+
+      // ✅ 確定エフェクト適用
+      if (debugConfig.alwaysEffect || _random.nextDouble() < effectProb) {
+        final effects = EffectType.values.where((e) => e != EffectType.none).toList();
+        effectType = effects[_random.nextInt(effects.length)];
+      }
+
       final newItemCompanion = GachaItemsCompanion.insert(
         imagePath: sourceItem.imagePath,
         title: sourceItem.title,
@@ -274,12 +283,13 @@ class GachaItemRepository {
         isSource: const Value(false),
         sourceId: Value(sourceItem.id),
 
+        effectType: Value(effectType),
         strBonus: Value(str),
         intBonus: Value(intellect),
         vitBonus: Value(vit),
         luckBonus: Value(luck),
         chaBonus: Value(cha),
-        bondLevel: const Value(1), // 初期レベル1
+        bondLevel: const Value(1),
 
         skillType: Value(skillType),
         skillValue: Value(skillVal),
@@ -295,7 +305,7 @@ class GachaItemRepository {
     });
   }
 
-  // --- 4. 売却 ---
+  // --- その他のメソッド ---
   Future<void> sellItem(int itemId, int price) async {
     return await _db.transaction(() async {
       final isEquippedChar = await (_db.select(
@@ -320,7 +330,20 @@ class GachaItemRepository {
     });
   }
 
-  // --- 5. 削除 (元ネタ削除) ---
+  Stream<List<GachaItem>> watchMyItems() {
+    return (_db.select(_db.gachaItems)
+          ..where((t) => t.isSource.equals(false))
+          ..orderBy([(item) => OrderingTerm.desc(item.createdAt)]))
+        .watch();
+  }
+
+  Stream<List<GachaItem>> watchLineupItems() {
+    return (_db.select(_db.gachaItems)
+          ..where((t) => t.isSource.equals(true))
+          ..orderBy([(item) => OrderingTerm.desc(item.createdAt)]))
+        .watch();
+  }
+
   Future<void> deleteItem(int id) async {
     final item = await (_db.select(
       _db.gachaItems,
@@ -352,22 +375,6 @@ class GachaItemRepository {
     )..where((t) => t.id.equals(id))).write(GachaItemsCompanion(title: Value(newTitle)));
   }
 
-  // --- 読み込み ---
-  Stream<List<GachaItem>> watchMyItems() {
-    return (_db.select(_db.gachaItems)
-          ..where((t) => t.isSource.equals(false))
-          ..orderBy([(item) => OrderingTerm.desc(item.createdAt)]))
-        .watch();
-  }
-
-  Stream<List<GachaItem>> watchLineupItems() {
-    return (_db.select(_db.gachaItems)
-          ..where((t) => t.isSource.equals(true))
-          ..orderBy([(item) => OrderingTerm.desc(item.createdAt)]))
-        .watch();
-  }
-
-  // 互換性維持
   Stream<List<GachaItem>> watchAllItems() => watchMyItems();
   Future<List<GachaItem>> getAllItems() async => await (_db.select(_db.gachaItems)).get();
   Future<void> unlockItem(int id) async {}
