@@ -6,6 +6,7 @@ import 'repositories/party_repository.dart';
 import 'repositories/title_repository.dart';
 import 'repositories/settings_repository.dart';
 import 'repositories/boss_repository.dart';
+import 'repositories/shop_repository.dart';
 
 // ============================================================================
 // Global Providers
@@ -81,6 +82,12 @@ final titleRepositoryProvider = Provider<TitleRepository>((ref) {
 final titlesProvider = StreamProvider<List<Title>>((ref) {
   final repository = ref.watch(titleRepositoryProvider);
   return repository.watchAllTitles();
+});
+
+// --- Shop (ご褒美ショップ) ---
+final shopRepositoryProvider = Provider<ShopRepository>((ref) {
+  final db = ref.watch(databaseProvider);
+  return ShopRepository(db);
 });
 
 // --- Settings (設定) ---

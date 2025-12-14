@@ -10,6 +10,7 @@ import 'habit_screen.dart';
 import 'party_edit_screen.dart';
 import 'title_list_screen.dart';
 import 'settings_screen.dart';
+import 'shop_screen.dart';
 
 // currentPartnerProvider
 final currentPartnerProvider = StreamProvider<GachaItem?>((ref) {
@@ -32,6 +33,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     const HabitScreen(),
     const PartyEditScreen(),
     const GachaScreen(),
+    const ShopScreen(),
   ];
 
   @override
@@ -65,6 +67,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icon(Icons.auto_awesome_outlined),
             selectedIcon: Icon(Icons.auto_awesome),
             label: 'Gacha',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.storefront_outlined),
+            selectedIcon: Icon(Icons.storefront),
+            label: 'Shop',
           ),
         ],
       ),

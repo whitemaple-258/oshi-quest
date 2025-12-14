@@ -5343,6 +5343,344 @@ class BossResultsCompanion extends UpdateCompanion<BossResult> {
   }
 }
 
+class $RewardItemsTable extends RewardItems
+    with TableInfo<$RewardItemsTable, RewardItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RewardItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _costMeta = const VerificationMeta('cost');
+  @override
+  late final GeneratedColumn<int> cost = GeneratedColumn<int>(
+    'cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _iconDataMeta = const VerificationMeta(
+    'iconData',
+  );
+  @override
+  late final GeneratedColumn<String> iconData = GeneratedColumn<String>(
+    'icon_data',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('card_giftcard'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, title, cost, iconData, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reward_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RewardItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('cost')) {
+      context.handle(
+        _costMeta,
+        cost.isAcceptableOrUnknown(data['cost']!, _costMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_costMeta);
+    }
+    if (data.containsKey('icon_data')) {
+      context.handle(
+        _iconDataMeta,
+        iconData.isAcceptableOrUnknown(data['icon_data']!, _iconDataMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RewardItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RewardItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      cost: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cost'],
+      )!,
+      iconData: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_data'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $RewardItemsTable createAlias(String alias) {
+    return $RewardItemsTable(attachedDatabase, alias);
+  }
+}
+
+class RewardItem extends DataClass implements Insertable<RewardItem> {
+  final int id;
+  final String title;
+  final int cost;
+  final String iconData;
+  final DateTime createdAt;
+  const RewardItem({
+    required this.id,
+    required this.title,
+    required this.cost,
+    required this.iconData,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['title'] = Variable<String>(title);
+    map['cost'] = Variable<int>(cost);
+    map['icon_data'] = Variable<String>(iconData);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  RewardItemsCompanion toCompanion(bool nullToAbsent) {
+    return RewardItemsCompanion(
+      id: Value(id),
+      title: Value(title),
+      cost: Value(cost),
+      iconData: Value(iconData),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory RewardItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RewardItem(
+      id: serializer.fromJson<int>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      cost: serializer.fromJson<int>(json['cost']),
+      iconData: serializer.fromJson<String>(json['iconData']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'title': serializer.toJson<String>(title),
+      'cost': serializer.toJson<int>(cost),
+      'iconData': serializer.toJson<String>(iconData),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  RewardItem copyWith({
+    int? id,
+    String? title,
+    int? cost,
+    String? iconData,
+    DateTime? createdAt,
+  }) => RewardItem(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    cost: cost ?? this.cost,
+    iconData: iconData ?? this.iconData,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  RewardItem copyWithCompanion(RewardItemsCompanion data) {
+    return RewardItem(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      cost: data.cost.present ? data.cost.value : this.cost,
+      iconData: data.iconData.present ? data.iconData.value : this.iconData,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RewardItem(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('cost: $cost, ')
+          ..write('iconData: $iconData, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, title, cost, iconData, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RewardItem &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.cost == this.cost &&
+          other.iconData == this.iconData &&
+          other.createdAt == this.createdAt);
+}
+
+class RewardItemsCompanion extends UpdateCompanion<RewardItem> {
+  final Value<int> id;
+  final Value<String> title;
+  final Value<int> cost;
+  final Value<String> iconData;
+  final Value<DateTime> createdAt;
+  const RewardItemsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.cost = const Value.absent(),
+    this.iconData = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  RewardItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String title,
+    required int cost,
+    this.iconData = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : title = Value(title),
+       cost = Value(cost);
+  static Insertable<RewardItem> custom({
+    Expression<int>? id,
+    Expression<String>? title,
+    Expression<int>? cost,
+    Expression<String>? iconData,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (cost != null) 'cost': cost,
+      if (iconData != null) 'icon_data': iconData,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  RewardItemsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? title,
+    Value<int>? cost,
+    Value<String>? iconData,
+    Value<DateTime>? createdAt,
+  }) {
+    return RewardItemsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      cost: cost ?? this.cost,
+      iconData: iconData ?? this.iconData,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (cost.present) {
+      map['cost'] = Variable<int>(cost.value);
+    }
+    if (iconData.present) {
+      map['icon_data'] = Variable<String>(iconData.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RewardItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('cost: $cost, ')
+          ..write('iconData: $iconData, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5354,6 +5692,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PartyMembersTable partyMembers = $PartyMembersTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
   late final $BossResultsTable bossResults = $BossResultsTable(this);
+  late final $RewardItemsTable rewardItems = $RewardItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5367,6 +5706,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     partyMembers,
     userSettings,
     bossResults,
+    rewardItems,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -8548,6 +8888,200 @@ typedef $$BossResultsTableProcessedTableManager =
       BossResult,
       PrefetchHooks Function()
     >;
+typedef $$RewardItemsTableCreateCompanionBuilder =
+    RewardItemsCompanion Function({
+      Value<int> id,
+      required String title,
+      required int cost,
+      Value<String> iconData,
+      Value<DateTime> createdAt,
+    });
+typedef $$RewardItemsTableUpdateCompanionBuilder =
+    RewardItemsCompanion Function({
+      Value<int> id,
+      Value<String> title,
+      Value<int> cost,
+      Value<String> iconData,
+      Value<DateTime> createdAt,
+    });
+
+class $$RewardItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $RewardItemsTable> {
+  $$RewardItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get cost => $composableBuilder(
+    column: $table.cost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get iconData => $composableBuilder(
+    column: $table.iconData,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RewardItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RewardItemsTable> {
+  $$RewardItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get cost => $composableBuilder(
+    column: $table.cost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get iconData => $composableBuilder(
+    column: $table.iconData,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RewardItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RewardItemsTable> {
+  $$RewardItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<int> get cost =>
+      $composableBuilder(column: $table.cost, builder: (column) => column);
+
+  GeneratedColumn<String> get iconData =>
+      $composableBuilder(column: $table.iconData, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$RewardItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RewardItemsTable,
+          RewardItem,
+          $$RewardItemsTableFilterComposer,
+          $$RewardItemsTableOrderingComposer,
+          $$RewardItemsTableAnnotationComposer,
+          $$RewardItemsTableCreateCompanionBuilder,
+          $$RewardItemsTableUpdateCompanionBuilder,
+          (
+            RewardItem,
+            BaseReferences<_$AppDatabase, $RewardItemsTable, RewardItem>,
+          ),
+          RewardItem,
+          PrefetchHooks Function()
+        > {
+  $$RewardItemsTableTableManager(_$AppDatabase db, $RewardItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RewardItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RewardItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RewardItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<int> cost = const Value.absent(),
+                Value<String> iconData = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => RewardItemsCompanion(
+                id: id,
+                title: title,
+                cost: cost,
+                iconData: iconData,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String title,
+                required int cost,
+                Value<String> iconData = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => RewardItemsCompanion.insert(
+                id: id,
+                title: title,
+                cost: cost,
+                iconData: iconData,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RewardItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RewardItemsTable,
+      RewardItem,
+      $$RewardItemsTableFilterComposer,
+      $$RewardItemsTableOrderingComposer,
+      $$RewardItemsTableAnnotationComposer,
+      $$RewardItemsTableCreateCompanionBuilder,
+      $$RewardItemsTableUpdateCompanionBuilder,
+      (
+        RewardItem,
+        BaseReferences<_$AppDatabase, $RewardItemsTable, RewardItem>,
+      ),
+      RewardItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8568,4 +9102,6 @@ class $AppDatabaseManager {
       $$UserSettingsTableTableManager(_db, _db.userSettings);
   $$BossResultsTableTableManager get bossResults =>
       $$BossResultsTableTableManager(_db, _db.bossResults);
+  $$RewardItemsTableTableManager get rewardItems =>
+      $$RewardItemsTableTableManager(_db, _db.rewardItems);
 }

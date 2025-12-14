@@ -88,20 +88,31 @@ final Map<EffectType, EffectDef> effectMasterData = {
     wobbleStrength: 0.001,
   ),
 
-  // ❄️ 豪雪/瘴気 (Dark)
+  // ❄️ 雪 (snow)
   EffectType.snow: EffectDef(
-    particleCount: 100,
+    particleCount: 150, // 密度を出すために少し多めに
     spawnType: SpawnType.top,
-    minSize: 2.0,
-    maxSize: 7.0,
-    minSpeedX: -0.0005,
-    maxSpeedX: 0.0005,
-    minSpeedY: 0.001,
-    maxSpeedY: 0.002,
-    decayRate: 0.0,
-    colors: [Colors.white],
+    
+    // サイズ差をつけて奥行きを出す
+    minSize: 3.0, 
+    maxSize: 10.0, 
+    
+    // 風の影響 (全体的に少しだけ左に流れるなど)
+    minSpeedX: -0.0002, 
+    maxSpeedX: 0.0002,
+    
+    // 落下速度 (ロジック側でサイズに基づいて再計算するので、ここはベース値)
+    minSpeedY: 0.0005, 
+    maxSpeedY: 0.0015,
+    
+    // 自然に落ちるように減衰はほぼなし (画面外でリセットさせる)
+    decayRate: 0.0005,
+    
+    colors: [Colors.white], 
     drawType: EffectDrawType.snow,
-    wobbleStrength: 0.0005,
+    
+    // ゆらゆらさせる強度
+    wobbleStrength: 0.003, 
   ),
 
   // 🫧 泡 (Water)
@@ -137,20 +148,21 @@ final Map<EffectType, EffectDef> effectMasterData = {
     wobbleStrength: 0.0005,
   ),
 
-  // ⚡ 稲妻 (Thunder)
+  // ⚡ 稲妻 (lightning)
   EffectType.lightning: EffectDef(
-    particleCount: 2,
+    particleCount: 5, // ✅ 修正: バースト時に詰まらないよう少し余裕を持たせる
     spawnType: SpawnType.random,
-    minSize: 2.0,
-    maxSize: 4.0, // 線の太さ
-    minSpeedX: 0.0,
-    maxSpeedX: 0.0,
-    minSpeedY: 0.0,
-    maxSpeedY: 0.0,
-    decayRate: 0.06, // すぐ消える
-    colors: [Colors.white],
+    minSize: 3.0, maxSize: 6.0,
+    minSpeedX: 0.0, maxSpeedX: 0.0,
+    minSpeedY: 0.0, maxSpeedY: 0.0,
+    decayRate: 0.15, 
+    colors: [
+      Colors.cyanAccent,
+      Colors.lightBlueAccent,
+      Colors.white,
+    ],
     drawType: EffectDrawType.lightning,
-    blendMode: BlendMode.srcOver,
+    blendMode: BlendMode.plus, 
   ),
 
   // ☔ 雨 (Rain) - 新規追加
@@ -169,11 +181,10 @@ final Map<EffectType, EffectDef> effectMasterData = {
 
     decayRate: 0.0,
 
-    // ✅ 色を「水」っぽく変更 (青・水色・白)
     colors: [
-      Colors.blueAccent,
-      Colors.lightBlueAccent,
-      Color(0xFF64B5F6), // Blue.shade300
+      Colors.white.withOpacity(0.5), // メインの雨粒
+      Colors.white.withOpacity(0.3), // 少し薄い雨
+      Colors.white.withOpacity(0.1), // 背景に溶け込む雨
     ],
 
     drawType: EffectDrawType.rain,

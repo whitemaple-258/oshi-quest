@@ -77,15 +77,7 @@ enum GachaItemType {
 }
 
 // エフェクトの種類
-enum EffectType {
-  none,
-  cherry,
-  ember,
-  bubble,
-  rain,
-  lightning,
-  snow,
-}
+enum EffectType { none, cherry, ember, bubble, rain, lightning, snow }
 
 // --- Tables ---
 class Players extends Table {
@@ -206,6 +198,16 @@ class BossResults extends Table {
   List<String> get customConstraints => ['UNIQUE(boss_type, period_key)'];
 }
 
+// ご褒美アイテムテーブル
+class RewardItems extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get title => text()(); // ご褒美名（例: ゲーム1時間）
+  IntColumn get cost => integer()(); // 必要ジェム数
+  TextColumn get iconData =>
+      text().withDefault(const Constant('card_giftcard'))(); // アイコン名（今回は簡易的にデフォルト使用）
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 @DriftDatabase(
   tables: [
     Players,
@@ -216,13 +218,14 @@ class BossResults extends Table {
     PartyMembers,
     UserSettings,
     BossResults,
+    RewardItems,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -239,8 +242,9 @@ class AppDatabase extends _$AppDatabase {
         );
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // v7までのマイグレーションは複雑なので、開発中は再インストール推奨
-        await m.createAll();
+        if (from < 9) {
+          await m.createTable(rewardItems);
+        }
       },
     );
   }

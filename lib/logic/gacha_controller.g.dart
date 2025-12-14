@@ -6,7 +6,7 @@ part of 'gacha_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$gachaControllerHash() => r'11b7c2b2fb5eaa2632a4e697d208d4e3059af9ff';
+String _$gachaControllerHash() => r'c90e45ee439faeeafe5f15e39be6e32d3cca8a0a';
 
 /// See also [GachaController].
 @ProviderFor(GachaController)
