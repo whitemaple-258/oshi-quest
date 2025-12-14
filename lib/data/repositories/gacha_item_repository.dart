@@ -541,7 +541,20 @@ class GachaItemRepository {
     )..where((t) => t.id.equals(id))).write(GachaItemsCompanion(title: Value(newTitle)));
   }
 
+// お気に入り切り替え
+  Future<void> toggleFavorite(int id) async {
+    // 1. 対象のアイテムを取得
+    final item = await (_db.select(_db.gachaItems)..where((tbl) => tbl.id.equals(id))).getSingle();
+    
+    // 2. isFavoriteを反転して更新
+    // Driftでは更新に Companion を使用します
+    await (_db.update(_db.gachaItems)..where((tbl) => tbl.id.equals(id))).write(
+      GachaItemsCompanion(
+        isFavorite: Value(!item.isFavorite),
+      ),
+    );
+  }
+
   Stream<List<GachaItem>> watchAllItems() => watchMyItems();
   Future<List<GachaItem>> getAllItems() async => await (_db.select(_db.gachaItems)).get();
-  Future<void> unlockItem(int id) async {}
 }

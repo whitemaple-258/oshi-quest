@@ -1230,6 +1230,21 @@ class $GachaItemsTable extends GachaItems
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+    'is_favorite',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1255,6 +1270,7 @@ class $GachaItemsTable extends GachaItems
     sourceId,
     createdAt,
     unlockedAt,
+    isFavorite,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1386,6 +1402,12 @@ class $GachaItemsTable extends GachaItems
         unlockedAt.isAcceptableOrUnknown(data['unlocked_at']!, _unlockedAtMeta),
       );
     }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+        _isFavoriteMeta,
+        isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
+      );
+    }
     return context;
   }
 
@@ -1497,6 +1519,10 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.dateTime,
         data['${effectivePrefix}unlocked_at'],
       ),
+      isFavorite: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_favorite'],
+      )!,
     );
   }
 
@@ -1541,6 +1567,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int? sourceId;
   final DateTime createdAt;
   final DateTime? unlockedAt;
+  final bool isFavorite;
   const GachaItem({
     required this.id,
     required this.imagePath,
@@ -1565,6 +1592,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     this.sourceId,
     required this.createdAt,
     this.unlockedAt,
+    required this.isFavorite,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1616,6 +1644,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     if (!nullToAbsent || unlockedAt != null) {
       map['unlocked_at'] = Variable<DateTime>(unlockedAt);
     }
+    map['is_favorite'] = Variable<bool>(isFavorite);
     return map;
   }
 
@@ -1650,6 +1679,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       unlockedAt: unlockedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(unlockedAt),
+      isFavorite: Value(isFavorite),
     );
   }
 
@@ -1692,6 +1722,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       sourceId: serializer.fromJson<int?>(json['sourceId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       unlockedAt: serializer.fromJson<DateTime?>(json['unlockedAt']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
     );
   }
   @override
@@ -1731,6 +1762,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'sourceId': serializer.toJson<int?>(sourceId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'unlockedAt': serializer.toJson<DateTime?>(unlockedAt),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
     };
   }
 
@@ -1758,6 +1790,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     Value<int?> sourceId = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> unlockedAt = const Value.absent(),
+    bool? isFavorite,
   }) => GachaItem(
     id: id ?? this.id,
     imagePath: imagePath ?? this.imagePath,
@@ -1784,6 +1817,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
     createdAt: createdAt ?? this.createdAt,
     unlockedAt: unlockedAt.present ? unlockedAt.value : this.unlockedAt,
+    isFavorite: isFavorite ?? this.isFavorite,
   );
   GachaItem copyWithCompanion(GachaItemsCompanion data) {
     return GachaItem(
@@ -1824,6 +1858,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       unlockedAt: data.unlockedAt.present
           ? data.unlockedAt.value
           : this.unlockedAt,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
     );
   }
 
@@ -1852,7 +1889,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('isSource: $isSource, ')
           ..write('sourceId: $sourceId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('unlockedAt: $unlockedAt')
+          ..write('unlockedAt: $unlockedAt, ')
+          ..write('isFavorite: $isFavorite')
           ..write(')'))
         .toString();
   }
@@ -1882,6 +1920,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     sourceId,
     createdAt,
     unlockedAt,
+    isFavorite,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1909,7 +1948,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.isSource == this.isSource &&
           other.sourceId == this.sourceId &&
           other.createdAt == this.createdAt &&
-          other.unlockedAt == this.unlockedAt);
+          other.unlockedAt == this.unlockedAt &&
+          other.isFavorite == this.isFavorite);
 }
 
 class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
@@ -1936,6 +1976,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int?> sourceId;
   final Value<DateTime> createdAt;
   final Value<DateTime?> unlockedAt;
+  final Value<bool> isFavorite;
   const GachaItemsCompanion({
     this.id = const Value.absent(),
     this.imagePath = const Value.absent(),
@@ -1960,6 +2001,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.sourceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
+    this.isFavorite = const Value.absent(),
   });
   GachaItemsCompanion.insert({
     this.id = const Value.absent(),
@@ -1985,6 +2027,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.sourceId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
+    this.isFavorite = const Value.absent(),
   }) : imagePath = Value(imagePath),
        title = Value(title),
        effectType = Value(effectType);
@@ -2012,6 +2055,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<int>? sourceId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? unlockedAt,
+    Expression<bool>? isFavorite,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2037,6 +2081,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (sourceId != null) 'source_id': sourceId,
       if (createdAt != null) 'created_at': createdAt,
       if (unlockedAt != null) 'unlocked_at': unlockedAt,
+      if (isFavorite != null) 'is_favorite': isFavorite,
     });
   }
 
@@ -2064,6 +2109,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<int?>? sourceId,
     Value<DateTime>? createdAt,
     Value<DateTime?>? unlockedAt,
+    Value<bool>? isFavorite,
   }) {
     return GachaItemsCompanion(
       id: id ?? this.id,
@@ -2089,6 +2135,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       sourceId: sourceId ?? this.sourceId,
       createdAt: createdAt ?? this.createdAt,
       unlockedAt: unlockedAt ?? this.unlockedAt,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 
@@ -2174,6 +2221,9 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (unlockedAt.present) {
       map['unlocked_at'] = Variable<DateTime>(unlockedAt.value);
     }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
     return map;
   }
 
@@ -2202,7 +2252,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('isSource: $isSource, ')
           ..write('sourceId: $sourceId, ')
           ..write('createdAt: $createdAt, ')
-          ..write('unlockedAt: $unlockedAt')
+          ..write('unlockedAt: $unlockedAt, ')
+          ..write('isFavorite: $isFavorite')
           ..write(')'))
         .toString();
   }
@@ -5793,6 +5844,7 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<int?> sourceId,
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
+      Value<bool> isFavorite,
     });
 typedef $$GachaItemsTableUpdateCompanionBuilder =
     GachaItemsCompanion Function({
@@ -5819,6 +5871,7 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<int?> sourceId,
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
+      Value<bool> isFavorite,
     });
 
 final class $$GachaItemsTableReferences
@@ -5997,6 +6050,11 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> partyDecksRefs(
     Expression<bool> Function($$PartyDecksTableFilterComposer f) f,
   ) {
@@ -6171,6 +6229,11 @@ class $$GachaItemsTableOrderingComposer
     column: $table.unlockedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GachaItemsTableAnnotationComposer
@@ -6263,6 +6326,11 @@ class $$GachaItemsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get unlockedAt => $composableBuilder(
     column: $table.unlockedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
     builder: (column) => column,
   );
 
@@ -6368,6 +6436,7 @@ class $$GachaItemsTableTableManager
                 Value<int?> sourceId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
               }) => GachaItemsCompanion(
                 id: id,
                 imagePath: imagePath,
@@ -6392,6 +6461,7 @@ class $$GachaItemsTableTableManager
                 sourceId: sourceId,
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
+                isFavorite: isFavorite,
               ),
           createCompanionCallback:
               ({
@@ -6418,6 +6488,7 @@ class $$GachaItemsTableTableManager
                 Value<int?> sourceId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
+                Value<bool> isFavorite = const Value.absent(),
               }) => GachaItemsCompanion.insert(
                 id: id,
                 imagePath: imagePath,
@@ -6442,6 +6513,7 @@ class $$GachaItemsTableTableManager
                 sourceId: sourceId,
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
+                isFavorite: isFavorite,
               ),
           withReferenceMapper: (p0) => p0
               .map(

@@ -73,6 +73,20 @@ class GachaController extends _$GachaController {
     }
   }
 
+  // ✅ お気に入り切り替え
+  Future<void> toggleFavorite(int itemId) async {
+    try {
+      final repository = ref.read(gachaItemRepositoryProvider);
+      await repository.toggleFavorite(itemId);
+      
+      // リストを再読込してUIに反映
+      ref.invalidate(myItemsProvider);
+    } catch (e) {
+      // エラーハンドリング (必要であれば)
+      print('Favorite Error: $e');
+    }
+  }
+
   /// 単体売却（価格計算はここで行う：UI側で確認ダイアログに価格を出す等の都合上）
   Future<bool> sellItem(GachaItem item) async {
     state = const AsyncValue.loading();

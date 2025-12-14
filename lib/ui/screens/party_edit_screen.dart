@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/party_controller.dart';
-import '../widgets/sparkle_effect_overlay.dart';
-import 'bulk_sell_screen.dart';
+import '../../logic/gacha_controller.dart';
 import 'character_detail_screen.dart';
+import 'bulk_sell_screen.dart';
 
 class PartyEditScreen extends ConsumerStatefulWidget {
   const PartyEditScreen({super.key});
@@ -17,9 +17,12 @@ class PartyEditScreen extends ConsumerStatefulWidget {
 }
 
 class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
+  // フィルター状態
   final Set<Rarity> _selectedRarities = {Rarity.n, Rarity.r, Rarity.sr, Rarity.ssr};
-  int? _selectedSlotIndex; // 現在選択中のスロット
+  bool _showFavoritesOnly = false;
+  int? _selectedSlotIndex;
 
+  // フィルターダイアログ
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -31,8 +34,18 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('表示するレアリティを選択'),
-                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('お気に入りのみ表示'),
+                    secondary: const Icon(Icons.favorite, color: Colors.pinkAccent),
+                    value: _showFavoritesOnly,
+                    onChanged: (val) {
+                      setState(() => _showFavoritesOnly = val);
+                      this.setState(() {}); 
+                    },
+                  ),
+                  const Divider(),
+                  const Text('レアリティ'),
+                  const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     children: Rarity.values.map((rarity) {
@@ -50,7 +63,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                               _selectedRarities.remove(rarity);
                             }
                           });
-                          this.setState(() {});
+                          this.setState(() {}); 
                         },
                       );
                     }).toList(),
@@ -60,12 +73,18 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    setState(() => _selectedRarities.addAll(Rarity.values));
+                    setState(() {
+                      _selectedRarities.addAll(Rarity.values);
+                      _showFavoritesOnly = false;
+                    });
                     this.setState(() {});
                   },
-                  child: const Text('全表示'),
+                  child: const Text('リセット'),
                 ),
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('閉じる')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('閉じる'),
+                ),
               ],
             );
           },
@@ -84,6 +103,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
     final allItems = myItemsAsync.value ?? [];
 
     final displayItems = allItems.where((item) {
+      if (_showFavoritesOnly && !item.isFavorite) return false;
       return _selectedRarities.contains(item.rarity);
     }).toList();
 
@@ -94,7 +114,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: _selectedRarities.length < 4 ? Colors.amber : null,
+              color: (_selectedRarities.length < 4 || _showFavoritesOnly) ? Colors.amber : null,
             ),
             tooltip: '絞り込み',
             onPressed: _showFilterDialog,
@@ -102,7 +122,10 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'sell') {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const BulkSellScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BulkSellScreen()),
+                );
               }
             },
             itemBuilder: (context) => [
@@ -122,66 +145,38 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
       ),
       body: Column(
         children: [
-          // --- 1. パーティスロット (左メイン/右サブ) ---
+          // --- 1. パーティスロット ---
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               color: Colors.blueGrey[900],
-              boxShadow: const [
-                BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 4)),
-              ],
+              boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 4))],
             ),
             child: Column(
               children: [
-                // 合計ステータス
                 _buildTotalBonus(activeParty),
                 const SizedBox(height: 12),
-
-                // スロット配置
                 SizedBox(
-                  height: 250, // 高さを固定
+                  height: 250,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 左: メイン (9:16)
                       Expanded(
                         flex: 5,
                         child: Column(
                           children: [
-                            const Text(
-                              'MAIN PARTNER',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.pinkAccent,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            const Text('MAIN PARTNER', style: TextStyle(fontSize: 10, color: Colors.pinkAccent, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Expanded(
-                              child: _buildSlot(
-                                0,
-                                activeParty[0],
-                                aspectRatio: 9 / 16,
-                                isMain: true,
-                              ),
-                            ),
+                            Expanded(child: _buildSlot(0, activeParty[0], isMain: true)),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // 右: サブ (グリッド)
                       Expanded(
                         flex: 5,
                         child: Column(
                           children: [
-                            const Text(
-                              'SUPPORTERS',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.blueAccent,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            const Text('SUPPORTERS', style: TextStyle(fontSize: 10, color: Colors.blueAccent, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
                             Expanded(
                               child: Column(
@@ -189,13 +184,9 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                                   Expanded(
                                     child: Row(
                                       children: [
-                                        Expanded(
-                                          child: _buildSlot(1, activeParty[1], aspectRatio: 9 / 16),
-                                        ),
+                                        Expanded(child: _buildSlot(1, activeParty[1])),
                                         const SizedBox(width: 8),
-                                        Expanded(
-                                          child: _buildSlot(2, activeParty[2], aspectRatio: 9 / 16),
-                                        ),
+                                        Expanded(child: _buildSlot(2, activeParty[2])),
                                       ],
                                     ),
                                   ),
@@ -203,13 +194,9 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                                   Expanded(
                                     child: Row(
                                       children: [
-                                        Expanded(
-                                          child: _buildSlot(3, activeParty[3], aspectRatio: 9 / 16),
-                                        ),
+                                        Expanded(child: _buildSlot(3, activeParty[3])),
                                         const SizedBox(width: 8),
-                                        Expanded(
-                                          child: _buildSlot(4, activeParty[4], aspectRatio: 9 / 16),
-                                        ),
+                                        Expanded(child: _buildSlot(4, activeParty[4])),
                                       ],
                                     ),
                                   ),
@@ -236,17 +223,14 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                   ? 'キャラをタップして ${(_selectedSlotIndex! == 0) ? "MAIN" : "SUB ${_selectedSlotIndex!}"} に装備'
                   : 'スロットをタップして選択してください',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: _selectedSlotIndex != null ? Colors.cyanAccent : Colors.grey,
-              ),
+              style: TextStyle(fontSize: 12, color: _selectedSlotIndex != null ? Colors.cyanAccent : Colors.grey),
             ),
           ),
 
           // --- 2. 所持キャラリスト ---
           Expanded(
             child: displayItems.isEmpty
-                ? const Center(child: Text('キャラクターがいません'))
+                ? const Center(child: Text('条件に合うキャラクターがいません'))
                 : GridView.builder(
                     padding: const EdgeInsets.all(12),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -258,40 +242,34 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                     itemCount: displayItems.length,
                     itemBuilder: (context, index) {
                       final item = displayItems[index];
+                      // 装備中かどうか判定
                       final isEquipped = activeParty.values.any((e) => e.id == item.id);
-
+                      
                       return GestureDetector(
+                        // タップ: 装備/解除
                         onTap: () {
                           if (_selectedSlotIndex != null) {
                             HapticFeedback.selectionClick();
-                            // スロットが選択されていれば装備実行
                             partyController.equipItem(_selectedSlotIndex!, item.id);
                           } else {
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('先に上のスロットをタップして選択してください'),
-                                duration: Duration(milliseconds: 1000),
-                              ),
-                            );
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('先に上のスロットをタップして選択してください'), duration: Duration(milliseconds: 1000)));
                           }
                         },
-                        child: LongPressDraggable<GachaItem>(
-                          data: item,
-                          feedback: Opacity(
-                            opacity: 0.8,
-                            child: SizedBox(
-                              width: 80,
-                              height: 80,
-                              child: Image.file(File(item.imagePath), fit: BoxFit.cover),
+                        // ✅ 長押し: 詳細画面へ遷移 (ドラッグ廃止)
+                        onLongPress: () {
+                          HapticFeedback.mediumImpact();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CharacterDetailScreen(
+                                items: displayItems,
+                                initialIndex: index,
+                              ),
                             ),
-                          ),
-                          childWhenDragging: Opacity(
-                            opacity: 0.3,
-                            child: _buildListItem(item, isEquipped),
-                          ),
-                          child: _buildListItem(item, isEquipped),
-                        ),
+                          );
+                        },
+                        child: _buildListItem(item, isEquipped),
                       );
                     },
                   ),
@@ -303,72 +281,52 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
 
   // --- Widgets ---
 
-  Widget _buildSlot(int slotId, GachaItem? item, {double aspectRatio = 1.0, bool isMain = false}) {
+  Widget _buildSlot(int slotId, GachaItem? item, {bool isMain = false}) {
     final isSelected = _selectedSlotIndex == slotId;
     final partyController = ref.read(partyControllerProvider.notifier);
 
-    return DragTarget<GachaItem>(
-      onWillAcceptWithDetails: (_) => true,
-      onAcceptWithDetails: (details) {
-        partyController.equipItem(slotId, details.data.id);
-        setState(() => _selectedSlotIndex = slotId);
+    // ✅ DragTarget を削除し、シンプルな GestureDetector に変更
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        setState(() {
+          if (_selectedSlotIndex == slotId) {
+            if (item != null) partyController.unequipItem(slotId);
+            else _selectedSlotIndex = null;
+          } else {
+            _selectedSlotIndex = slotId;
+          }
+        });
       },
-      builder: (context, candidateData, rejectedData) {
-        return GestureDetector(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            setState(() {
-              if (_selectedSlotIndex == slotId) {
-                // 再タップで解除
-                if (item != null)
-                  partyController.unequipItem(slotId);
-                else
-                  _selectedSlotIndex = null;
-              } else {
-                // 選択
-                _selectedSlotIndex = slotId;
-              }
-            });
-          },
-          onLongPress: item == null
-              ? null
-              : () {
-                  HapticFeedback.mediumImpact();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => CharacterDetailScreen.single(item: item)),
-                  );
-                },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: Colors.black38,
-              border: Border.all(
-                color: isSelected
-                    ? Colors.cyanAccent
-                    : (candidateData.isNotEmpty
-                          ? Colors.white
-                          : (isMain ? Colors.pinkAccent : Colors.blueAccent)),
-                width: isSelected ? 3 : 1,
-              ),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: isSelected
-                  ? [BoxShadow(color: Colors.cyanAccent.withOpacity(0.4), blurRadius: 10)]
-                  : null,
-            ),
-            child: item == null
-                ? Icon(Icons.add, color: isSelected ? Colors.cyanAccent : Colors.white24)
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Image.file(
-                      File(item.imagePath),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.error),
-                    ),
-                  ),
+      onLongPress: item == null ? null : () {
+        HapticFeedback.mediumImpact();
+        Navigator.push(context, MaterialPageRoute(builder: (_) => CharacterDetailScreen.single(item: item)));
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: Colors.black38,
+          border: Border.all(
+            color: isSelected 
+                ? Colors.cyanAccent 
+                : (item != null ? Colors.white : (isMain ? Colors.pinkAccent : Colors.blueAccent)),
+            width: isSelected ? 3 : 1,
           ),
-        );
-      },
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected ? [BoxShadow(color: Colors.cyanAccent.withOpacity(0.4), blurRadius: 10)] : null,
+        ),
+        child: item == null
+            ? Icon(Icons.add, color: isSelected ? Colors.cyanAccent : Colors.white24)
+            : ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.file(
+                  File(item.imagePath),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.error),
+                ),
+              ),
+      ),
     );
   }
 
@@ -379,45 +337,35 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: _getRarityColor(item.rarity), width: 2),
+            border: Border.all(
+              color: item.isFavorite ? Colors.pinkAccent : _getRarityColor(item.rarity), 
+              width: item.isFavorite ? 3 : 2
+            ),
             color: Colors.black,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: Image.file(
-              File(item.imagePath),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image, size: 16)),
-            ),
+            child: Image.file(File(item.imagePath), fit: BoxFit.cover, errorBuilder: (_,__,___) => const Center(child: Icon(Icons.broken_image, size: 16))),
           ),
         ),
         if (isEquipped)
           Container(
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(6),
-            ),
+            decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(6)),
             child: const Center(child: Icon(Icons.check, color: Colors.greenAccent, size: 32)),
           ),
         Positioned(
-          top: 0,
-          left: 0,
+          top: 0, left: 0,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            decoration: BoxDecoration(
-              color: _getRarityColor(item.rarity),
-              borderRadius: const BorderRadius.only(bottomRight: Radius.circular(6)),
-            ),
-            child: Text(
-              item.rarity.name.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            decoration: BoxDecoration(color: _getRarityColor(item.rarity), borderRadius: const BorderRadius.only(bottomRight: Radius.circular(6))),
+            child: Text(item.rarity.name.toUpperCase(), style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
           ),
         ),
+        if (item.isFavorite)
+          const Positioned(
+            bottom: 2, right: 2,
+            child: Icon(Icons.favorite, color: Colors.pinkAccent, size: 14),
+          ),
       ],
     );
   }
@@ -446,10 +394,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
   Widget _buildStatText(String label, int val, Color color) {
     return Column(
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
-        ),
+        Text(label, style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold)),
         Text('+$val', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
@@ -457,14 +402,10 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
 
   Color _getRarityColor(Rarity r) {
     switch (r) {
-      case Rarity.n:
-        return Colors.grey;
-      case Rarity.r:
-        return Colors.blueAccent;
-      case Rarity.sr:
-        return Colors.purpleAccent;
-      case Rarity.ssr:
-        return const Color(0xFFFFD700);
+      case Rarity.n: return Colors.grey;
+      case Rarity.r: return Colors.blueAccent;
+      case Rarity.sr: return Colors.purpleAccent;
+      case Rarity.ssr: return const Color(0xFFFFD700);
     }
   }
 }

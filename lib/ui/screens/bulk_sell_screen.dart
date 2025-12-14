@@ -4,41 +4,109 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/gacha_controller.dart';
-import '../widgets/sparkle_effect_overlay.dart';
 
 class BulkSellScreen extends ConsumerStatefulWidget {
   const BulkSellScreen({super.key});
+
+  // ✅ 追加: 他の画面から呼び出せる価格計算ロジック
+  static int getSellPrice(Rarity rarity) {
+    switch (rarity) {
+      case Rarity.n: return 50;
+      case Rarity.r: return 150;
+      case Rarity.sr: return 500;
+      case Rarity.ssr: return 2000;
+    }
+  }
+
+  // ✅ 追加: 他の画面から呼び出せる「単発売却ダイアログ」
+  static Future<void> showSingleSellDialog(BuildContext context, WidgetRef ref, GachaItem item) async {
+    // お気に入りチェック
+    if (item.isFavorite) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('お気に入り登録されているため売却できません')),
+      );
+      return;
+    }
+
+    final price = getSellPrice(item.rarity);
+
+    // ダイアログ表示
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('売却確認'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('「${item.title}」を売却しますか？'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Text('獲得ジェム: '),
+                const Icon(Icons.diamond, size: 16, color: Colors.cyanAccent),
+                Text(' $price', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text('※この操作は取り消せません', style: TextStyle(fontSize: 12, color: Colors.redAccent)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('売却する'),
+          ),
+        ],
+      ),
+    );
+
+    // 売却実行
+    if (result == true) {
+      try {
+        // コントローラー呼び出し
+        final success = await ref.read(gachaControllerProvider.notifier).sellItem(item);
+        
+        if (context.mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('売却しました (+$price 💎)')),
+            );
+            // 呼び出し元が詳細画面なら画面を閉じる
+            Navigator.of(context).pop(); 
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('装備中のため売却できません')),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('エラー: $e')));
+        }
+      }
+    }
+  }
 
   @override
   ConsumerState<BulkSellScreen> createState() => _BulkSellScreenState();
 }
 
 class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
-  // 選択されたアイテムIDの集合
   final Set<int> _selectedIds = {};
-
-  // 売却価格の定義 (Repositoryと合わせる)
-  int _getPrice(Rarity rarity) {
-    switch (rarity) {
-      case Rarity.n:
-        return 50;
-      case Rarity.r:
-        return 150;
-      case Rarity.sr:
-        return 500;
-      case Rarity.ssr:
-        return 2000;
-    }
-  }
 
   // 一括選択ロジック
   void _selectByRarity(List<GachaItem> items, Rarity rarity, Set<int> equippedIds) {
-    final targets = items
-        .where((item) => item.rarity == rarity && !equippedIds.contains(item.id))
-        .map((e) => e.id);
+    final targets = items.where((item) => 
+      item.rarity == rarity && !equippedIds.contains(item.id)
+    ).map((e) => e.id);
 
     setState(() {
-      // 既に全て選択済みなら解除、そうでなければ追加
       if (_selectedIds.containsAll(targets)) {
         _selectedIds.removeAll(targets);
       } else {
@@ -47,17 +115,28 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
     });
   }
 
-  // 売却実行
+  // 一括売却実行
   Future<void> _executeSell() async {
     if (_selectedIds.isEmpty) return;
+    
+    // 現在の所持アイテムリストを取得して価格計算
+    final allItems = ref.read(myItemsProvider).value ?? [];
+    int totalGain = 0;
+    for (var id in _selectedIds) {
+      final item = allItems.firstWhere((e) => e.id == id, orElse: () => allItems.first);
+      totalGain += BulkSellScreen.getSellPrice(item.rarity);
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('売却確認'),
-        content: Text('${_selectedIds.length}体のキャラを売却します。\nこの操作は取り消せません。'),
+        title: const Text('一括売却確認'),
+        content: Text('${_selectedIds.length}体のキャラを売却します。\n獲得予定: $totalGain 💎\nこの操作は取り消せません。'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('キャンセル')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('キャンセル'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -70,12 +149,11 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
     if (confirmed == true) {
       try {
         await ref.read(gachaControllerProvider.notifier).sellItems(_selectedIds.toList());
-
         if (mounted) {
-          setState(() {
-            _selectedIds.clear();
-          });
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('売却しました')));
+          setState(() => _selectedIds.clear());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('売却しました (+$totalGain 💎)')),
+          );
         }
       } catch (e) {
         if (mounted) {
@@ -87,7 +165,6 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // データ取得
     final myItemsAsync = ref.watch(myItemsProvider);
     final partyAsync = ref.watch(activePartyProvider);
 
@@ -95,7 +172,6 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
       appBar: AppBar(
         title: const Text('一括売却 (整理)'),
         actions: [
-          // 選択解除ボタン
           if (_selectedIds.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.deselect),
@@ -108,60 +184,41 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (items) {
-          // 装備中のIDリストを作成
           final equippedIds = <int>{};
           partyAsync.whenData((party) {
             party.forEach((slot, item) => equippedIds.add(item.id));
           });
 
-          if (items.isEmpty) {
-            return const Center(child: Text('売却できるキャラがいません'));
-          }
+          if (items.isEmpty) return const Center(child: Text('売却できるキャラがいません'));
 
           // 合計金額計算
           int totalGain = 0;
           for (var item in items) {
             if (_selectedIds.contains(item.id)) {
-              totalGain += _getPrice(item.rarity);
+              totalGain += BulkSellScreen.getSellPrice(item.rarity); // ✅ staticメソッド使用
             }
           }
 
           return Column(
             children: [
-              // --- フィルターボタン ---
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.all(8),
                 child: Row(
                   children: [
                     const Text('一括選択: '),
-                    _FilterChip(
-                      label: 'N',
-                      color: Colors.grey,
-                      onTap: () => _selectByRarity(items, Rarity.n, equippedIds),
-                    ),
-                    _FilterChip(
-                      label: 'R',
-                      color: Colors.blueAccent,
-                      onTap: () => _selectByRarity(items, Rarity.r, equippedIds),
-                    ),
-                    _FilterChip(
-                      label: 'SR',
-                      color: Colors.purpleAccent,
-                      onTap: () => _selectByRarity(items, Rarity.sr, equippedIds),
-                    ),
-                    // SSRは誤操作防止のため一括選択ボタンを置かない、等の配慮も可
+                    _FilterChip(label: 'N', color: Colors.grey, onTap: () => _selectByRarity(items, Rarity.n, equippedIds)),
+                    _FilterChip(label: 'R', color: Colors.blueAccent, onTap: () => _selectByRarity(items, Rarity.r, equippedIds)),
+                    _FilterChip(label: 'SR', color: Colors.purpleAccent, onTap: () => _selectByRarity(items, Rarity.sr, equippedIds)),
                   ],
                 ),
               ),
               const Divider(height: 1),
-
-              // --- アイテムグリッド ---
               Expanded(
                 child: GridView.builder(
                   padding: const EdgeInsets.all(8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // 小さめにたくさん表示
+                    crossAxisCount: 4,
                     childAspectRatio: 0.8,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
@@ -173,8 +230,8 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
                     final isSelected = _selectedIds.contains(item.id);
 
                     return GestureDetector(
-                      onTap: isEquipped
-                          ? null // 装備中は選択不可
+                      onTap: isEquipped 
+                          ? null 
                           : () {
                               setState(() {
                                 if (isSelected) {
@@ -189,56 +246,30 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            // 画像
                             ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: Image.file(
                                 File(item.imagePath),
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(color: Colors.grey),
+                                errorBuilder: (_,__,___) => Container(color: Colors.grey),
                               ),
                             ),
-
-                            // 装備中バッジ
                             if (isEquipped)
                               Container(
                                 color: Colors.black54,
-                                child: const Center(
-                                  child: Text(
-                                    '装備中',
-                                    style: TextStyle(color: Colors.white, fontSize: 10),
-                                  ),
-                                ),
+                                child: const Center(child: Text('装備中', style: TextStyle(color: Colors.white, fontSize: 10))),
                               ),
-
-                            // 選択中オーバーレイ
                             if (isSelected)
                               Container(
                                 color: Colors.black45,
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: Colors.greenAccent,
-                                    size: 32,
-                                  ),
-                                ),
+                                child: const Center(child: Icon(Icons.check_circle, color: Colors.greenAccent, size: 32)),
                               ),
-
-                            // レアリティ表示 (左上)
                             Positioned(
-                              top: 0,
-                              left: 0,
+                              top: 0, left: 0,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                                 color: Colors.black87,
-                                child: Text(
-                                  item.rarity.name.toUpperCase(),
-                                  style: TextStyle(
-                                    color: _getRarityColor(item.rarity),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                child: Text(item.rarity.name.toUpperCase(), style: TextStyle(color: _getRarityColor(item.rarity), fontSize: 10, fontWeight: FontWeight.bold)),
                               ),
                             ),
                           ],
@@ -248,15 +279,11 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
                   },
                 ),
               ),
-
-              // --- フッター (実行エリア) ---
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).scaffoldBackgroundColor,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, -2)),
-                  ],
+                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, -2))],
                 ),
                 child: Row(
                   children: [
@@ -268,10 +295,7 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
                           children: [
                             const Text('獲得: '),
                             const Icon(Icons.diamond, size: 16, color: Colors.cyanAccent),
-                            Text(
-                              ' $totalGain',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                            ),
+                            Text(' $totalGain', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                           ],
                         ),
                       ],
@@ -281,10 +305,7 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
                       onPressed: _selectedIds.isEmpty ? null : _executeSell,
                       icon: const Icon(Icons.sell),
                       label: const Text('売却する'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white,
-                      ),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
                     ),
                   ],
                 ),
@@ -298,14 +319,10 @@ class _BulkSellScreenState extends ConsumerState<BulkSellScreen> {
 
   Color _getRarityColor(Rarity r) {
     switch (r) {
-      case Rarity.n:
-        return Colors.white;
-      case Rarity.r:
-        return Colors.blueAccent;
-      case Rarity.sr:
-        return Colors.purpleAccent;
-      case Rarity.ssr:
-        return Colors.amber;
+      case Rarity.n: return Colors.white;
+      case Rarity.r: return Colors.blueAccent;
+      case Rarity.sr: return Colors.purpleAccent;
+      case Rarity.ssr: return Colors.amber;
     }
   }
 }
@@ -314,9 +331,7 @@ class _FilterChip extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-
   const _FilterChip({required this.label, required this.color, required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     return Padding(
