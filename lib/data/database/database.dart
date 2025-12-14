@@ -78,15 +78,13 @@ enum GachaItemType {
 
 // エフェクトの種類
 enum EffectType {
-  none(0),
-  fire(1),    // 炎のオーラ
-  water(2),   // 水の泡
-  thunder(3), // 雷光
-  light(4),   // 神々しい光
-  dark(5);    // 闇の波動
-
-  const EffectType(this.value);
-  final int value;
+  none,
+  cherry,
+  ember,
+  bubble,
+  rain,
+  lightning,
+  snow,
 }
 
 // --- Tables ---
@@ -114,8 +112,8 @@ class GachaItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get imagePath => text()();
   TextColumn get title => text()();
+  IntColumn get effectType => intEnum<EffectType>()();
   IntColumn get type => intEnum<GachaItemType>().withDefault(const Constant(0))();
-  IntColumn get effectType => intEnum<EffectType>().withDefault(const Constant(0))();
   IntColumn get rarity => intEnum<Rarity>().withDefault(Constant(Rarity.n.value))();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
@@ -134,6 +132,7 @@ class GachaItems extends Table {
   IntColumn get sourceId => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get unlockedAt => dateTime().nullable()();
+  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
 }
 
 class Habits extends Table {

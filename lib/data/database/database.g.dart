@@ -998,6 +998,15 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: true,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<EffectType, int> effectType =
+      GeneratedColumn<int>(
+        'effect_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<EffectType>($GachaItemsTable.$convertereffectType);
+  @override
   late final GeneratedColumnWithTypeConverter<GachaItemType, int> type =
       GeneratedColumn<int>(
         'type',
@@ -1007,16 +1016,6 @@ class $GachaItemsTable extends GachaItems
         requiredDuringInsert: false,
         defaultValue: const Constant(0),
       ).withConverter<GachaItemType>($GachaItemsTable.$convertertype);
-  @override
-  late final GeneratedColumnWithTypeConverter<EffectType, int> effectType =
-      GeneratedColumn<int>(
-        'effect_type',
-        aliasedName,
-        false,
-        type: DriftSqlType.int,
-        requiredDuringInsert: false,
-        defaultValue: const Constant(0),
-      ).withConverter<EffectType>($GachaItemsTable.$convertereffectType);
   @override
   late final GeneratedColumnWithTypeConverter<Rarity, int> rarity =
       GeneratedColumn<int>(
@@ -1236,8 +1235,8 @@ class $GachaItemsTable extends GachaItems
     id,
     imagePath,
     title,
-    type,
     effectType,
+    type,
     rarity,
     isUnlocked,
     strBonus,
@@ -1408,16 +1407,16 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.string,
         data['${effectivePrefix}title'],
       )!,
-      type: $GachaItemsTable.$convertertype.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.int,
-          data['${effectivePrefix}type'],
-        )!,
-      ),
       effectType: $GachaItemsTable.$convertereffectType.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}effect_type'],
+        )!,
+      ),
+      type: $GachaItemsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}type'],
         )!,
       ),
       rarity: $GachaItemsTable.$converterrarity.fromSql(
@@ -1506,10 +1505,10 @@ class $GachaItemsTable extends GachaItems
     return $GachaItemsTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<GachaItemType, int, int> $convertertype =
-      const EnumIndexConverter<GachaItemType>(GachaItemType.values);
   static JsonTypeConverter2<EffectType, int, int> $convertereffectType =
       const EnumIndexConverter<EffectType>(EffectType.values);
+  static JsonTypeConverter2<GachaItemType, int, int> $convertertype =
+      const EnumIndexConverter<GachaItemType>(GachaItemType.values);
   static JsonTypeConverter2<Rarity, int, int> $converterrarity =
       const EnumIndexConverter<Rarity>(Rarity.values);
   static JsonTypeConverter2<SkillType, int, int> $converterskillType =
@@ -1522,8 +1521,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int id;
   final String imagePath;
   final String title;
-  final GachaItemType type;
   final EffectType effectType;
+  final GachaItemType type;
   final Rarity rarity;
   final bool isUnlocked;
   final int strBonus;
@@ -1546,8 +1545,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.id,
     required this.imagePath,
     required this.title,
-    required this.type,
     required this.effectType,
+    required this.type,
     required this.rarity,
     required this.isUnlocked,
     required this.strBonus,
@@ -1574,12 +1573,12 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['image_path'] = Variable<String>(imagePath);
     map['title'] = Variable<String>(title);
     {
-      map['type'] = Variable<int>($GachaItemsTable.$convertertype.toSql(type));
-    }
-    {
       map['effect_type'] = Variable<int>(
         $GachaItemsTable.$convertereffectType.toSql(effectType),
       );
+    }
+    {
+      map['type'] = Variable<int>($GachaItemsTable.$convertertype.toSql(type));
     }
     {
       map['rarity'] = Variable<int>(
@@ -1625,8 +1624,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       id: Value(id),
       imagePath: Value(imagePath),
       title: Value(title),
-      type: Value(type),
       effectType: Value(effectType),
+      type: Value(type),
       rarity: Value(rarity),
       isUnlocked: Value(isUnlocked),
       strBonus: Value(strBonus),
@@ -1663,11 +1662,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       id: serializer.fromJson<int>(json['id']),
       imagePath: serializer.fromJson<String>(json['imagePath']),
       title: serializer.fromJson<String>(json['title']),
-      type: $GachaItemsTable.$convertertype.fromJson(
-        serializer.fromJson<int>(json['type']),
-      ),
       effectType: $GachaItemsTable.$convertereffectType.fromJson(
         serializer.fromJson<int>(json['effectType']),
+      ),
+      type: $GachaItemsTable.$convertertype.fromJson(
+        serializer.fromJson<int>(json['type']),
       ),
       rarity: $GachaItemsTable.$converterrarity.fromJson(
         serializer.fromJson<int>(json['rarity']),
@@ -1702,11 +1701,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'id': serializer.toJson<int>(id),
       'imagePath': serializer.toJson<String>(imagePath),
       'title': serializer.toJson<String>(title),
-      'type': serializer.toJson<int>(
-        $GachaItemsTable.$convertertype.toJson(type),
-      ),
       'effectType': serializer.toJson<int>(
         $GachaItemsTable.$convertereffectType.toJson(effectType),
+      ),
+      'type': serializer.toJson<int>(
+        $GachaItemsTable.$convertertype.toJson(type),
       ),
       'rarity': serializer.toJson<int>(
         $GachaItemsTable.$converterrarity.toJson(rarity),
@@ -1739,8 +1738,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     int? id,
     String? imagePath,
     String? title,
-    GachaItemType? type,
     EffectType? effectType,
+    GachaItemType? type,
     Rarity? rarity,
     bool? isUnlocked,
     int? strBonus,
@@ -1763,8 +1762,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     id: id ?? this.id,
     imagePath: imagePath ?? this.imagePath,
     title: title ?? this.title,
-    type: type ?? this.type,
     effectType: effectType ?? this.effectType,
+    type: type ?? this.type,
     rarity: rarity ?? this.rarity,
     isUnlocked: isUnlocked ?? this.isUnlocked,
     strBonus: strBonus ?? this.strBonus,
@@ -1791,10 +1790,10 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       id: data.id.present ? data.id.value : this.id,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       title: data.title.present ? data.title.value : this.title,
-      type: data.type.present ? data.type.value : this.type,
       effectType: data.effectType.present
           ? data.effectType.value
           : this.effectType,
+      type: data.type.present ? data.type.value : this.type,
       rarity: data.rarity.present ? data.rarity.value : this.rarity,
       isUnlocked: data.isUnlocked.present
           ? data.isUnlocked.value
@@ -1834,8 +1833,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('id: $id, ')
           ..write('imagePath: $imagePath, ')
           ..write('title: $title, ')
-          ..write('type: $type, ')
           ..write('effectType: $effectType, ')
+          ..write('type: $type, ')
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
@@ -1863,8 +1862,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     id,
     imagePath,
     title,
-    type,
     effectType,
+    type,
     rarity,
     isUnlocked,
     strBonus,
@@ -1891,8 +1890,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.id == this.id &&
           other.imagePath == this.imagePath &&
           other.title == this.title &&
-          other.type == this.type &&
           other.effectType == this.effectType &&
+          other.type == this.type &&
           other.rarity == this.rarity &&
           other.isUnlocked == this.isUnlocked &&
           other.strBonus == this.strBonus &&
@@ -1917,8 +1916,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int> id;
   final Value<String> imagePath;
   final Value<String> title;
-  final Value<GachaItemType> type;
   final Value<EffectType> effectType;
+  final Value<GachaItemType> type;
   final Value<Rarity> rarity;
   final Value<bool> isUnlocked;
   final Value<int> strBonus;
@@ -1941,8 +1940,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.id = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.title = const Value.absent(),
-    this.type = const Value.absent(),
     this.effectType = const Value.absent(),
+    this.type = const Value.absent(),
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
@@ -1966,8 +1965,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.id = const Value.absent(),
     required String imagePath,
     required String title,
+    required EffectType effectType,
     this.type = const Value.absent(),
-    this.effectType = const Value.absent(),
     this.rarity = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
@@ -1987,13 +1986,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
   }) : imagePath = Value(imagePath),
-       title = Value(title);
+       title = Value(title),
+       effectType = Value(effectType);
   static Insertable<GachaItem> custom({
     Expression<int>? id,
     Expression<String>? imagePath,
     Expression<String>? title,
-    Expression<int>? type,
     Expression<int>? effectType,
+    Expression<int>? type,
     Expression<int>? rarity,
     Expression<bool>? isUnlocked,
     Expression<int>? strBonus,
@@ -2017,8 +2017,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (id != null) 'id': id,
       if (imagePath != null) 'image_path': imagePath,
       if (title != null) 'title': title,
-      if (type != null) 'type': type,
       if (effectType != null) 'effect_type': effectType,
+      if (type != null) 'type': type,
       if (rarity != null) 'rarity': rarity,
       if (isUnlocked != null) 'is_unlocked': isUnlocked,
       if (strBonus != null) 'str_bonus': strBonus,
@@ -2044,8 +2044,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<int>? id,
     Value<String>? imagePath,
     Value<String>? title,
-    Value<GachaItemType>? type,
     Value<EffectType>? effectType,
+    Value<GachaItemType>? type,
     Value<Rarity>? rarity,
     Value<bool>? isUnlocked,
     Value<int>? strBonus,
@@ -2069,8 +2069,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       id: id ?? this.id,
       imagePath: imagePath ?? this.imagePath,
       title: title ?? this.title,
-      type: type ?? this.type,
       effectType: effectType ?? this.effectType,
+      type: type ?? this.type,
       rarity: rarity ?? this.rarity,
       isUnlocked: isUnlocked ?? this.isUnlocked,
       strBonus: strBonus ?? this.strBonus,
@@ -2104,14 +2104,14 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (title.present) {
       map['title'] = Variable<String>(title.value);
     }
-    if (type.present) {
-      map['type'] = Variable<int>(
-        $GachaItemsTable.$convertertype.toSql(type.value),
-      );
-    }
     if (effectType.present) {
       map['effect_type'] = Variable<int>(
         $GachaItemsTable.$convertereffectType.toSql(effectType.value),
+      );
+    }
+    if (type.present) {
+      map['type'] = Variable<int>(
+        $GachaItemsTable.$convertertype.toSql(type.value),
       );
     }
     if (rarity.present) {
@@ -2183,8 +2183,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('id: $id, ')
           ..write('imagePath: $imagePath, ')
           ..write('title: $title, ')
-          ..write('type: $type, ')
           ..write('effectType: $effectType, ')
+          ..write('type: $type, ')
           ..write('rarity: $rarity, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
@@ -5773,8 +5773,8 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<int> id,
       required String imagePath,
       required String title,
+      required EffectType effectType,
       Value<GachaItemType> type,
-      Value<EffectType> effectType,
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
@@ -5799,8 +5799,8 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> imagePath,
       Value<String> title,
-      Value<GachaItemType> type,
       Value<EffectType> effectType,
+      Value<GachaItemType> type,
       Value<Rarity> rarity,
       Value<bool> isUnlocked,
       Value<int> strBonus,
@@ -5892,15 +5892,15 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<GachaItemType, GachaItemType, int> get type =>
-      $composableBuilder(
-        column: $table.type,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
   ColumnWithTypeConverterFilters<EffectType, EffectType, int> get effectType =>
       $composableBuilder(
         column: $table.effectType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<GachaItemType, GachaItemType, int> get type =>
+      $composableBuilder(
+        column: $table.type,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
@@ -6072,13 +6072,13 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get type => $composableBuilder(
-    column: $table.type,
+  ColumnOrderings<int> get effectType => $composableBuilder(
+    column: $table.effectType,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get effectType => $composableBuilder(
-    column: $table.effectType,
+  ColumnOrderings<int> get type => $composableBuilder(
+    column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6191,14 +6191,14 @@ class $$GachaItemsTableAnnotationComposer
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
   GeneratedColumnWithTypeConverter<EffectType, int> get effectType =>
       $composableBuilder(
         column: $table.effectType,
         builder: (column) => column,
       );
+
+  GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<Rarity, int> get rarity =>
       $composableBuilder(column: $table.rarity, builder: (column) => column);
@@ -6348,8 +6348,8 @@ class $$GachaItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> imagePath = const Value.absent(),
                 Value<String> title = const Value.absent(),
-                Value<GachaItemType> type = const Value.absent(),
                 Value<EffectType> effectType = const Value.absent(),
+                Value<GachaItemType> type = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
@@ -6372,8 +6372,8 @@ class $$GachaItemsTableTableManager
                 id: id,
                 imagePath: imagePath,
                 title: title,
-                type: type,
                 effectType: effectType,
+                type: type,
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
@@ -6398,8 +6398,8 @@ class $$GachaItemsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String imagePath,
                 required String title,
+                required EffectType effectType,
                 Value<GachaItemType> type = const Value.absent(),
-                Value<EffectType> effectType = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
@@ -6422,8 +6422,8 @@ class $$GachaItemsTableTableManager
                 id: id,
                 imagePath: imagePath,
                 title: title,
-                type: type,
                 effectType: effectType,
+                type: type,
                 rarity: rarity,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,

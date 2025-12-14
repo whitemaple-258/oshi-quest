@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../database/database.dart';
 import '../master_data/gacha_logic_master.dart';
-import '../master_data/frame_master_data.dart';
 import '../../logic/gacha_config_controller.dart';
 
 class GachaItemRepository {
@@ -41,56 +38,6 @@ class GachaItemRepository {
       ],
     );
     return croppedFile?.path;
-  }
-
-  // --- 1. マスターデータからフレームを一括登録 ---
-  Future<void> seedFramesFromMasterData() async {
-    for (final def in defaultFrames) {
-      final exists =
-          await (_db.select(_db.gachaItems)
-                ..where((t) => t.title.equals(def.title))
-                ..where((t) => t.type.equals(GachaItemType.frame.index))
-                ..where((t) => t.isSource.equals(true)))
-              .getSingleOrNull();
-
-      if (exists != null) continue;
-
-      try {
-        final ByteData data = await rootBundle.load(def.assetPath);
-        final Uint8List bytes = data.buffer.asUint8List();
-
-        final appDir = await getApplicationDocumentsDirectory();
-        final imagesDir = Directory(p.join(appDir.path, 'oshi_images'));
-        if (!await imagesDir.exists()) await imagesDir.create(recursive: true);
-
-        final filename = p.basename(def.assetPath);
-        final newPath = p.join(imagesDir.path, 'seeded_$filename');
-        final file = File(newPath);
-        await file.writeAsBytes(bytes);
-
-        await _db
-            .into(_db.gachaItems)
-            .insert(
-              GachaItemsCompanion.insert(
-                imagePath: newPath,
-                title: def.title,
-                type: const Value(GachaItemType.frame),
-                rarity: Value(def.rarity),
-                isUnlocked: const Value(false),
-                isSource: const Value(true),
-                sourceId: const Value(null),
-                strBonus: Value(def.strBonus),
-                intBonus: Value(def.intBonus),
-                vitBonus: Value(def.vitBonus),
-                luckBonus: Value(def.luckBonus),
-                chaBonus: Value(def.chaBonus),
-                bondLevel: const Value(0),
-              ),
-            );
-      } catch (e) {
-        print('❌ フレーム登録失敗 (${def.title}): $e');
-      }
-    }
   }
 
   // --- 2. 画像登録 (元ネタ作成) ---
@@ -134,6 +81,7 @@ class GachaItemRepository {
         luckBonus: const Value(0),
         chaBonus: const Value(0),
         bondLevel: const Value(0),
+        effectType: EffectType.none,
       );
 
       return await _db.into(_db.gachaItems).insert(companion);
@@ -283,7 +231,7 @@ class GachaItemRepository {
         isSource: const Value(false),
         sourceId: Value(sourceItem.id),
 
-        effectType: Value(effectType),
+        effectType: effectType,
         strBonus: Value(str),
         intBonus: Value(intellect),
         vitBonus: Value(vit),
@@ -305,7 +253,177 @@ class GachaItemRepository {
     });
   }
 
-  // --- その他のメソッド ---
+  // ✅ 追加: 10連ガチャ (複数回実行)
+  Future<List<GachaItem>> pullGachaMulti(int count, int gemCostPerPull) async {
+    return _pullGachaLogic(gemCostPerPull, count);
+  }
+
+  // ✅ 共通ロジック: 指定回数分ガチャを回す
+  Future<List<GachaItem>> _pullGachaLogic(int costPerPull, int count) async {
+    final debugConfig = _ref.read(gachaConfigControllerProvider);
+    final totalCost = costPerPull * count;
+
+    return await _db.transaction(() async {
+      // 1. ジェム確認
+      final player = await (_db.select(_db.players)..where((p) => p.id.equals(1))).getSingle();
+      if (player.willGems < totalCost) throw Exception('ジェムが足りません (必要: $totalCost)');
+
+      // 2. 候補取得
+      final candidates = await (_db.select(
+        _db.gachaItems,
+      )..where((t) => t.isSource.equals(true))).get();
+
+      if (candidates.isEmpty) throw Exception('ガチャから出る推しがいません！\nまずは画像を登録してください。');
+
+      // 3. 重み計算
+      final luckFactor = 1.0 + (player.luck / 1000.0);
+      double rarityTotalWeight = 0;
+      final weights = <GachaItem, double>{};
+
+      for (var item in candidates) {
+        double weight = 100.0;
+        if (item.rarity == Rarity.r) weight = 30.0;
+        if (item.rarity == Rarity.sr) weight = 10.0 * luckFactor * debugConfig.srWeightMult;
+        if (item.rarity == Rarity.ssr) weight = 3.0 * luckFactor * debugConfig.ssrWeightMult;
+
+        weights[item] = weight;
+        rarityTotalWeight += weight;
+      }
+
+      final List<GachaItem> results = [];
+      final now = DateTime.now();
+
+      // 4. 回数分ループ
+      for (int i = 0; i < count; i++) {
+        // --- 抽選ロジック ---
+        GachaItem? sourceItem;
+        double randomPoint = _random.nextDouble() * rarityTotalWeight;
+        for (var item in candidates) {
+          if (randomPoint < weights[item]!) {
+            sourceItem = item;
+            break;
+          }
+          randomPoint -= weights[item]!;
+        }
+        sourceItem ??= candidates.last;
+
+        // --- パラメータ生成 ---
+        final setting = raritySettings[sourceItem.rarity] ?? raritySettings[Rarity.n]!;
+        final template = statTemplates[_random.nextInt(statTemplates.length)];
+        final totalPoints =
+            setting.minTotalStatus +
+            _random.nextInt(setting.maxTotalStatus - setting.minTotalStatus + 1) +
+            debugConfig.statusBoost.round();
+
+        final statusTotalWeight =
+            template.strWeight +
+            template.intWeight +
+            template.vitWeight +
+            template.luckWeight +
+            template.chaWeight;
+
+        int str = (totalPoints * (template.strWeight / statusTotalWeight)).round();
+        int intellect = (totalPoints * (template.intWeight / statusTotalWeight)).round();
+        int vit = (totalPoints * (template.vitWeight / statusTotalWeight)).round();
+        int luck = (totalPoints * (template.luckWeight / statusTotalWeight)).round();
+        int cha = totalPoints - (str + intellect + vit + luck);
+        if (cha < 0) cha = 0;
+
+        // スキル抽選
+        SkillType skillType = SkillType.none;
+        int skillVal = 0;
+        int cooldown = 0;
+        int duration = 0;
+
+        if (_random.nextDouble() < (setting.skillProb * debugConfig.skillProbMult)) {
+          double totalSkillProb = 0;
+          for (var def in skillDefinitions) totalSkillProb += def.probability;
+          double skillRandom = _random.nextDouble() * totalSkillProb;
+          for (final def in skillDefinitions) {
+            if (skillRandom < def.probability) {
+              skillType = def.type;
+              skillVal =
+                  ((def.minVal + _random.nextInt(def.maxVal - def.minVal + 1)) *
+                          setting.skillPowerMult)
+                      .round();
+              duration =
+                  60 *
+                  (def.minDurationMinutes +
+                      _random.nextInt(def.maxDurationMinutes - def.minDurationMinutes + 1));
+              cooldown = duration * 2;
+              break;
+            }
+            skillRandom -= def.probability;
+          }
+        }
+
+        // シリーズ抽選
+        SeriesType series = SeriesType.none;
+        if (_random.nextDouble() < setting.seriesProb) {
+          double totalSeriesProb = 0;
+          for (var def in seriesDefinitions) totalSeriesProb += def.probability;
+          double seriesRandom = _random.nextDouble() * totalSeriesProb;
+          for (final def in seriesDefinitions) {
+            if (seriesRandom < def.probability) {
+              series = def.type;
+              break;
+            }
+            seriesRandom -= def.probability;
+          }
+        }
+
+        // エフェクト抽選
+        EffectType effectType = EffectType.none;
+        double effectProb = 0.05;
+        if (sourceItem.rarity == Rarity.sr) effectProb = 0.20;
+        if (sourceItem.rarity == Rarity.ssr) effectProb = 0.50;
+
+        if (debugConfig.alwaysEffect || _random.nextDouble() < effectProb) {
+          final effects = EffectType.values.where((e) => e != EffectType.none).toList();
+          effectType = effects[_random.nextInt(effects.length)];
+        }
+
+        // DB登録用データ作成
+        final newItemCompanion = GachaItemsCompanion.insert(
+          imagePath: sourceItem.imagePath,
+          title: sourceItem.title,
+          type: Value(sourceItem.type),
+          rarity: Value(sourceItem.rarity),
+          isUnlocked: const Value(true),
+          isSource: const Value(false),
+          sourceId: Value(sourceItem.id),
+          effectType: effectType, // Enum直接渡し
+          strBonus: Value(str),
+          intBonus: Value(intellect),
+          vitBonus: Value(vit),
+          luckBonus: Value(luck),
+          chaBonus: Value(cha),
+          bondLevel: const Value(1),
+          skillType: Value(skillType),
+          skillValue: Value(skillVal),
+          skillDuration: Value(duration),
+          skillCooldown: Value(cooldown),
+          seriesId: Value(series),
+          createdAt: Value(now),
+        );
+
+        final newId = await _db.into(_db.gachaItems).insert(newItemCompanion);
+        final newItem = await (_db.select(
+          _db.gachaItems,
+        )..where((t) => t.id.equals(newId))).getSingle();
+        results.add(newItem);
+      } // End Loop
+
+      // 5. ジェム消費 (一括)
+      await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
+        PlayersCompanion(willGems: Value(player.willGems - totalCost), updatedAt: Value(now)),
+      );
+
+      return results;
+    });
+  }
+
+  // --- 4. 売却 (単体・価格指定) ---
   Future<void> sellItem(int itemId, int price) async {
     return await _db.transaction(() async {
       final isEquippedChar = await (_db.select(
@@ -327,6 +445,54 @@ class GachaItemRepository {
       await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
         PlayersCompanion(willGems: Value(player.willGems + price)),
       );
+    });
+  }
+
+  // --- 5. 一括売却 (リスト指定・価格自動計算) ---
+  Future<void> sellItems(List<int> itemIds) async {
+    return await _db.transaction(() async {
+      int totalSellPrice = 0;
+      final player = await (_db.select(
+        _db.players,
+      )..where((p) => p.id.equals(1))).getSingleOrNull();
+      if (player == null) return;
+
+      for (final id in itemIds) {
+        final isEquipped = await (_db.select(
+          _db.partyMembers,
+        )..where((t) => t.gachaItemId.equals(id))).get().then((l) => l.isNotEmpty);
+        if (isEquipped) continue;
+
+        final item = await (_db.select(
+          _db.gachaItems,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
+        if (item == null || item.isSource) continue;
+
+        int price = 50;
+        switch (item.rarity) {
+          case Rarity.n:
+            price = 50;
+            break;
+          case Rarity.r:
+            price = 150;
+            break;
+          case Rarity.sr:
+            price = 500;
+            break;
+          case Rarity.ssr:
+            price = 2000;
+            break;
+        }
+        totalSellPrice += price;
+
+        await (_db.delete(_db.gachaItems)..where((t) => t.id.equals(id))).go();
+      }
+
+      if (totalSellPrice > 0) {
+        await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
+          PlayersCompanion(willGems: Value(player.willGems + totalSellPrice)),
+        );
+      }
     });
   }
 

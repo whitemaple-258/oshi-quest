@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/party_controller.dart';
-import '../../logic/gacha_controller.dart';
+import '../widgets/sparkle_effect_overlay.dart';
+import 'bulk_sell_screen.dart';
 import 'character_detail_screen.dart';
 
 class PartyEditScreen extends ConsumerStatefulWidget {
@@ -16,466 +17,454 @@ class PartyEditScreen extends ConsumerStatefulWidget {
 }
 
 class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
-  int _selectedSlotId = 0;
+  final Set<Rarity> _selectedRarities = {Rarity.n, Rarity.r, Rarity.sr, Rarity.ssr};
+  int? _selectedSlotIndex; // 現在選択中のスロット
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('表示フィルター'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('表示するレアリティを選択'),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    children: Rarity.values.map((rarity) {
+                      final isSelected = _selectedRarities.contains(rarity);
+                      return FilterChip(
+                        label: Text(rarity.name.toUpperCase()),
+                        selected: isSelected,
+                        selectedColor: _getRarityColor(rarity).withOpacity(0.3),
+                        checkmarkColor: _getRarityColor(rarity),
+                        onSelected: (bool selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedRarities.add(rarity);
+                            } else {
+                              _selectedRarities.remove(rarity);
+                            }
+                          });
+                          this.setState(() {});
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() => _selectedRarities.addAll(Rarity.values));
+                    this.setState(() {});
+                  },
+                  child: const Text('全表示'),
+                ),
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text('閉じる')),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final activePartyAsync = ref.watch(activePartyProvider);
-    final allItemsAsync = ref.watch(myItemsProvider);
-    final partyState = ref.watch(partyControllerProvider);
+    final myItemsAsync = ref.watch(myItemsProvider);
+    final partyController = ref.read(partyControllerProvider.notifier);
 
-    ref.listen(partyControllerProvider, (previous, next) {
-      if (next is AsyncError) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('エラー: ${next.error}'), backgroundColor: Colors.red));
-      }
-    });
+    final activeParty = activePartyAsync.value ?? {};
+    final allItems = myItemsAsync.value ?? [];
+
+    final displayItems = allItems.where((item) {
+      return _selectedRarities.contains(item.rarity);
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('パーティ編成'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline),
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('キャラを長押しで詳細確認・換金ができます')));
+            icon: Icon(
+              Icons.filter_list,
+              color: _selectedRarities.length < 4 ? Colors.amber : null,
+            ),
+            tooltip: '絞り込み',
+            onPressed: _showFilterDialog,
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'sell') {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const BulkSellScreen()));
+              }
             },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'sell',
+                child: Row(
+                  children: [
+                    Icon(Icons.sell, color: Colors.orange, size: 20),
+                    SizedBox(width: 8),
+                    Text('一括売却・整理'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
       body: Column(
         children: [
-          // --- 上部: ステータス & スロット ---
+          // --- 1. パーティスロット (左メイン/右サブ) ---
           Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.black26,
-            child: activePartyAsync.when(
-              data: (partyMap) => Column(
-                children: [
-                  _buildTotalBonus(partyMap),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 250,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'MAIN PARTNER',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.pinkAccent,
-                                  fontWeight: FontWeight.bold,
-                                ),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.blueGrey[900],
+              boxShadow: const [
+                BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 4)),
+              ],
+            ),
+            child: Column(
+              children: [
+                // 合計ステータス
+                _buildTotalBonus(activeParty),
+                const SizedBox(height: 12),
+
+                // スロット配置
+                SizedBox(
+                  height: 250, // 高さを固定
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // 左: メイン (9:16)
+                      Expanded(
+                        flex: 5,
+                        child: Column(
+                          children: [
+                            const Text(
+                              'MAIN PARTNER',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.pinkAccent,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 4),
-                              Expanded(child: _buildMainSlot(0, partyMap[0])),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 4),
+                            Expanded(
+                              child: _buildSlot(
+                                0,
+                                activeParty[0],
+                                aspectRatio: 9 / 16,
+                                isMain: true,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'SUPPORTERS',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.blueAccent,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      ),
+                      const SizedBox(width: 8),
+                      // 右: サブ (グリッド)
+                      Expanded(
+                        flex: 5,
+                        child: Column(
+                          children: [
+                            const Text(
+                              'SUPPORTERS',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.blueAccent,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 4),
-                              Expanded(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Expanded(child: _buildSmallSlot(1, partyMap[1])),
-                                          const SizedBox(width: 8),
-                                          Expanded(child: _buildSmallSlot(2, partyMap[2])),
-                                        ],
-                                      ),
+                            ),
+                            const SizedBox(height: 4),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildSlot(1, activeParty[1], aspectRatio: 9 / 16),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: _buildSlot(2, activeParty[2], aspectRatio: 9 / 16),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 8),
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Expanded(child: _buildSmallSlot(3, partyMap[3])),
-                                          const SizedBox(width: 8),
-                                          Expanded(child: _buildSmallSlot(4, partyMap[4])),
-                                        ],
-                                      ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildSlot(3, activeParty[3], aspectRatio: 9 / 16),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: _buildSlot(4, activeParty[4], aspectRatio: 9 / 16),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // --- 案内メッセージ ---
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            color: _selectedSlotIndex != null ? Colors.cyan.withOpacity(0.1) : Colors.transparent,
+            child: Text(
+              _selectedSlotIndex != null
+                  ? 'キャラをタップして ${(_selectedSlotIndex! == 0) ? "MAIN" : "SUB ${_selectedSlotIndex!}"} に装備'
+                  : 'スロットをタップして選択してください',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: _selectedSlotIndex != null ? Colors.cyanAccent : Colors.grey,
+              ),
+            ),
+          ),
+
+          // --- 2. 所持キャラリスト ---
+          Expanded(
+            child: displayItems.isEmpty
+                ? const Center(child: Text('キャラクターがいません'))
+                : GridView.builder(
+                    padding: const EdgeInsets.all(12),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 0.8,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                    ),
+                    itemCount: displayItems.length,
+                    itemBuilder: (context, index) {
+                      final item = displayItems[index];
+                      final isEquipped = activeParty.values.any((e) => e.id == item.id);
+
+                      return GestureDetector(
+                        onTap: () {
+                          if (_selectedSlotIndex != null) {
+                            HapticFeedback.selectionClick();
+                            // スロットが選択されていれば装備実行
+                            partyController.equipItem(_selectedSlotIndex!, item.id);
+                          } else {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('先に上のスロットをタップして選択してください'),
+                                duration: Duration(milliseconds: 1000),
+                              ),
+                            );
+                          }
+                        },
+                        child: LongPressDraggable<GachaItem>(
+                          data: item,
+                          feedback: Opacity(
+                            opacity: 0.8,
+                            child: SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: Image.file(File(item.imagePath), fit: BoxFit.cover),
+                            ),
+                          ),
+                          childWhenDragging: Opacity(
+                            opacity: 0.3,
+                            child: _buildListItem(item, isEquipped),
+                          ),
+                          child: _buildListItem(item, isEquipped),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Widgets ---
+
+  Widget _buildSlot(int slotId, GachaItem? item, {double aspectRatio = 1.0, bool isMain = false}) {
+    final isSelected = _selectedSlotIndex == slotId;
+    final partyController = ref.read(partyControllerProvider.notifier);
+
+    return DragTarget<GachaItem>(
+      onWillAcceptWithDetails: (_) => true,
+      onAcceptWithDetails: (details) {
+        partyController.equipItem(slotId, details.data.id);
+        setState(() => _selectedSlotIndex = slotId);
+      },
+      builder: (context, candidateData, rejectedData) {
+        return GestureDetector(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            setState(() {
+              if (_selectedSlotIndex == slotId) {
+                // 再タップで解除
+                if (item != null)
+                  partyController.unequipItem(slotId);
+                else
+                  _selectedSlotIndex = null;
+              } else {
+                // 選択
+                _selectedSlotIndex = slotId;
+              }
+            });
+          },
+          onLongPress: item == null
+              ? null
+              : () {
+                  HapticFeedback.mediumImpact();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => CharacterDetailScreen.single(item: item)),
+                  );
+                },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: Colors.black38,
+              border: Border.all(
+                color: isSelected
+                    ? Colors.cyanAccent
+                    : (candidateData.isNotEmpty
+                          ? Colors.white
+                          : (isMain ? Colors.pinkAccent : Colors.blueAccent)),
+                width: isSelected ? 3 : 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: isSelected
+                  ? [BoxShadow(color: Colors.cyanAccent.withOpacity(0.4), blurRadius: 10)]
+                  : null,
+            ),
+            child: item == null
+                ? Icon(Icons.add, color: isSelected ? Colors.cyanAccent : Colors.white24)
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.file(
+                      File(item.imagePath),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.error),
                     ),
                   ),
-                ],
-              ),
-              loading: () =>
-                  const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
-              error: (_, __) => const SizedBox(height: 200, child: Center(child: Text('エラー'))),
-            ),
           ),
-
-          const Divider(height: 1),
-
-          // --- 下部: キャラクター一覧 ---
-          Expanded(
-            child: allItemsAsync.when(
-              data: (items) {
-                final unlockedItems = items.where((i) => i.isUnlocked).toList();
-                if (unlockedItems.isEmpty) return const Center(child: Text('所持している推しがいません'));
-
-                final partyMap = activePartyAsync.value ?? {};
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: unlockedItems.length,
-                  itemBuilder: (context, index) {
-                    final item = unlockedItems[index];
-
-                    int? equippedAt;
-                    partyMap.forEach((slot, equippedItem) {
-                      if (equippedItem.id == item.id) equippedAt = slot;
-                    });
-                    final isEquippedInCurrentSlot = equippedAt == _selectedSlotId;
-
-                    return Card(
-                      color: isEquippedInCurrentSlot ? Colors.grey[800] : null,
-                      child: ListTile(
-                        leading: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: Image.file(File(item.imagePath), fit: BoxFit.cover),
-                          ),
-                        ),
-                        title: Text(
-                          item.title,
-                          style: TextStyle(
-                            color: isEquippedInCurrentSlot
-                                ? (_selectedSlotId == 0 ? Colors.pinkAccent : Colors.blueAccent)
-                                : null,
-                            fontWeight: isEquippedInCurrentSlot
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                        subtitle: Text(
-                          'STR:${item.strBonus} INT:${item.intBonus} VIT:${item.vitBonus} LUK:${item.luckBonus} CHA:${item.chaBonus}',
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                        trailing: equippedAt != null
-                            ? Chip(
-                                label: Text(equippedAt == 0 ? 'MAIN' : 'SUB $equippedAt'),
-                                backgroundColor: equippedAt == 0
-                                    ? Colors.pinkAccent
-                                    : Colors.blueAccent,
-                                labelStyle: const TextStyle(fontSize: 10, color: Colors.white),
-                              )
-                            : null,
-                        enabled: !partyState.isLoading,
-
-                        // ✅ 変更: タップ時の挙動（トグル）
-                        onTap: partyState.isLoading
-                            ? null
-                            : () {
-                                HapticFeedback.selectionClick();
-
-                                if (isEquippedInCurrentSlot) {
-                                  // 既にこのスロットに装備中なら解除
-                                  ref
-                                      .read(partyControllerProvider.notifier)
-                                      .unequipItem(_selectedSlotId);
-                                } else {
-                                  // それ以外なら装備（上書き/移動）
-                                  ref
-                                      .read(partyControllerProvider.notifier)
-                                      .equipItem(_selectedSlotId, item.id);
-                                }
-                              },
-
-                        onLongPress: () {
-                          HapticFeedback.mediumImpact();
-                          _showCharacterMenu(context, ref, item);
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, s) => Center(child: Text('エラー: $e')),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  // --- メニュー表示 ---
-  void _showCharacterMenu(BuildContext context, WidgetRef ref, GachaItem item) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.info_outline, color: Colors.blue),
-              title: const Text('詳細を見る'),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CharacterDetailScreen(item: item)),
-                );
-              },
+  Widget _buildListItem(GachaItem item, bool isEquipped) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: _getRarityColor(item.rarity), width: 2),
+            color: Colors.black,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: Image.file(
+              File(item.imagePath),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image, size: 16)),
             ),
-            ListTile(
-              leading: const Icon(Icons.monetization_on, color: Colors.amber),
-              title: const Text('換金する (お別れ)'),
-              subtitle: Text(_getSellPriceText(item.rarity)),
-              onTap: () {
-                Navigator.pop(ctx);
-                _confirmSell(context, ref, item);
-              },
-            ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  String _getSellPriceText(Rarity rarity) {
-    switch (rarity) {
-      case Rarity.n:
-        return '売却額: 50 Gems';
-      case Rarity.r:
-        return '売却額: 150 Gems';
-      case Rarity.sr:
-        return '売却額: 500 Gems';
-      case Rarity.ssr:
-        return '売却額: 2000 Gems';
-    }
-  }
-
-  Future<void> _confirmSell(BuildContext context, WidgetRef ref, GachaItem item) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('換金確認'),
-        content: Text('「${item.title}」とお別れしてジェムに換えますか？\n\n※この操作は取り消せません。\n※装備中のキャラは売却できません。'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('キャンセル')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              '換金する',
-              style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+        if (isEquipped)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Center(child: Icon(Icons.check, color: Colors.greenAccent, size: 32)),
+          ),
+        Positioned(
+          top: 0,
+          left: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: _getRarityColor(item.rarity),
+              borderRadius: const BorderRadius.only(bottomRight: Radius.circular(6)),
+            ),
+            child: Text(
+              item.rarity.name.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
-
-    if (confirm == true) {
-      try {
-        await ref.read(gachaControllerProvider.notifier).sellItem(item);
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('換金しました！'), backgroundColor: Colors.amber));
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString().replaceAll('Exception: ', '')),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
   }
 
   Widget _buildTotalBonus(Map<int, GachaItem> partyMap) {
-    int str = 0, intellect = 0, luck = 0, cha = 0, vit = 0;
+    int str = 0, intl = 0, vit = 0, luck = 0, cha = 0;
     for (var item in partyMap.values) {
       str += item.strBonus;
-      intellect += item.intBonus;
+      intl += item.intBonus;
+      vit += item.vitBonus;
       luck += item.luckBonus;
       cha += item.chaBonus;
-      vit += item.vitBonus;
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildStatValue('STR', str, Colors.redAccent),
-        _buildStatValue('INT', intellect, Colors.blueAccent),
-        _buildStatValue('VIT', vit, Colors.orange),
-        _buildStatValue('LUCK', luck, Colors.purpleAccent),
-        _buildStatValue('CHA', cha, Colors.pinkAccent),
+        _buildStatText('STR', str, Colors.redAccent),
+        _buildStatText('INT', intl, Colors.blueAccent),
+        _buildStatText('VIT', vit, Colors.green),
+        _buildStatText('LUK', luck, Colors.purpleAccent),
+        _buildStatText('CHA', cha, Colors.pinkAccent),
       ],
     );
   }
 
-  Widget _buildStatValue(String label, int value, Color color) {
+  Widget _buildStatText(String label, int val, Color color) {
     return Column(
       children: [
         Text(
           label,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 10),
+          style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold),
         ),
-        Text('+$value', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('+$val', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }
 
-  Widget _buildSmallSlot(int slotId, GachaItem? item) {
-    final isSelected = _selectedSlotId == slotId;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedSlotId = slotId);
-        HapticFeedback.selectionClick();
-      },
-      onLongPress: item == null
-          ? null
-          : () {
-              HapticFeedback.mediumImpact();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CharacterDetailScreen(item: item)),
-              );
-            },
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.blueAccent : Colors.grey[700]!,
-            width: isSelected ? 3 : 1,
-          ),
-          image: item != null
-              ? DecorationImage(image: FileImage(File(item.imagePath)), fit: BoxFit.cover)
-              : null,
-        ),
-        child: item == null ? const Icon(Icons.add, size: 20, color: Colors.grey) : null,
-      ),
-    );
-  }
-
-  Widget _buildMainSlot(int slotId, GachaItem? item) {
-    final isSelected = _selectedSlotId == slotId;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedSlotId = slotId);
-        HapticFeedback.selectionClick();
-      },
-      onLongPress: item == null
-          ? null
-          : () {
-              HapticFeedback.mediumImpact();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CharacterDetailScreen(item: item)),
-              );
-            },
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? Colors.pinkAccent : Colors.grey[700]!,
-            width: isSelected ? 3 : 1,
-          ),
-          image: item != null
-              ? DecorationImage(
-                  image: FileImage(File(item.imagePath)),
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                )
-              : null,
-        ),
-        child: Stack(
-          children: [
-            if (item == null)
-              const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outline, size: 40, color: Colors.grey),
-                    SizedBox(height: 4),
-                    Text('パートナーを選択', style: TextStyle(color: Colors.grey, fontSize: 10)),
-                  ],
-                ),
-              ),
-            if (isSelected)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    '選択中',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            if (item != null)
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
-                  ),
-                  child: Text(
-                    item.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+  Color _getRarityColor(Rarity r) {
+    switch (r) {
+      case Rarity.n:
+        return Colors.grey;
+      case Rarity.r:
+        return Colors.blueAccent;
+      case Rarity.sr:
+        return Colors.purpleAccent;
+      case Rarity.ssr:
+        return const Color(0xFFFFD700);
+    }
   }
 }

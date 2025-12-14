@@ -321,38 +321,22 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  // エフェクト描画メソッド
-  Widget _buildEffectOverlay(EffectType type) {
-    Color color;
-    switch (type) {
-      case EffectType.fire:
-        color = Colors.red.withOpacity(0.3);
-        break;
-      case EffectType.water:
-        color = Colors.blue.withOpacity(0.3);
-        break;
-      case EffectType.thunder:
-        color = Colors.yellow.withOpacity(0.3);
-        break;
-      case EffectType.light:
-        color = Colors.white.withOpacity(0.3);
-        break;
-      case EffectType.dark:
-        color = Colors.purple.withOpacity(0.4);
-        break;
-      default:
-        return const SizedBox.shrink();
+  /// エフェクト描画用Widgetを構築するメソッド（最新版）
+  ///
+  /// [mainPartner] 現在設定されているメインパートナーのデータ（いない場合はnull）
+  /// [showEffect] 設定画面でのエフェクト表示設定（trueなら表示）
+  Widget _buildEffectOverlay(GachaItem? mainPartner, bool showEffect) {
+    // 1. 表示条件のチェック
+    // 設定がOFF、キャラが未設定、またはエフェクトタイプが「none」の場合は何も表示しない
+    if (!showEffect || mainPartner == null || mainPartner.effectType == EffectType.none) {
+      return const SizedBox.shrink();
     }
 
-    return IgnorePointer(
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Colors.transparent, color],
-            stops: const [0.5, 1.0], // 周囲をぼんやり光らせる
-          ),
-        ),
-      ),
+    // 2. エフェクトWidgetを配置
+    // EffectType Enumを渡すだけで、内部でマスターデータを参照して適切な描画が行われます。
+    // Stackの上に重ねて表示されるため、キャラクター画像の前面にエフェクトが出現します。
+    return SparkleEffectOverlay(
+      effectType: mainPartner.effectType,
     );
   }
 

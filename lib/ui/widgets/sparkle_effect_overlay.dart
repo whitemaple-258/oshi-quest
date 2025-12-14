@@ -1,36 +1,45 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
+import '../../data/master_data/effect_master_data.dart';
+import '../../logic/settings_controller.dart';
 
-class SparkleEffectOverlay extends StatefulWidget {
+class SparkleEffectOverlay extends ConsumerStatefulWidget {
   final EffectType effectType;
 
   const SparkleEffectOverlay({super.key, required this.effectType});
 
   @override
-  State<SparkleEffectOverlay> createState() => _SparkleEffectOverlayState();
+  ConsumerState<SparkleEffectOverlay> createState() => _SparkleEffectOverlayState();
 }
 
-class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
+class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   final List<_Particle> _particles = [];
   final Random _random = Random();
   double _time = 0;
 
+  EffectDef? _currentDef;
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
 
-    _prewarmParticles();
+    _loadDefAndParticles();
   }
 
-  void _prewarmParticles() {
-    final count = _getParticleCount();
-    for (int i = 0; i < count; i++) {
-      if (widget.effectType != EffectType.thunder) {
-        _particles.add(_createParticle(randomY: true));
+  void _loadDefAndParticles() {
+    _currentDef = effectMasterData[widget.effectType];
+    _particles.clear();
+
+    if (_currentDef != null) {
+      if (_currentDef!.drawType != EffectDrawType.lightning) {
+        for (int i = 0; i < _currentDef!.particleCount; i++) {
+          _particles.add(_createParticle(randomY: true));
+        }
       }
     }
   }
@@ -40,9 +49,8 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.effectType != widget.effectType) {
       setState(() {
-        _particles.clear();
         _time = 0;
-        _prewarmParticles();
+        _loadDefAndParticles();
       });
     }
   }
@@ -51,23 +59,6 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  int _getParticleCount() {
-    switch (widget.effectType) {
-      case EffectType.fire:
-        return 150; // 火の粉は多めに
-      case EffectType.water:
-        return 30;
-      case EffectType.thunder:
-        return 2;
-      case EffectType.light:
-        return 60;
-      case EffectType.dark:
-        return 100;
-      default:
-        return 0;
-    }
   }
 
   Path _generateThunderPath() {
@@ -86,77 +77,55 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
   }
 
   _Particle _createParticle({bool randomY = false}) {
+    final def = _currentDef!;
     final w = 1.0;
     final h = 1.0;
 
     double x = _random.nextDouble() * w;
-    double y = randomY ? _random.nextDouble() * h : -0.1;
+    double y = 0.0;
 
-    double size = 0;
-    double speedX = 0;
-    double speedY = 0;
-    double rotation = _random.nextDouble() * 2 * pi;
+    switch (def.spawnType) {
+      case SpawnType.top:
+        y = randomY ? _random.nextDouble() * h : -0.1;
+        break;
+      case SpawnType.bottom:
+        y = randomY ? _random.nextDouble() * h : 1.1;
+        break;
+      case SpawnType.random:
+        y = _random.nextDouble() * h;
+        break;
+    }
+
+    double size = def.minSize + _random.nextDouble() * (def.maxSize - def.minSize);
+    double speedX = def.minSpeedX + _random.nextDouble() * (def.maxSpeedX - def.minSpeedX);
+    double speedY = def.minSpeedY + _random.nextDouble() * (def.maxSpeedY - def.minSpeedY);
+
+    if (def.drawType == EffectDrawType.snow) {
+      speedY = (size * 0.0008) + 0.001;
+    }
+
+    Color color = def.colors.isNotEmpty
+        ? def.colors[_random.nextInt(def.colors.length)]
+        : Colors.white;
+
+    if (def.drawType == EffectDrawType.snow || def.drawType == EffectDrawType.ember) {
+      color = color.withOpacity(_random.nextDouble() * 0.5 + 0.5);
+    }
+
+    // ✅ 修正: 雨の場合は回転させない (角度を0に固定)
+    double rotation = 0;
     double rotationSpeed = 0;
-    Color color = Colors.white;
+
+    if (def.drawType != EffectDrawType.rain) {
+      rotation = _random.nextDouble() * 2 * pi;
+      rotationSpeed = (_random.nextDouble() - 0.5) * 0.05;
+    }
+
     Path? thunderPath;
-    double length = 0;
-
-    switch (widget.effectType) {
-      case EffectType.light:
-        y = randomY ? _random.nextDouble() * h : -0.1;
-        size = _random.nextDouble() * 8 + 5;
-        speedY = _random.nextDouble() * 0.002 + 0.001;
-        speedX = 0.002 + (_random.nextDouble() - 0.5) * 0.001;
-        rotationSpeed = (_random.nextDouble() - 0.5) * 0.05;
-        color = [
-          Colors.pinkAccent.withOpacity(0.8),
-          Colors.pink.shade200.withOpacity(0.8),
-          Colors.white.withOpacity(0.9),
-        ][_random.nextInt(3)];
-        break;
-
-      case EffectType.dark:
-        y = randomY ? _random.nextDouble() * h : -0.1;
-        size = _random.nextDouble() * 5 + 2;
-        speedY = (size * 0.0008) + 0.001;
-        speedX = (_random.nextDouble() - 0.5) * 0.001;
-        rotationSpeed = (_random.nextDouble() - 0.5) * 0.02;
-        color = Colors.white.withOpacity(_random.nextDouble() * 0.5 + 0.5);
-        break;
-
-      case EffectType.water:
-        y = randomY ? _random.nextDouble() * h : 1.1;
-        size = _random.nextDouble() * 20 + 10;
-        speedY = -(_random.nextDouble() * 0.001 + 0.0005);
-        speedX = 0;
-        color = Colors.transparent;
-        break;
-
-      case EffectType.fire:
-        // 🔥 炎 (修正: さらに小さく)
-        y = randomY ? _random.nextDouble() * h : 1.1;
-        // ✅ 修正: 1~3px (極小)
-        size = _random.nextDouble() * 2 + 1;
-        speedY = -(_random.nextDouble() * 0.003 + 0.001);
-        speedX = (_random.nextDouble() - 0.5) * 0.002;
-        color = [
-          Colors.deepOrange,
-          Colors.orangeAccent,
-          Colors.amber,
-          Colors.white,
-        ][_random.nextInt(4)];
-        break;
-
-      case EffectType.thunder:
-        x = 0;
-        y = 0;
-        size = _random.nextDouble() * 2 + 2;
-        color = Colors.white;
-        thunderPath = _generateThunderPath();
-        break;
-
-      default:
-        break;
+    if (def.drawType == EffectDrawType.lightning) {
+      x = 0;
+      y = 0;
+      thunderPath = _generateThunderPath();
     }
 
     return _Particle(
@@ -165,11 +134,9 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
       speedX: speedX,
       speedY: speedY,
       size: size,
-      length: length,
       color: color,
       rotation: rotation,
       rotationSpeed: rotationSpeed,
-      type: widget.effectType,
       life: 1.0,
       maxLife: 1.0,
       wobbleOffset: _random.nextDouble() * 2 * pi,
@@ -179,7 +146,12 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.effectType == EffectType.none) return const SizedBox.shrink();
+    final settingsAsync = ref.watch(settingsControllerProvider);
+    final showEffect = settingsAsync.valueOrNull?.showEffect ?? true;
+
+    if (!showEffect || _currentDef == null) {
+      return const SizedBox.shrink();
+    }
 
     return ClipRect(
       child: IgnorePointer(
@@ -187,9 +159,9 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
           animation: _controller,
           builder: (context, child) {
             _time += 0.016;
+            final def = _currentDef!;
 
-            if (widget.effectType == EffectType.thunder &&
-                _particles.length < _getParticleCount()) {
+            if (def.drawType == EffectDrawType.lightning && _particles.length < def.particleCount) {
               if (_random.nextDouble() < 0.02) {
                 _particles.add(_createParticle());
               }
@@ -199,27 +171,23 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
               p.x += p.speedX;
               p.y += p.speedY;
               p.rotation += p.rotationSpeed;
+              p.life -= def.decayRate;
 
-              if (widget.effectType == EffectType.thunder) {
-                p.life -= 0.06;
-              } else if (widget.effectType == EffectType.fire) {
-                // ✅ 修正: 寿命減少をさらに緩やかに (1秒程度延長)
-                p.life -= 0.0035;
+              if (def.drawType == EffectDrawType.ember) {
+                p.life -= _random.nextDouble() * 0.01;
               }
 
-              if (widget.effectType == EffectType.light) {
-                p.x += sin(_time * 2 + p.wobbleOffset) * 0.001;
-                p.y += cos(_time * 1 + p.wobbleOffset) * 0.0005;
-              } else if (widget.effectType == EffectType.dark) {
-                p.x += sin(_time * 1.5 + p.wobbleOffset) * 0.0005;
-              } else if (widget.effectType == EffectType.water) {
-                p.x += sin(_time * 1 + p.wobbleOffset) * 0.0003;
-              } else if (widget.effectType == EffectType.fire) {
-                p.x += sin(_time * 3 + p.wobbleOffset) * 0.0005;
+              if (def.wobbleStrength > 0) {
+                p.x +=
+                    sin(_time * (def.drawType == EffectDrawType.ember ? 3 : 2) + p.wobbleOffset) *
+                    def.wobbleStrength;
+                if (def.drawType == EffectDrawType.petal) {
+                  p.y += cos(_time + p.wobbleOffset) * (def.wobbleStrength * 0.5);
+                }
               }
 
               bool reset = false;
-              if (widget.effectType == EffectType.thunder) {
+              if (def.drawType == EffectDrawType.lightning) {
                 reset = p.life <= 0;
               } else {
                 reset = p.life <= 0 || p.y > 1.1 || p.y < -0.2 || p.x < -0.2 || p.x > 1.2;
@@ -230,13 +198,13 @@ class _SparkleEffectOverlayState extends State<SparkleEffectOverlay>
               }
             }
 
-            if (widget.effectType == EffectType.thunder) {
+            if (def.drawType == EffectDrawType.lightning) {
               _particles.removeWhere((p) => p.life <= 0);
             }
 
             return RepaintBoundary(
               child: CustomPaint(
-                painter: _ParticlePainter(_particles, widget.effectType),
+                painter: _ParticlePainter(_particles, def),
                 child: const SizedBox.expand(),
               ),
             );
@@ -251,14 +219,12 @@ class _Particle {
   double x, y;
   double speedX, speedY;
   double size;
-  double length;
   Color color;
   double rotation;
   double rotationSpeed;
   double life;
   double maxLife;
   double wobbleOffset;
-  EffectType type;
   Path? thunderPath;
 
   _Particle({
@@ -267,14 +233,12 @@ class _Particle {
     required this.speedX,
     required this.speedY,
     required this.size,
-    this.length = 0,
     required this.color,
     required this.rotation,
     required this.rotationSpeed,
     required this.life,
     required this.maxLife,
     required this.wobbleOffset,
-    required this.type,
     this.thunderPath,
   });
 
@@ -284,36 +248,29 @@ class _Particle {
     speedX = p.speedX;
     speedY = p.speedY;
     size = p.size;
-    length = p.length;
     color = p.color;
     rotation = p.rotation;
     rotationSpeed = p.rotationSpeed;
     life = p.maxLife;
     maxLife = p.maxLife;
     wobbleOffset = p.wobbleOffset;
-    type = p.type;
     thunderPath = p.thunderPath;
   }
 }
 
 class _ParticlePainter extends CustomPainter {
   final List<_Particle> particles;
-  final EffectType type;
+  final EffectDef def;
 
-  _ParticlePainter(this.particles, this.type);
+  _ParticlePainter(this.particles, this.def);
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-
-    if (type == EffectType.thunder || type == EffectType.water) {
-      paint.blendMode = BlendMode.srcOver;
-    } else {
-      paint.blendMode = BlendMode.plus;
-    }
+    paint.blendMode = def.blendMode;
 
     for (var p in particles) {
-      if (type != EffectType.thunder) {
+      if (def.drawType != EffectDrawType.lightning) {
         final dx = p.x * size.width;
         final dy = p.y * size.height;
         canvas.save();
@@ -325,58 +282,80 @@ class _ParticlePainter extends CustomPainter {
 
       double opacity = (p.life / p.maxLife).clamp(0.0, 1.0);
 
-      if (type == EffectType.fire) {
-        // ✅ 修正: 寿命ギリギリまで表示し、最後にフェードアウト
+      if (def.drawType == EffectDrawType.ember) {
         opacity = p.life < 0.2 ? p.life * 5.0 : 1.0;
       }
-      if (type == EffectType.thunder) opacity = p.life > 0.1 ? 1.0 : p.life * 10;
+      if (def.drawType == EffectDrawType.lightning) {
+        opacity = p.life > 0.1 ? 1.0 : p.life * 10;
+      }
 
       paint.color = p.color.withOpacity(opacity * p.color.opacity);
 
-      if (type == EffectType.light) {
-        canvas.drawOval(
-          Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.6),
-          paint,
-        );
-      } else if (type == EffectType.dark) {
-        final glowPaint = Paint()
-          ..color = p.color.withOpacity(opacity * 0.6)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3)
-          ..blendMode = BlendMode.plus;
-        canvas.drawCircle(Offset.zero, p.size, glowPaint);
-        paint.color = Colors.white.withOpacity(opacity);
-        canvas.drawCircle(Offset.zero, p.size * 0.5, paint);
-      } else if (type == EffectType.water) {
-        final fillPaint = Paint()
-          ..color = Colors.lightBlueAccent.withOpacity(opacity * 0.15)
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(Offset.zero, p.size, fillPaint);
-        final strokePaint = Paint()
-          ..color = Colors.lightBlueAccent.withOpacity(opacity * 0.8)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5;
-        canvas.drawCircle(Offset.zero, p.size, strokePaint);
-        final highlightPaint = Paint()
-          ..color = Colors.white.withOpacity(opacity * 0.5)
-          ..style = PaintingStyle.fill;
-        canvas.drawCircle(Offset(-p.size * 0.35, -p.size * 0.35), p.size * 0.25, highlightPaint);
-      } else if (type == EffectType.fire) {
-        // 火の粉（小さな円）
-        canvas.drawCircle(Offset.zero, p.size, paint);
-      } else if (type == EffectType.thunder) {
-        if (p.thunderPath != null && p.life > 0) {
+      switch (def.drawType) {
+        case EffectDrawType.petal:
+          canvas.drawOval(
+            Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.6),
+            paint,
+          );
+          break;
+
+        case EffectDrawType.snow:
+          final glowPaint = Paint()
+            ..color = p.color.withOpacity(opacity * 0.6)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3)
+            ..blendMode = BlendMode.plus;
+          canvas.drawCircle(Offset.zero, p.size, glowPaint);
+          paint.color = Colors.white.withOpacity(opacity);
+          canvas.drawCircle(Offset.zero, p.size * 0.5, paint);
+          break;
+
+        case EffectDrawType.bubble:
+          final fillPaint = Paint()
+            ..color = Colors.lightBlueAccent.withOpacity(opacity * 0.15)
+            ..style = PaintingStyle.fill;
+          canvas.drawCircle(Offset.zero, p.size, fillPaint);
+          final strokePaint = Paint()
+            ..color = Colors.lightBlueAccent.withOpacity(opacity * 0.8)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5;
+          canvas.drawCircle(Offset.zero, p.size, strokePaint);
+          final highlightPaint = Paint()
+            ..color = Colors.white.withOpacity(opacity * 0.5)
+            ..style = PaintingStyle.fill;
+          canvas.drawCircle(Offset(-p.size * 0.35, -p.size * 0.35), p.size * 0.25, highlightPaint);
+          break;
+
+        case EffectDrawType.ember:
+          canvas.drawCircle(Offset.zero, p.size, paint);
+          break;
+
+        case EffectDrawType.lightning:
+          if (p.thunderPath != null && p.life > 0) {
+            paint.style = PaintingStyle.stroke;
+            paint.strokeWidth = p.size;
+            paint.strokeCap = StrokeCap.round;
+            paint.strokeJoin = StrokeJoin.round;
+            paint.maskFilter = null;
+            final matrix = Matrix4.identity();
+            matrix.scale(size.width, size.height);
+            final transformedPath = p.thunderPath!.transform(matrix.storage);
+            canvas.drawPath(transformedPath, paint);
+          }
+          break;
+
+        // ✅ 修正: 雨の描画 (回転なしで描画)
+        case EffectDrawType.rain:
           paint.style = PaintingStyle.stroke;
-          paint.strokeWidth = p.size;
+          paint.strokeWidth = 2.0; // 少し太く
           paint.strokeCap = StrokeCap.round;
-          paint.strokeJoin = StrokeJoin.round;
-          paint.maskFilter = null;
 
-          final matrix = Matrix4.identity();
-          matrix.scale(size.width, size.height);
-          final transformedPath = p.thunderPath!.transform(matrix.storage);
+          // 速度ベクトルの逆方向に線を引く (残像)
+          // 20.0 は長さの係数
+          final tailX = -p.speedX * 500.0;
+          final tailY = -p.speedY * 500.0;
 
-          canvas.drawPath(transformedPath, paint);
-        }
+          canvas.drawLine(Offset.zero, Offset(tailX, tailY), paint);
+          break;
       }
       canvas.restore();
     }

@@ -29,6 +29,26 @@ class GachaController extends _$GachaController {
       rethrow; // UI側でエラーメッセージを出すために再スロー
     }
   }
+
+  // ✅ 追加: 10連ガチャ
+  Future<List<GachaItem>> pullGacha10() async {
+    state = const AsyncValue.loading();
+    try {
+      const costPerPull = 100; // 1回あたりのコスト
+      const count = 10;
+
+      final repository = ref.read(gachaItemRepositoryProvider);
+
+      // 10連実行
+      final items = await repository.pullGachaMulti(count, costPerPull);
+      state = const AsyncValue.data(null);
+      return items;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
   // 👇 追加: 削除
   Future<void> deleteItem(int id) async {
     state = const AsyncValue.loading();
@@ -53,11 +73,10 @@ class GachaController extends _$GachaController {
     }
   }
 
-  // 👇 追加: 売却アクション
-  Future<void> sellItem(GachaItem item) async {
+  /// 単体売却（価格計算はここで行う：UI側で確認ダイアログに価格を出す等の都合上）
+  Future<bool> sellItem(GachaItem item) async {
     state = const AsyncValue.loading();
     try {
-      // レアリティごとの売却額設定
       int price = 0;
       switch (item.rarity) {
         case Rarity.n:
@@ -76,11 +95,26 @@ class GachaController extends _$GachaController {
 
       final repository = ref.read(gachaItemRepositoryProvider);
       await repository.sellItem(item.id, price);
-      
+
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return false; // 売却失敗
+    }
+  }
+
+  // ✅ 追加: 一括売却
+  Future<void> sellItems(List<int> itemIds) async {
+    state = const AsyncValue.loading();
+    try {
+      final repository = ref.read(gachaItemRepositoryProvider);
+      await repository.sellItems(itemIds);
+
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
-      rethrow; // UI側でエラーメッセージを出すために再スロー
+      rethrow;
     }
   }
 }
