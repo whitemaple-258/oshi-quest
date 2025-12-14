@@ -92,77 +92,90 @@ final Map<EffectType, EffectDef> effectMasterData = {
   EffectType.snow: EffectDef(
     particleCount: 150, // 密度を出すために少し多めに
     spawnType: SpawnType.top,
-    
+
     // サイズ差をつけて奥行きを出す
-    minSize: 3.0, 
-    maxSize: 10.0, 
-    
+    minSize: 3.0,
+    maxSize: 10.0,
+
     // 風の影響 (全体的に少しだけ左に流れるなど)
-    minSpeedX: -0.0002, 
+    minSpeedX: -0.0002,
     maxSpeedX: 0.0002,
-    
+
     // 落下速度 (ロジック側でサイズに基づいて再計算するので、ここはベース値)
-    minSpeedY: 0.0005, 
+    minSpeedY: 0.0005,
     maxSpeedY: 0.0015,
-    
+
     // 自然に落ちるように減衰はほぼなし (画面外でリセットさせる)
     decayRate: 0.0005,
-    
-    colors: [Colors.white], 
+
+    colors: [Colors.white],
     drawType: EffectDrawType.snow,
-    
+
     // ゆらゆらさせる強度
-    wobbleStrength: 0.003, 
+    wobbleStrength: 0.003,
   ),
 
   // 🫧 泡 (Water)
   EffectType.bubble: EffectDef(
-    particleCount: 30,
+    particleCount: 150, // 数を大幅に増やす (密度アップ)
     spawnType: SpawnType.bottom,
-    minSize: 10.0,
-    maxSize: 30.0,
-    minSpeedX: 0.0,
-    maxSpeedX: 0.0,
-    minSpeedY: -0.0015,
-    maxSpeedY: -0.0005,
-    decayRate: 0.0,
-    colors: [Colors.transparent], // 色は描画ロジックで固定
+    minSize: 1.0, // 極小の粒
+    maxSize: 3.5, // 大きくてもこの程度
+    minSpeedX: -0.0005, // わずかに左右に揺れる
+    maxSpeedX: 0.0005,
+    minSpeedY: -0.012, // ★高速で上昇 (これがシュワシュワ感の肝)
+    maxSpeedY: -0.005,
+    decayRate: 0.002, // 上に行くにつれて少しずつ消える
+    colors: [
+      Colors.white,
+      Color(0xFFE0F7FA), // Cyan.shade50 (ほんのり青みがかった白)
+    ],
     drawType: EffectDrawType.bubble,
-    blendMode: BlendMode.srcOver, // くっきり表示
-    wobbleStrength: 0.0003,
+    blendMode: BlendMode.plus, // 重なった時に明るく光らせる
+    wobbleStrength: 0.002, // 左右に小刻みに震える
   ),
 
-  // 🔥 火の粉 (Fire) - 小さく長く舞う設定
+  // 🔥 火の粉 (Fire) - カオス＆極細 (Chaos & Thin Embers)
   EffectType.ember: EffectDef(
-    particleCount: 150,
+    particleCount: 200, // 粒子を細かくしたので、数は多めにして密度感を維持
     spawnType: SpawnType.bottom,
     minSize: 1.0,
-    maxSize: 3.0,
-    minSpeedX: -0.001,
-    maxSpeedX: 0.001,
-    minSpeedY: -0.004,
-    maxSpeedY: -0.001,
-    decayRate: 0.0035, // ゆっくり消える
-    colors: [Colors.deepOrange, Colors.orangeAccent, Colors.amber, Colors.white],
+    maxSize: 6.0,
+
+    // 無秩序: 左右どちらにも飛ぶように設定
+    minSpeedX: -0.005,
+    maxSpeedX: 0.005,
+
+    // 基本は上昇だが、ばらつきを持たせる
+    minSpeedY: -0.003,
+    maxSpeedY: -0.010,
+
+    decayRate: 0.003,
+
+    colors: [
+      Colors.deepOrange,
+      Color(0xFF5D4037), // Brown.shade700 (暗部用)
+      Colors.redAccent,
+    ],
     drawType: EffectDrawType.ember,
-    wobbleStrength: 0.0005,
+    blendMode: BlendMode.plus,
+    wobbleStrength: 0.004,
   ),
 
   // ⚡ 稲妻 (lightning)
   EffectType.lightning: EffectDef(
     particleCount: 5, // ✅ 修正: バースト時に詰まらないよう少し余裕を持たせる
     spawnType: SpawnType.random,
-    minSize: 3.0, maxSize: 6.0,
-    minSpeedX: 0.0, maxSpeedX: 0.0,
-    minSpeedY: 0.0, maxSpeedY: 0.0,
-    decayRate: 0.15, 
-    colors: [
-      Colors.cyanAccent,
-      Colors.lightBlueAccent,
-      Colors.white,
-    ],
+    minSize: 3.0,
+    maxSize: 6.0,
+    minSpeedX: 0.0,
+    maxSpeedX: 0.0,
+    minSpeedY: 0.0,
+    maxSpeedY: 0.0,
+    decayRate: 0.15,
+    colors: [Colors.cyanAccent, Colors.lightBlueAccent, Colors.white],
     drawType: EffectDrawType.lightning,
-    blendMode: BlendMode.plus, 
+    blendMode: BlendMode.plus,
   ),
 
   // ☔ 雨 (Rain) - 新規追加

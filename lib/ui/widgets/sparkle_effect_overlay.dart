@@ -21,8 +21,8 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
   final Random _random = Random();
   double _time = 0;
 
-  double _lightningCooldown = 0.0; // 次のバーストまでの待機時間
-  int _remainingBurstShots = 0; // バースト中の残り発射数
+  double _lightningCooldown = 0.0;
+  int _remainingBurstShots = 0;
   double _burstShotCooldown = 0.0;
 
   EffectDef? _currentDef;
@@ -31,7 +31,6 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(seconds: 10))..repeat();
-
     _loadDefAndParticles();
   }
 
@@ -45,7 +44,6 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
           _particles.add(_createParticle(randomY: true));
         }
       } else {
-        // 雷の場合は初期タイマーをセット (最初は少し待つ)
         _lightningCooldown = 1.0;
         _remainingBurstShots = 0;
       }
@@ -69,56 +67,59 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
     super.dispose();
   }
 
-  void _generateBranch(Path path, Offset start, double length, double angle, int depth) {
-    if (depth <= 0 || length < 20.0) return;
+  // --- ⚡ 雷生成ロジック ---
+  void _createBoltPath(Path path, Offset p1, Offset p2, double displacement, int depth) {
+    if (depth <= 0) {
+      path.moveTo(p1.dx, p1.dy);
+      path.lineTo(p2.dx, p2.dy);
+      return;
+    }
+    double midX = (p1.dx + p2.dx) / 2;
+    double midY = (p1.dy + p2.dy) / 2;
+    double dx = p2.dx - p1.dx;
+    double dy = p2.dy - p1.dy;
+    double length = sqrt(dx * dx + dy * dy);
+    if (length < 0.001) {
+      path.moveTo(p1.dx, p1.dy);
+      path.lineTo(p2.dx, p2.dy);
+      return;
+    }
+    double unitNx = -dy / length;
+    double unitNy = dx / length;
+    double offsetAmount = (_random.nextDouble() - 0.5) * displacement;
+    Offset mid = Offset(midX + unitNx * offsetAmount, midY + unitNy * offsetAmount);
 
-    // 終点を計算（角度にランダムな揺らぎを加える）
-    final wobble = (_random.nextDouble() - 0.5) * pi / 3; // ±60度の範囲で揺らぐ
-    final endX = start.dx + length * cos(angle + wobble);
-    final endY = start.dy + length * sin(angle + wobble);
-    final end = Offset(endX, endY);
+    _createBoltPath(path, p1, mid, displacement * 0.5, depth - 1);
+    _createBoltPath(path, mid, p2, displacement * 0.5, depth - 1);
 
-    path.lineTo(end.dx, end.dy);
-
-    // 次の分岐へ
-    final nextLength = length * (_random.nextDouble() * 0.4 + 0.6); // 長さを0.6~1.0倍に減衰
-
-    // メインの枝を続ける
-    _generateBranch(path, end, nextLength, angle, depth - 1);
-
-    // 確率でサブの枝を分岐させる
-    if (_random.nextDouble() < 0.6) {
-      // 60%の確率で分岐
-      final branchAngle =
-          angle +
-          (_random.nextBool() ? 1 : -1) * (_random.nextDouble() * pi / 4 + pi / 6); // 30~75度傾ける
-
-      // 分岐用の新しいパスを開始
-      final branchPath = Path()..moveTo(end.dx, end.dy);
-      _generateBranch(branchPath, end, nextLength * 0.7, branchAngle, depth - 1);
-      path.addPath(branchPath, Offset.zero);
+    if (_random.nextDouble() < 0.4) { 
+      double angle = (_random.nextDouble() - 0.5) * 1.0;
+      double branchLen = length * 0.6;
+      double newDx = dx * cos(angle) - dy * sin(angle);
+      double newDy = dx * sin(angle) + dy * cos(angle);
+      double currentLen = sqrt(newDx * newDx + newDy * newDy);
+      if (currentLen > 0) {
+        Offset branchEnd = Offset(
+          mid.dx + (newDx / currentLen) * branchLen,
+          mid.dy + (newDy / currentLen) * branchLen
+        );
+        _createBoltPath(path, mid, branchEnd, displacement * 0.5, depth - 1);
+      }
     }
   }
 
-  // ✅ 修正: 雷パス生成のエントリーポイント
   Path _generateThunderPath() {
     final path = Path();
-
-    // 画面外上部からスタート
-    final startX = _random.nextDouble() * 1.2 - 0.1; // -0.1 ~ 1.1
-    final startY = -0.2;
+    final startX = 0.2 + _random.nextDouble() * 0.6;
+    final startY = -0.1;
     final start = Offset(startX, startY);
-
-    path.moveTo(start.dx, start.dy);
-
-    // メインの角度（ほぼ下向き）
-    final mainAngle = pi / 2 + (_random.nextDouble() - 0.5) * pi / 6; // 下方向 ±30度
-
-    // 再帰的に雷を生成（開始点、初期長さ、角度、再帰深度）
-    _generateBranch(path, start, 150.0, mainAngle, 6);
-
+    final endX = startX + (_random.nextDouble() - 0.5) * 0.6;
+    final endY = 0.8 + _random.nextDouble() * 0.3;
+    final end = Offset(endX, endY);
+    _createBoltPath(path, start, end, 0.25, 7);
     return path;
   }
+  // ----------------------------------------
 
   _Particle _createParticle({bool randomY = false}) {
     final def = _currentDef!;
@@ -127,6 +128,10 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
 
     double x = _random.nextDouble() * w;
     double y = 0.0;
+    
+    if (def.drawType == EffectDrawType.ember) {
+      x = _random.nextDouble() * 1.2 - 0.1;
+    }
 
     switch (def.spawnType) {
       case SpawnType.top:
@@ -140,7 +145,17 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
         break;
     }
 
-    double size = def.minSize + _random.nextDouble() * (def.maxSize - def.minSize);
+    // サイズ分布
+    double sizeRatio;
+    if (def.drawType == EffectDrawType.ember) {
+      double r = _random.nextDouble();
+      sizeRatio = pow(r, 4).toDouble(); 
+    } else {
+      sizeRatio = _random.nextDouble();
+    }
+    
+    double size = def.minSize + sizeRatio * (def.maxSize - def.minSize);
+    
     double speedX = def.minSpeedX + _random.nextDouble() * (def.maxSpeedX - def.minSpeedX);
     double speedY = def.minSpeedY + _random.nextDouble() * (def.maxSpeedY - def.minSpeedY);
 
@@ -148,29 +163,45 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
         ? def.colors[_random.nextInt(def.colors.length)]
         : Colors.white;
 
-    // ❄️ 雪: 奥行きの表現 (手前は速くくっきり、奥は遅く薄く)
-    if (def.drawType == EffectDrawType.snow) {
-      final sizeRatio = (size - def.minSize) / (def.maxSize - def.minSize);
-      speedY = 0.0005 + (sizeRatio * 0.0015);
-      final opacity = 0.4 + (sizeRatio * 0.6);
+    bool isTrail = false;
+    double randomPhase = _random.nextDouble() * 2 * pi;
+
+    if (def.drawType == EffectDrawType.ember) {
+      isTrail = true;
+      double chaos = 0.003;
+      speedX += (_random.nextDouble() - 0.5) * chaos;
+      speedY += (_random.nextDouble() - 0.5) * chaos * 0.5;
+      double speedFactor = 0.5 + sizeRatio * 1.0; 
+      speedX *= speedFactor;
+      speedY *= speedFactor;
+      
+      if (sizeRatio > 0.8) {
+        color = const Color(0xFFFFE0B2); 
+      } else if (sizeRatio > 0.4) {
+        color = Colors.deepOrangeAccent; 
+      } else {
+        color = const Color(0xFF5D4037); 
+      }
+    } 
+    else if (def.drawType == EffectDrawType.snow) {
+      final ratio = (size - def.minSize) / (def.maxSize - def.minSize);
+      speedY = 0.0005 + (ratio * 0.0015);
+      final opacity = 0.4 + (ratio * 0.6);
       color = color.withOpacity(opacity);
-    }
-    // 🫧 泡: 浮力の表現 (大きい泡ほど速く昇る)
+    } 
     else if (def.drawType == EffectDrawType.bubble) {
-      final sizeRatio = (size - def.minSize) / (def.maxSize - def.minSize);
-      speedY = -0.0005 - (sizeRatio * 0.0015);
-    }
-    // 🔥 火の粉: ランダムな透明度
+      final ratio = (size - def.minSize) / (def.maxSize - def.minSize);
+      speedY = -0.0005 - (ratio * 0.0015);
+    } 
     else if (def.drawType == EffectDrawType.ember) {
       color = color.withOpacity(_random.nextDouble() * 0.5 + 0.5);
     }
 
-    // 回転
     double rotation = 0;
     double rotationSpeed = 0;
-    if (def.drawType != EffectDrawType.rain) {
+    
+    if (def.drawType != EffectDrawType.rain && def.drawType != EffectDrawType.ember) {
       rotation = _random.nextDouble() * 2 * pi;
-      // 雪はゆっくり回転する
       final rotScale = def.drawType == EffectDrawType.snow ? 0.02 : 0.05;
       rotationSpeed = (_random.nextDouble() - 0.5) * rotScale;
     }
@@ -196,6 +227,9 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
       wobbleOffset: _random.nextDouble() * 2 * pi,
       wobbleSpeed: 1.0 + _random.nextDouble(),
       thunderPath: thunderPath,
+      isTrail: isTrail,
+      sizeRatio: sizeRatio,
+      randomPhase: randomPhase,
     );
   }
 
@@ -216,71 +250,71 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
             _time += 0.016;
             final def = _currentDef!;
 
+            // 生成ロジック
             if (def.drawType == EffectDrawType.lightning) {
               if (_remainingBurstShots > 0) {
-                // --- バースト中 (連続発生) ---
                 _burstShotCooldown -= 0.016;
                 if (_burstShotCooldown <= 0) {
-                  // 生成上限チェック
-                  if (_particles.length < def.particleCount) {
-                    _particles.add(_createParticle());
-                  }
-
+                  if (_particles.length < def.particleCount) _particles.add(_createParticle());
                   _remainingBurstShots--;
-
-                  // 次の1発までの短い間隔 (0.1秒〜0.25秒)
-                  // 少しバラつきを持たせて自然にする
                   _burstShotCooldown = _random.nextDouble() * 0.15 + 0.1;
-
-                  // バースト終了判定
-                  if (_remainingBurstShots <= 0) {
-                    // 次のバーストまでの長いクールダウン (2秒〜5秒)
-                    _lightningCooldown = _random.nextDouble() * 3.0 + 2.0;
-                  }
+                  if (_remainingBurstShots <= 0) _lightningCooldown = _random.nextDouble() * 3.0 + 2.0;
                 }
               } else {
-                // --- 待機中 (何も起きない) ---
                 _lightningCooldown -= 0.016;
                 if (_lightningCooldown <= 0) {
-                  // バースト開始！
-                  _remainingBurstShots = _random.nextInt(2) + 2; // 2本 または 3本
-                  _burstShotCooldown = 0; // 即座に1発目を撃つ
+                  _remainingBurstShots = _random.nextInt(2) + 2; 
+                  _burstShotCooldown = 0;
                 }
               }
             } else if (_particles.length < def.particleCount) {
-              // 泡などは全画面に出てほしいので、足りなければ確率で補充
-              // (lightningは上で制御しているのでここには来ない)
-              // ※ここで確率を入れることで一気に出現するのを防いでいる
               if (def.drawType == EffectDrawType.bubble) {
                 if (_random.nextDouble() < 0.05) _particles.add(_createParticle());
               } else {
-                // 通常のエフェクト
-                if (_random.nextDouble() < 0.02) _particles.add(_createParticle());
+                if (_random.nextDouble() < 0.08) _particles.add(_createParticle());
               }
             }
 
-            // パーティクル更新ループ (位置計算など)
+            // 更新ロジック
             for (var p in _particles) {
-              p.x += p.speedX;
-              p.y += p.speedY;
-              p.rotation += p.rotationSpeed;
-              p.life -= def.decayRate;
-
+              
               if (def.drawType == EffectDrawType.ember) {
-                p.life -= _random.nextDouble() * 0.01;
+                double decay = (1.1 - p.sizeRatio) * 0.004; 
+                p.life -= decay;
+
+                // リアルな気流シミュレーション
+                double turbulenceX = sin(p.y * 5 + _time * 2 + p.randomPhase) * cos(p.x * 3 + p.randomPhase);
+                double turbulenceY = cos(p.y * 4 + _time * 1.5 + p.randomPhase) * sin(p.x * 6);
+                
+                double strength = 0.0005 * (1.5 - p.sizeRatio);
+
+                p.speedX += turbulenceX * strength;
+                p.speedY += turbulenceY * strength * 0.5;
+
+                p.speedX *= 0.98;
+                p.speedY *= 0.99;
+
+                p.speedY -= 0.0001 * (1.0 + p.sizeRatio); 
+
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.rotation = atan2(p.speedY, p.speedX) + pi / 2;
+
+              } else {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.rotation += p.rotationSpeed;
+                p.life -= def.decayRate;
               }
 
-              if (def.wobbleStrength > 0) {
+              if (def.drawType != EffectDrawType.ember && def.wobbleStrength > 0) {
                 if (def.drawType == EffectDrawType.snow) {
                   p.x += sin(_time + p.wobbleOffset) * def.wobbleStrength * 0.5;
                 } else if (def.drawType == EffectDrawType.bubble) {
-                  final wobble =
+                   final wobble =
                       sin(_time * p.wobbleSpeed + p.wobbleOffset) * 0.5 +
                       sin(_time * p.wobbleSpeed * 0.5 + p.wobbleOffset) * 0.5;
                   p.x += wobble * def.wobbleStrength;
-                } else if (def.drawType == EffectDrawType.petal) {
-                  p.x += sin(_time * 2 + p.wobbleOffset) * def.wobbleStrength;
-                  p.y += cos(_time + p.wobbleOffset) * (def.wobbleStrength * 0.5);
                 } else {
                   p.x += sin(_time * 2 + p.wobbleOffset) * def.wobbleStrength;
                 }
@@ -294,32 +328,23 @@ class _SparkleEffectOverlayState extends ConsumerState<SparkleEffectOverlay>
               if (def.drawType == EffectDrawType.lightning) {
                 reset = p.life <= 0;
               } else {
-                reset = p.life <= 0 || p.y > 1.1 || p.y < -0.2 || p.x < -0.2 || p.x > 1.2;
+                reset = p.life <= 0 || p.y > 1.2 || p.y < -0.2 || p.x < -0.2 || p.x > 1.2;
               }
 
               if (reset) {
-                // 雷の場合は消滅させる (次の生成はタイマーが管理)
-                if (def.drawType == EffectDrawType.lightning) {
-                  // リストから削除するためにマークしたいが、
-                  // 下の removeWhere で処理するのでここでは何もしないでOK
-                  // (p.life <= 0 になっていれば削除される)
-                } else {
-                  // 他のエフェクトは再利用
+                if (def.drawType != EffectDrawType.lightning) {
                   p.reset(_createParticle());
                 }
               }
             }
 
-            // 寿命が尽きたパーティクルを削除 (雷用)
-            // 他のエフェクトは reset で再利用しているので life > 0 に戻っているはずだが、
-            // 安全のため lightning 限定の削除ロジックにする
             if (def.drawType == EffectDrawType.lightning) {
               _particles.removeWhere((p) => p.life <= 0);
             }
 
             return RepaintBoundary(
               child: CustomPaint(
-                painter: _ParticlePainter(_particles, def),
+                painter: _ParticlePainter(_particles, def, _time),
                 child: const SizedBox.expand(),
               ),
             );
@@ -342,6 +367,9 @@ class _Particle {
   double wobbleOffset;
   double wobbleSpeed;
   Path? thunderPath;
+  bool isTrail;
+  double sizeRatio;
+  double randomPhase;
 
   _Particle({
     required this.x,
@@ -357,6 +385,9 @@ class _Particle {
     required this.wobbleOffset,
     this.wobbleSpeed = 1.0,
     this.thunderPath,
+    this.isTrail = false,
+    this.sizeRatio = 0.5,
+    this.randomPhase = 0.0,
   });
 
   void reset(_Particle p) {
@@ -373,14 +404,18 @@ class _Particle {
     wobbleOffset = p.wobbleOffset;
     wobbleSpeed = p.wobbleSpeed;
     thunderPath = p.thunderPath;
+    isTrail = p.isTrail;
+    sizeRatio = p.sizeRatio;
+    randomPhase = p.randomPhase;
   }
 }
 
 class _ParticlePainter extends CustomPainter {
   final List<_Particle> particles;
   final EffectDef def;
+  final double time;
 
-  _ParticlePainter(this.particles, this.def);
+  _ParticlePainter(this.particles, this.def, this.time);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -396,139 +431,174 @@ class _ParticlePainter extends CustomPainter {
         canvas.rotate(p.rotation);
       } else {
         canvas.save();
+        final matrix = Matrix4.identity();
+        matrix.scale(size.width, size.height);
+        canvas.transform(matrix.storage);
       }
 
       double opacity = (p.life / p.maxLife).clamp(0.0, 1.0);
 
+      // --- 色・描画計算 ---
       if (def.drawType == EffectDrawType.ember) {
-        opacity = p.life < 0.2 ? p.life * 5.0 : 1.0;
-      }
+        opacity *= 0.6;
+        double flicker = sin(time * 10 + p.randomPhase) * 0.15 + 0.85;
+        opacity *= flicker;
 
-      if (def.drawType == EffectDrawType.lightning) {
-        // 雷フェードアウト
-        opacity = p.life > 0.8 ? (1.0 - p.life) * 5.0 : p.life * 1.2;
-        opacity = opacity.clamp(0.0, 1.0);
-      }
+        Color baseColor;
+        double glowStrength;
 
-      paint.color = p.color.withOpacity(opacity * p.color.opacity);
+        if (p.sizeRatio > 0.8) {
+          baseColor = Color.lerp(Colors.orangeAccent, Colors.white, p.life * 0.5)!;
+          glowStrength = 1.0; 
+        } else if (p.sizeRatio > 0.4) {
+          baseColor = Color.lerp(Colors.deepOrange, Colors.brown, 1.0 - p.life)!;
+          glowStrength = 0.6;
+        } else {
+          baseColor = Color.lerp(const Color(0xFF5D4037), const Color(0xFF210A0A), 1.0 - p.life)!;
+          glowStrength = 0.0;
+        }
+        
+        if (p.life < 0.3) opacity *= p.life * 3.0;
+        paint.color = baseColor.withOpacity(opacity);
+        
+        double speed = sqrt(p.speedX * p.speedX + p.speedY * p.speedY);
+        // 短めのトレイル (300.0)
+        double trailLen = speed * 300.0 * p.size; 
+        trailLen = max(trailLen, p.size * 1.5);
+        double width = p.size * 0.15; 
 
-      switch (def.drawType) {
-        case EffectDrawType.petal:
-          canvas.drawOval(
-            Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.6),
+        if (glowStrength > 0) {
+          paint.maskFilter = MaskFilter.blur(BlurStyle.normal, glowStrength);
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromCenter(center: Offset(0, trailLen / 2), width: width * 3.0, height: trailLen),
+              Radius.circular(width),
+            ),
             paint,
           );
+        }
+        
+        paint.maskFilter = null;
+        paint.color = baseColor.withOpacity(opacity * 0.8);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(center: Offset(0, trailLen / 2), width: width, height: trailLen),
+            Radius.circular(width),
+          ),
+          paint,
+        );
+        
+        canvas.restore();
+        continue; 
+      } 
+      // ... (他エフェクト)
+      else if (def.drawType == EffectDrawType.lightning) {
+        opacity = p.life > 0.8 ? (1.0 - p.life) * 5.0 : p.life * 1.5;
+        opacity = opacity.clamp(0.0, 1.0);
+        paint.color = p.color.withOpacity(opacity * p.color.opacity);
+      } else {
+        paint.color = p.color.withOpacity(opacity * p.color.opacity);
+      }
+
+      // --- 描画 (共通) ---
+      switch (def.drawType) {
+        
+        // ★ 変更: 桜の花びらのパス描画
+        case EffectDrawType.petal:
+          final path = Path();
+          // スリムな比率を維持
+          final w = p.size * 0.8; 
+          final h = p.size * 1.2;
+          
+          // (0,0)を中心に描画
+          path.moveTo(0, h * 0.5); // 下の先端
+          
+          // 左側 (下から左上の山へ)
+          path.cubicTo(
+            -w * 0.5, h * 0.1,    // 制御点1 (下部の膨らみ)
+            -w * 0.4, -h * 0.4,   // 制御点2 (上部の絞り)
+            -w * 0.15, -h * 0.5   // 左上の山頂 (少し中心からずらす)
+          );
+          
+          // 上部の切り込み (V字)
+          path.lineTo(0, -h * 0.35);       // 中央の谷 (切り込みの深さ)
+          path.lineTo(w * 0.15, -h * 0.5); // 右上の山頂
+          
+          // 右側 (右上の山から下へ)
+          path.cubicTo(
+            w * 0.4, -h * 0.4,    // 制御点2
+            w * 0.5, h * 0.1,     // 制御点1
+            0, h * 0.5            // 下の先端に戻る
+          );
+          
+          path.close();
+          canvas.drawPath(path, paint);
           break;
 
         case EffectDrawType.snow:
-          paint.style = PaintingStyle.stroke;
-          paint.strokeWidth = (p.size * 0.1).clamp(0.5, 1.5);
-          paint.strokeCap = StrokeCap.round;
-          paint.color = Colors.white.withOpacity(opacity);
-
-          final radius = p.size / 2;
-
-          // 6方向への枝を描画 (雪の結晶)
-          for (int i = 0; i < 3; i++) {
-            canvas.save();
-            canvas.rotate(pi / 3 * i); // 60度ずつ回転 (3本で6方向)
-
-            // メインの軸線
-            canvas.drawLine(Offset(0, -radius), Offset(0, radius), paint);
-
-            // 枝分かれの装飾 (視認性を考慮してシンプルに)
-            final branchY = radius * 0.6;
-            final branchSize = radius * 0.3;
-
-            // 上側の枝
-            canvas.drawLine(Offset(0, -branchY), Offset(-branchSize, -branchY - branchSize), paint);
-            canvas.drawLine(Offset(0, -branchY), Offset(branchSize, -branchY - branchSize), paint);
-
-            // 下側の枝
-            canvas.drawLine(Offset(0, branchY), Offset(-branchSize, branchY + branchSize), paint);
-            canvas.drawLine(Offset(0, branchY), Offset(branchSize, branchY + branchSize), paint);
-
-            canvas.restore();
-          }
+           paint.style = PaintingStyle.stroke;
+           paint.strokeWidth = (p.size * 0.1).clamp(0.5, 1.5);
+           paint.strokeCap = StrokeCap.round;
+           final radius = p.size / 2;
+           for (int i = 0; i < 3; i++) {
+             canvas.save();
+             canvas.rotate(pi / 3 * i);
+             canvas.drawLine(Offset(0, -radius), Offset(0, radius), paint);
+             final branchY = radius * 0.6;
+             final branchSize = radius * 0.3;
+             canvas.drawLine(Offset(0, -branchY), Offset(-branchSize, -branchY - branchSize), paint);
+             canvas.drawLine(Offset(0, -branchY), Offset(branchSize, -branchY - branchSize), paint);
+             canvas.drawLine(Offset(0, branchY), Offset(-branchSize, branchY + branchSize), paint);
+             canvas.drawLine(Offset(0, branchY), Offset(branchSize, branchY + branchSize), paint);
+             canvas.restore();
+           }
           break;
 
         case EffectDrawType.bubble:
-          // 本体 (薄い)
-          final fillPaint = Paint()
-            ..color = Colors.lightBlueAccent.withOpacity(0.1 * opacity)
-            ..style = PaintingStyle.fill;
-          canvas.drawCircle(Offset.zero, p.size, fillPaint);
-
-          // 輪郭
-          final strokePaint = Paint()
-            ..color = Colors.white.withOpacity(0.5 * opacity)
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.0;
-          canvas.drawCircle(Offset.zero, p.size, strokePaint);
-
-          // ハイライト
-          final highlightPaint = Paint()
-            ..color = Colors.white.withOpacity(0.8 * opacity)
-            ..style = PaintingStyle.fill;
-
-          canvas.drawOval(
-            Rect.fromCenter(
-              center: Offset(-p.size * 0.4, -p.size * 0.4),
-              width: p.size * 0.4,
-              height: p.size * 0.25,
-            ),
-            highlightPaint,
-          );
-          canvas.drawCircle(Offset(p.size * 0.4, p.size * 0.4), p.size * 0.1, highlightPaint);
+          paint.color = p.color.withOpacity(opacity * 0.3);
+          paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
+          canvas.drawCircle(Offset.zero, p.size * 1.5, paint);
+          paint.color = Colors.white.withOpacity(opacity);
+          paint.maskFilter = null;
+          canvas.drawCircle(Offset.zero, p.size * 0.6, paint);
+          paint.blendMode = def.blendMode;
           break;
 
         case EffectDrawType.ember:
-          canvas.drawCircle(Offset.zero, p.size, paint);
           break;
 
         case EffectDrawType.lightning:
           if (p.thunderPath != null && p.life > 0) {
+            paint.style = PaintingStyle.stroke;
+            paint.strokeCap = StrokeCap.round;
+            paint.strokeJoin = StrokeJoin.round;
+            paint.blendMode = BlendMode.plus;
+            
+            canvas.restore(); 
+            canvas.save();
+            
             final matrix = Matrix4.identity();
-            matrix.translate(p.x * size.width * 0.2, p.y * size.height * 0.2);
-            matrix.scale(size.width * 1.2, size.height * 0.8);
+            matrix.scale(size.width, size.height);
             final transformedPath = p.thunderPath!.transform(matrix.storage);
 
-            paint.style = PaintingStyle.stroke;
-            paint.strokeCap = StrokeCap.butt;
-            paint.strokeJoin = StrokeJoin.miter;
-            paint.blendMode = BlendMode.plus;
-
-            // 1. 外光
-            paint.color = p.color.withOpacity(opacity * 0.6);
-            paint.strokeWidth = p.size * 6.0;
-            paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 15.0);
+            paint.color = Colors.blueAccent.withOpacity(opacity * 0.4);
+            paint.strokeWidth = 4.0;
+            paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 8.0);
             canvas.drawPath(transformedPath, paint);
 
-            // 2. 中間
-            paint.color = p.color.withOpacity(opacity * 0.8);
-            paint.strokeWidth = p.size * 3.0;
-            paint.maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
-            canvas.drawPath(transformedPath, paint);
-
-            // 3. コア
             paint.color = Colors.white.withOpacity(opacity);
-            paint.strokeWidth = p.size * 1.0;
+            paint.strokeWidth = 1.0;
             paint.maskFilter = null;
             canvas.drawPath(transformedPath, paint);
           }
           break;
 
-        // ✅ 修正: 雨の描画 (回転なしで描画)
         case EffectDrawType.rain:
           paint.style = PaintingStyle.stroke;
-          paint.strokeWidth = 2.0; // 少し太く
+          paint.strokeWidth = 2.0;
           paint.strokeCap = StrokeCap.round;
-
-          // 速度ベクトルの逆方向に線を引く (残像)
-          // 20.0 は長さの係数
           final tailX = -p.speedX * 500.0;
           final tailY = -p.speedY * 500.0;
-
           canvas.drawLine(Offset.zero, Offset(tailX, tailY), paint);
           break;
       }

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/party_controller.dart';
-import '../../logic/gacha_controller.dart';
 import 'character_detail_screen.dart';
 import 'bulk_sell_screen.dart';
 
@@ -18,8 +17,13 @@ class PartyEditScreen extends ConsumerStatefulWidget {
 
 class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
   // フィルター状態
-  final Set<Rarity> _selectedRarities = {Rarity.n, Rarity.r, Rarity.sr, Rarity.ssr};
+  final Set<Rarity> _selectedRarities = Rarity.values.toSet();
+  final Set<EffectType> _selectedEffects = EffectType.values.toSet(); // ✅ 追加: エフェクトフィルター
+  
   bool _showFavoritesOnly = false;
+  bool _showWithSkillOnly = false; // ✅ 追加: スキル持ちのみ
+  bool _showWithSeriesOnly = false; // ✅ 追加: シリーズ持ちのみ
+
   int? _selectedSlotIndex;
 
   // フィルターダイアログ
@@ -31,11 +35,14 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('表示フィルター'),
+              scrollable: true, // コンテンツが増えたのでスクロール可能に
               content: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // --- 基本スイッチ ---
                   SwitchListTile(
-                    title: const Text('お気に入りのみ表示'),
+                    title: const Text('お気に入りのみ'),
                     secondary: const Icon(Icons.favorite, color: Colors.pinkAccent),
                     value: _showFavoritesOnly,
                     onChanged: (val) {
@@ -43,11 +50,31 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                       this.setState(() {}); 
                     },
                   ),
+                  SwitchListTile(
+                    title: const Text('スキル所持のみ'),
+                    secondary: const Icon(Icons.flash_on, color: Colors.amber),
+                    value: _showWithSkillOnly,
+                    onChanged: (val) {
+                      setState(() => _showWithSkillOnly = val);
+                      this.setState(() {}); 
+                    },
+                  ),
+                  SwitchListTile(
+                    title: const Text('シリーズ所持のみ'),
+                    secondary: const Icon(Icons.collections_bookmark, color: Colors.deepPurpleAccent),
+                    value: _showWithSeriesOnly,
+                    onChanged: (val) {
+                      setState(() => _showWithSeriesOnly = val);
+                      this.setState(() {}); 
+                    },
+                  ),
+                  
                   const Divider(),
-                  const Text('レアリティ'),
+                  const Text('レアリティ', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
+                    runSpacing: 4,
                     children: Rarity.values.map((rarity) {
                       final isSelected = _selectedRarities.contains(rarity);
                       return FilterChip(
@@ -68,14 +95,46 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                       );
                     }).toList(),
                   ),
+
+                  const Divider(),
+                  // ✅ 追加: エフェクトフィルター
+                  const Text('エフェクト', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: EffectType.values.map((effect) {
+                      final isSelected = _selectedEffects.contains(effect);
+                      return FilterChip(
+                        label: Text(_getEffectLabel(effect)),
+                        selected: isSelected,
+                        selectedColor: Colors.cyan.withOpacity(0.3),
+                        checkmarkColor: Colors.cyanAccent,
+                        onSelected: (bool selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedEffects.add(effect);
+                            } else {
+                              _selectedEffects.remove(effect);
+                            }
+                          });
+                          this.setState(() {}); 
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () {
                     setState(() {
+                      // リセット処理
                       _selectedRarities.addAll(Rarity.values);
+                      _selectedEffects.addAll(EffectType.values);
                       _showFavoritesOnly = false;
+                      _showWithSkillOnly = false;
+                      _showWithSeriesOnly = false;
                     });
                     this.setState(() {});
                   },
@@ -93,6 +152,19 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
     );
   }
 
+  // エフェクト名の日本語表記
+  String _getEffectLabel(EffectType type) {
+    switch (type) {
+      case EffectType.none: return 'なし';
+      case EffectType.cherry: return '桜';
+      case EffectType.ember: return '火';
+      case EffectType.bubble: return '泡';
+      case EffectType.rain: return '雨';
+      case EffectType.lightning: return '雷';
+      case EffectType.snow: return '雪';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final activePartyAsync = ref.watch(activePartyProvider);
@@ -102,10 +174,33 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
     final activeParty = activePartyAsync.value ?? {};
     final allItems = myItemsAsync.value ?? [];
 
+    // ✅ フィルタリングロジックの更新
     final displayItems = allItems.where((item) {
+      // 1. お気に入り
       if (_showFavoritesOnly && !item.isFavorite) return false;
-      return _selectedRarities.contains(item.rarity);
+      
+      // 2. レアリティ
+      if (!_selectedRarities.contains(item.rarity)) return false;
+      
+      // 3. エフェクト (選択されていないエフェクトは非表示)
+      if (!_selectedEffects.contains(item.effectType)) return false;
+
+      // 4. スキル有無
+      if (_showWithSkillOnly && item.skillType == SkillType.none) return false;
+
+      // 5. シリーズ有無
+      if (_showWithSeriesOnly && item.seriesId == SeriesType.none) return false;
+
+      return true;
     }).toList();
+
+    // フィルターアイコンの色制御（フィルター適用中なら色を変える）
+    final bool isFilterActive = 
+        _selectedRarities.length < Rarity.values.length ||
+        _selectedEffects.length < EffectType.values.length ||
+        _showFavoritesOnly ||
+        _showWithSkillOnly ||
+        _showWithSeriesOnly;
 
     return Scaffold(
       appBar: AppBar(
@@ -114,7 +209,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: (_selectedRarities.length < 4 || _showFavoritesOnly) ? Colors.amber : null,
+              color: isFilterActive ? Colors.amber : null,
             ),
             tooltip: '絞り込み',
             onPressed: _showFilterDialog,
@@ -256,7 +351,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('先に上のスロットをタップして選択してください'), duration: Duration(milliseconds: 1000)));
                           }
                         },
-                        // ✅ 長押し: 詳細画面へ遷移 (ドラッグ廃止)
+                        // 長押し: 詳細画面へ遷移
                         onLongPress: () {
                           HapticFeedback.mediumImpact();
                           Navigator.push(
@@ -285,7 +380,6 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
     final isSelected = _selectedSlotIndex == slotId;
     final partyController = ref.read(partyControllerProvider.notifier);
 
-    // ✅ DragTarget を削除し、シンプルな GestureDetector に変更
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
@@ -323,7 +417,7 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                   File(item.imagePath),
                   fit: BoxFit.cover,
                   alignment: Alignment.topCenter,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.error),
+                  errorBuilder: (_,__,___) => const Icon(Icons.error),
                 ),
               ),
       ),
@@ -365,6 +459,12 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
           const Positioned(
             bottom: 2, right: 2,
             child: Icon(Icons.favorite, color: Colors.pinkAccent, size: 14),
+          ),
+        // ✅ スキル/シリーズ持ちのインジケーター（オプション）
+        if (item.skillType != SkillType.none)
+           Positioned(
+            top: 2, right: 2,
+            child: Icon(Icons.flash_on, color: Colors.amber.withOpacity(0.8), size: 12),
           ),
       ],
     );
