@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'tables.dart';
+import 'database.dart';
 
 part 'app_database.g.dart';
 
@@ -36,8 +36,3 @@ LazyDatabase _openConnection() {
     return NativeDatabase(file);
   });
 }
-
-
-
-
-

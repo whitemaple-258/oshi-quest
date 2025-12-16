@@ -1,72 +1,106 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 振動用
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
-import '../../logic/gacha_controller.dart';
 import '../../data/master_data/gacha_logic_master.dart';
+import '../../data/extensions/gacha_item_extension.dart';
+import 'full_screen_image_viewer.dart';
 
 class GachaLineupScreen extends ConsumerWidget {
   const GachaLineupScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allItemsAsync = ref.watch(lineupItemsProvider);
+    final db = ref.watch(databaseProvider);
+    // ✅ 変更: ガチャアイテム(GachaItems)ではなく、画像プール(CharacterImages)を監視
+    final imagesStream = db.select(db.characterImages).watch();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ガチャ提供割合')),
+      appBar: AppBar(title: const Text('提供割合・画像プール')),
       body: Column(
         children: [
-          // ✅ 追加: 確率表示エリア (スクロール可能にしても良いが、今回は固定表示)
+          // --- 1. 確率表示エリア (変更なし) ---
           ExpansionTile(
             title: const Text(
               '排出確率・詳細',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
+            initiallyExpanded: false,
             children: [
               Container(
-                height: 200, // 高さを制限してスクロールさせる
+                height: 300, // 内容が増えたので高さを拡張
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // --- 1. レアリティ ---
                       const Text(
                         '【レアリティ別 提供割合】',
                         style: TextStyle(fontWeight: FontWeight.bold, color: Colors.pinkAccent),
                       ),
                       const SizedBox(height: 4),
-                      _buildRateRow('N (Normal)', '約 50%'),
-                      _buildRateRow('R (Rare)', '約 30%'),
-                      _buildRateRow('SR (Super Rare)', '約 15%'),
-                      _buildRateRow('SSR (Legendary)', '約 5%'),
-                      const Text(
-                        '※LUK値によって高レアリティの確率が上昇します',
-                        style: TextStyle(fontSize: 10, color: Colors.grey),
-                      ),
+                      _buildRateRow('N (Normal)', '55%'),
+                      _buildRateRow('R (Rare)', '30%'),
+                      _buildRateRow('SR (Super Rare)', '12%'),
+                      _buildRateRow('SSR (Legendary)', '3%'),
+                      
+                      const SizedBox(height: 16),
 
-                      const SizedBox(height: 12),
+                      // --- 2. 画像とタイツ君の仕様 (Updated!) ---
                       const Text(
-                        '【スキル・シリーズ付与率】',
+                        '【画像排出と登録仕様】',
                         style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent),
                       ),
-                      const SizedBox(height: 4),
-                      _buildRateRow('スキル付与', '10% ~ 100% (レアリティ依存)'),
-                      _buildRateRow('シリーズ付与', '5% ~ 50% (レアリティ依存)'),
-                      _buildRateRow('エフェクト付与', '5% ~ 50% (レアリティ依存)'),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '・登録上限：最大 20枚\n'
+                        '・タイツ君排出率の変動：\n'
+                        '　登録画像数に応じて、タイツ君の出現率は100%から徐々に下がります。\n'
+                        '　上限(20枚)まで登録すると、最低保証値である「10%」になります。\n'
+                        '　(登録画像が多いほど、オリジナルキャラが出やすくなります)\n\n'
+                        '　[推移目安]\n'
+                        '　 0枚登録：タイツ君 100%\n'
+                        '　10枚登録：タイツ君  55%\n'
+                        '　20枚登録：タイツ君  10% (Min)',
+                        style: TextStyle(fontSize: 12, color: Colors.white70, height: 1.5),
+                      ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+
+                      // --- 3. スキル ---
                       const Text(
                         '【スキル一覧】',
                         style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
                       ),
+                      const Text(
+                        'レアリティに応じて確率で付与されます。',
+                        style: TextStyle(fontSize: 11, color: Colors.white54),
+                      ),
+                      const SizedBox(height: 4),
                       ...skillDefinitions.map(
                         (def) => _buildRateRow(
                           _getSkillName(def.type),
                           '${(def.probability * 100).toStringAsFixed(0)}%',
                         ),
                       ),
+
+                      const SizedBox(height: 16),
+
+                      // --- 4. シリーズ (New!) ---
+                      const Text(
+                        '【シリーズ効果】',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purpleAccent),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '稀に特定の「シリーズ」を持ったキャラが排出されます。\n'
+                        '同じシリーズを持つキャラをパーティに複数編成すると、ステータスにボーナスが発生します。',
+                        style: TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
+                      ),
+                      
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -75,60 +109,152 @@ class GachaLineupScreen extends ConsumerWidget {
           ),
           const Divider(height: 1),
 
-          // アイテムリスト (既存)
+          // --- 2. 画像プール表示エリア ---
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '排出対象画像 (登録済みプール)',
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+              ),
+            ),
+          ),
           Expanded(
-            child: allItemsAsync.when(
-              data: (items) {
-                if (items.isEmpty) {
-                  return const Center(child: Text('ラインナップがありません'));
+            child: StreamBuilder<List<CharacterImage>>(
+              stream: imagesStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('エラー: ${snapshot.error}'));
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(),
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final images = snapshot.data!;
+
+                // ============================================================
+                // 1. 表示用データの統合 (タイツ君 + ユーザー画像)
+                // ============================================================
+
+                // タイツ君の定義
+                final tightsDefinitions = [
+                  {'name': '全身タイツ君(N)', 'asset': 'assets/images/tights_gray.png'},
+                  {'name': '全身タイツ君(R)', 'asset': 'assets/images/tights_blue.png'},
+                  {'name': '全身タイツ君(SR)', 'asset': 'assets/images/tights_purple.png'},
+                  {'name': '全身タイツ君(SSR)', 'asset': 'assets/images/tights_gold.png'},
+                ];
+
+                // 統合リストを作成
+                final List<LineupDisplayItem> displayItems = [];
+
+                // A. タイツ君を追加
+                for (var def in tightsDefinitions) {
+                  displayItems.add(
+                    LineupDisplayItem(
+                      imageProvider: AssetImage(def['asset']!),
+                      name: def['name']!,
+                      isTightsMan: true,
+                    ),
+                  );
+                }
+
+                // B. ユーザー画像を追加
+                for (var img in images) {
+                  displayItems.add(
+                    LineupDisplayItem(
+                      // パスがnullなら空文字にしておく(エラービルダーが処理する)
+                      imageProvider: FileImage(File(img.imagePath)),
+                      name: img.name,
+                      isTightsMan: false,
+                    ),
+                  );
+                }
+
+                // ============================================================
+                // 2. GridViewの構築
+                // ============================================================
+                return GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.8,
+                  ),
+                  // 統合したリストの件数を使う
+                  itemCount: displayItems.length,
+
                   itemBuilder: (context, index) {
-                    final item = items[index];
-                    return ListTile(
-                      leading: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: Image.file(
-                            File(item.imagePath),
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.error),
+                    final item = displayItems[index];
+
+                    return GestureDetector(
+                      // タップ時の処理：全画面プレビューへ遷移
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            // 統合リスト全体と、現在のインデックスを渡す
+                            builder: (_) =>
+                                FullScreenImageViewer(items: displayItems, initialIndex: index),
                           ),
-                        ),
-                      ),
-                      title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('レアリティ: ${item.rarity.name.toUpperCase()}'),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (item.type == GachaItemType.frame)
-                            const Text(
-                              'FRAME',
-                              style: TextStyle(
-                                color: Colors.cyanAccent,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                          // 画像部分
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.white24),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Image(
+                                      image: item.imageProvider,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.grey[800],
+                                        child: const Icon(
+                                          Icons.broken_image,
+                                          color: Colors.white54,
+                                        ),
+                                      ),
+                                    ),
+                                    // タイツ君にはロックアイコンを表示(オプション)
+                                    if (item.isTightsMan)
+                                      const Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: Icon(Icons.lock, color: Colors.white38, size: 14),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ),
-                          const Text('提供中', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                          ),
+                          // 名前ラベル
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              item.name,
+                              style: const TextStyle(fontSize: 10, color: Colors.white70),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
-                      onLongPress: () {
-                        HapticFeedback.selectionClick();
-                        _showEditMenu(context, ref, item);
-                      },
                     );
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('エラー: $err')),
             ),
           ),
         ],
@@ -161,111 +287,6 @@ class GachaLineupScreen extends ConsumerWidget {
         return '幸運の星 (LUK UP)';
       default:
         return 'なし';
-    }
-  }
-
-  // --- 編集・削除メニュー ---
-
-  void _showEditMenu(BuildContext context, WidgetRef ref, GachaItem item) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('編集・再トリミング'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showEditDialog(context, ref, item);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('削除', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(ctx);
-                _confirmDelete(context, ref, item);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showEditDialog(BuildContext context, WidgetRef ref, GachaItem item) async {
-    final titleController = TextEditingController(text: item.title);
-
-    await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('推し編集'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'タイトル'),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: () async {
-                // 画像だけ先に再トリミングして更新
-                await ref
-                    .read(gachaControllerProvider.notifier)
-                    .updateItem(item.id, item.title, reCrop: true);
-                if (context.mounted) {
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('画像を更新しました')));
-                }
-              },
-              icon: const Icon(Icons.crop),
-              label: const Text('画像を再トリミングする'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('キャンセル')),
-          TextButton(
-            onPressed: () async {
-              // タイトル更新
-              await ref
-                  .read(gachaControllerProvider.notifier)
-                  .updateItem(item.id, titleController.text);
-              if (context.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('完了'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, GachaItem item) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('削除確認'),
-        content: Text('「${item.title}」をラインナップから削除しますか？\n※既に獲得済みのキャラ（個体）は消えません。'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('キャンセル')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('削除', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await ref.read(gachaControllerProvider.notifier).deleteItem(item.id);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('削除しました')));
-      }
     }
   }
 }

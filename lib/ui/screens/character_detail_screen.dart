@@ -1,12 +1,14 @@
 import 'dart:io';
-// import 'dart:ui'; // ImageFilterは不要になったので削除
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart' as drift; // drift.Value のためのインポート
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../logic/gacha_controller.dart';
 import '../widgets/sparkle_effect_overlay.dart';
 import 'bulk_sell_screen.dart';
+import 'image_pool_screen.dart'; // 整形・転生用
+import '../../data/extensions/gacha_item_extension.dart';
 
 class CharacterDetailScreen extends ConsumerStatefulWidget {
   final GachaItem? singleItem;
@@ -40,21 +42,147 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
     _pageController.dispose();
     super.dispose();
   }
+  
+  // --- 整形・転生フロー (前回のロジックを保持) ---
+  Future<void> _startModification(GachaItem item, ModificationType type) async {
+    final controller = ref.read(gachaControllerProvider.notifier);
+    final playerGems = ref.read(playerProvider).value?.willGems ?? 0;
+
+    final cost = controller.getModificationCost(item.rarity, type);
+    final typeName = type == ModificationType.reskin ? '整形' : '転生';
+    final desc = type == ModificationType.reskin 
+        ? '画像を差し替えます。\nステータスは維持されます。' 
+        : '新しい姿に生まれ変わります。\n画像を変更し、ステータスを再抽選します。\n(スキル、エフェクト等は維持)';
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('$typeNameしますか？'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(desc),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Text('必要ジェム: '),
+                const Icon(Icons.diamond, color: Colors.cyanAccent, size: 16),
+                Text(' $cost', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            if (playerGems < cost)
+               const Text('ジェムが不足しています。', style: TextStyle(color: Colors.redAccent)),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('キャンセル')),
+          TextButton(
+            onPressed: playerGems < cost ? null : () => Navigator.pop(ctx, true),
+            child: Text('実行する', style: TextStyle(color: playerGems < cost ? Colors.grey : null)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    final newImagePath = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ImagePoolScreen(isSelectionMode: true),
+        fullscreenDialog: true,
+      ),
+    );
+
+    if (newImagePath == null) return;
+
+    try {
+      if (type == ModificationType.reskin) {
+        await controller.reskinCharacter(item, newImagePath);
+      } else {
+        await controller.reincarnateCharacter(item, newImagePath);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$typeName完了！'), backgroundColor: Colors.green),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラー: ${e.toString().replaceAll('Exception: ', '')}'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  // --- お気に入り切り替え (前回のロジックを保持) ---
+  Future<void> _toggleFavorite(GachaItem item) async {
+    final db = ref.read(databaseProvider);
+    await (db.update(db.gachaItems)..where((t) => t.id.equals(item.id))).write(
+      GachaItemsCompanion(isFavorite: drift.Value(!item.isFavorite)),
+    );
+  }
+
+  // --- 4つのアクションボタンの共通化されたビルドメソッド ---
+  Widget _buildActionItem({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onTap,
+    String? subLabel, // 売却価格用
+  }) {
+    final effectiveColor = onTap == null ? Colors.white54 : color;
+    final itemColor = onTap == null ? Colors.black54 : Colors.white;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: effectiveColor,
+              size: 32,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(color: itemColor, fontSize: 10),
+            ),
+            if (subLabel != null)
+              Text(
+                subLabel,
+                style: TextStyle(color: effectiveColor, fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final myItemsAsync = ref.watch(myItemsProvider);
 
+    // ... (buildの大部分は省略) ...
+    // ... (AppBar, body, when, _getCurrentItem はそのまま) ...
+    
     return Scaffold(
-      backgroundColor: Colors.black,
-      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.black, 
+      extendBodyBehindAppBar: true, 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(color: Colors.black45, shape: BoxShape.circle),
+            decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
             child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
           ),
           onPressed: () => Navigator.pop(context),
@@ -120,56 +248,83 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
     }
   }
 
+  Widget _buildStatusRow(String label, int value, Color color) {
+    final maxValue = 50.0; // 仮の最大値
+    final progressValue = value / maxValue;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 50, // ラベル幅を確保
+            child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progressValue,
+                backgroundColor: Colors.white12,
+                color: color,
+                minHeight: 8, // 高さを確保
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text('+$value', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContent(GachaItem item) {
-    // 高さ制限 (imageHeight) を削除し、スクロール全体で高さを決定する
+    final imageHeight = MediaQuery.of(context).size.height * 0.6;
+    final partyAsync = ref.watch(activePartyProvider);
+    final isEquipped = partyAsync.value?.values.any((e) => e.id == item.id) ?? false;
+    final sellPrice = BulkSellScreen.getSellPrice(item.rarity);
+    final reskinCost = ref.read(gachaControllerProvider.notifier).getModificationCost(item.rarity, ModificationType.reskin);
+    final reincarnateCost = ref.read(gachaControllerProvider.notifier).getModificationCost(item.rarity, ModificationType.reincarnation);
+
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // --- 1. キャラクター画像エリア (横幅いっぱい、縦なりゆき) ---
-          Stack(
-            // fit: StackFit.expand, // 削除: 画像のサイズに合わせる
-            alignment: Alignment.topCenter,
-            children: [
-              // メイン画像: 横幅を画面に合わせて、縦はアスペクト比を維持して伸びる
-              Image.file(
-                File(item.imagePath),
-                fit: BoxFit.fitWidth, // ✅ 横幅いっぱい
-                width: double.infinity, // 明示的に横幅を最大にする
-                alignment: Alignment.topCenter,
-                errorBuilder: (_, __, ___) => Container(
-                  height: 300,
-                  color: Colors.grey[900],
-                  child: const Icon(Icons.broken_image, color: Colors.white),
+          // --- 1. キャラクターカードエリア (画像 + エフェクト) ---
+          SizedBox(
+            height: imageHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image(
+                  image: item.displayImageProvider,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  errorBuilder: (_, __, ___) => Container(color: Colors.grey[900]),
                 ),
-              ),
-
-              // エフェクト: Positioned.fill で画像エリア全体に広げる
-              if (item.effectType != EffectType.none)
-                Positioned.fill(child: SparkleEffectOverlay(effectType: item.effectType)),
-
-              // 下部の境界線をなじませるグラデーション
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 120, // グラデーションの高さを少し調整
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Colors.black],
-                      stops: [0.0, 1.0],
+                if (item.effectType != EffectType.none)
+                  SparkleEffectOverlay(effectType: item.effectType),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: 125,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.black],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
-          // --- 2. 情報エリア (黒背景) ---
+          // --- 2. 情報エリア ---
           Container(
             color: Colors.black,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -222,16 +377,27 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
                 ], Colors.blueGrey),
                 const SizedBox(height: 12),
 
-                // ステータス補正
-                _buildInfoCard('ステータス補正', [
-                  _buildRow('STR (筋力)', '+${item.strBonus}', color: Colors.redAccent),
-                  _buildRow('INT (知力)', '+${item.intBonus}', color: Colors.blueAccent),
-                  _buildRow('VIT (体力)', '+${item.vitBonus}', color: Colors.green),
-                  _buildRow('LUK (幸運)', '+${item.luckBonus}', color: Colors.purpleAccent),
-                  _buildRow('CHA (魅力)', '+${item.chaBonus}', color: Colors.pinkAccent),
-                ], Colors.indigo),
-                const SizedBox(height: 12),
+                // ステータス補正 (修正前のコードに存在しないが、前回のやり取りで実装されたロジックを流用)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    'ステータス補正', 
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 18,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                _buildStatusRow('STR', item.strBonus, Colors.redAccent),
+                _buildStatusRow('INT', item.intBonus, Colors.blueAccent),
+                _buildStatusRow('VIT', item.vitBonus, Colors.green),
+                _buildStatusRow('LUK', item.luckBonus, Colors.purpleAccent),
+                _buildStatusRow('CHA', item.chaBonus, Colors.pinkAccent),
 
+                const SizedBox(height: 32),
+                
                 // スキル情報
                 if (item.skillType != SkillType.none)
                   _buildInfoCard('保有スキル', [
@@ -258,9 +424,9 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
 
                 const SizedBox(height: 40),
 
-                // アクションボタン
+                // ✅ 修正: アクションボタンエリア
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                   decoration: BoxDecoration(
                     color: Colors.white10,
                     borderRadius: BorderRadius.circular(16),
@@ -269,62 +435,53 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // お気に入り
-                      InkWell(
-                        onTap: () {
-                          ref.read(gachaControllerProvider.notifier).toggleFavorite(item.id);
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Icon(
-                                item.isFavorite ? Icons.favorite : Icons.favorite_border,
-                                color: item.isFavorite ? Colors.pinkAccent : Colors.white,
-                                size: 32,
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'お気に入り',
-                                style: TextStyle(color: Colors.white, fontSize: 10),
-                              ),
-                            ],
-                          ),
-                        ),
+                      // 1. 整形
+                      _buildActionItem(
+                        icon: Icons.face,
+                        label: '整形',
+                        color: Colors.cyanAccent,
+                        subLabel: '(${reskinCost} 💎)',
+                        onTap: () => _startModification(item, ModificationType.reskin),
+                      ),
+                      
+                      Container(width: 1, height: 40, color: Colors.white24),
+                      
+                      // 2. 転生
+                      _buildActionItem(
+                        icon: Icons.autorenew,
+                        label: '転生',
+                        color: Colors.orangeAccent,
+                        subLabel: '(${reincarnateCost} 💎)',
+                        onTap: () => _startModification(item, ModificationType.reincarnation),
+                      ),
+                      
+                      Container(width: 1, height: 40, color: Colors.white24),
+
+                      // 3. お気に入り
+                      _buildActionItem(
+                        icon: item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                        label: 'お気に入り',
+                        color: item.isFavorite ? Colors.pinkAccent : Colors.white,
+                        onTap: () => _toggleFavorite(item),
                       ),
 
                       Container(width: 1, height: 40, color: Colors.white24),
 
-                      // 売却
-                      InkWell(
-                        onTap: () {
-                          BulkSellScreen.showSingleSellDialog(context, ref, item);
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              const Icon(
-                                Icons.monetization_on,
-                                color: Colors.amberAccent,
-                                size: 32,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '売却 (${BulkSellScreen.getSellPrice(item.rarity)})',
-                                style: const TextStyle(color: Colors.white, fontSize: 10),
-                              ),
-                            ],
-                          ),
-                        ),
+                      // 4. 売却
+                      _buildActionItem(
+                        icon: Icons.monetization_on,
+                        label: '売却',
+                        color: isEquipped ? Colors.white54 : Colors.amberAccent,
+                        subLabel: '(${sellPrice} 💎)',
+                        onTap: isEquipped 
+                          ? null 
+                          : () => BulkSellScreen.showSingleSellDialog(context, ref, item),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -332,8 +489,8 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
       ),
     );
   }
-
-  // --- Components & Helpers ---
+  
+  // --- Components & Helpers (変更なし) ---
 
   Widget _buildInfoCard(String title, List<Widget> children, Color color) {
     return Container(

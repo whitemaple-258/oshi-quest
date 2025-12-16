@@ -9,6 +9,7 @@ import 'gacha_lineup_screen.dart';
 import 'gacha_sequence_screen.dart';
 import 'gacha_result_screen.dart';
 import 'bulk_sell_screen.dart';
+import 'image_pool_screen.dart';
 
 class GachaScreen extends ConsumerStatefulWidget {
   const GachaScreen({super.key});
@@ -18,134 +19,25 @@ class GachaScreen extends ConsumerStatefulWidget {
 }
 
 class _GachaScreenState extends ConsumerState<GachaScreen> {
-  final TextEditingController _titleController = TextEditingController();
-  // 選択中のレアリティ（デフォルトN）
-  Rarity _selectedRarity = Rarity.n;
 
   @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
-  }
-
-  // --- 画像追加ロジック ---
-  Future<void> _pickAndSaveImage() async {
-    // 初期化
-    _titleController.clear();
-    _selectedRarity = Rarity.n;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('ガチャにアイテムを追加'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'あなたの推し画像を登録して、\nガチャのラインナップに追加します。',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'タイトル',
-                    hintText: '例: 推しの日常ショット',
-                    border: OutlineInputBorder(),
-                  ),
-                  autofocus: false,
-                ),
-                const SizedBox(height: 16),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('レアリティ', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 8),
-                // レアリティ選択
-                SegmentedButton<Rarity>(
-                  segments: const [
-                    ButtonSegment(value: Rarity.n, label: Text('N')),
-                    ButtonSegment(value: Rarity.r, label: Text('R')),
-                    ButtonSegment(value: Rarity.sr, label: Text('SR')),
-                    ButtonSegment(value: Rarity.ssr, label: Text('SSR')),
-                  ],
-                  selected: {_selectedRarity},
-                  onSelectionChanged: (Set<Rarity> newSelection) {
-                    setState(() {
-                      _selectedRarity = newSelection.first;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('キャンセル'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_titleController.text.trim().isNotEmpty) {
-                  Navigator.of(context).pop(true);
-                }
-              },
-              child: const Text('追加'),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (result != true) return;
-
-    try {
-      final repository = ref.read(gachaItemRepositoryProvider);
-
-      // ✅ 修正: 名前付き引数で渡す
-      await repository.pickAndSaveItem(
-        _titleController.text.trim(),
-        rarity: _selectedRarity,
-        type: GachaItemType.character, // デフォルト
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ガチャBOXに追加しました！'), backgroundColor: Colors.green),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('エラー: $e'), backgroundColor: Colors.red));
-      }
-    } finally {
-      _titleController.clear();
-    }
-  }
 
   // --- 単発ガチャ実行ロジック ---
   void _pullGacha() async {
     try {
-      final resultItem = await ref.read(gachaControllerProvider.notifier).pullGacha();
+      final resultItem = await ref.read(gachaControllerProvider.notifier).drawGacha(1);
 
-      if (resultItem != null && mounted) {
+      if (resultItem.isNotEmpty && mounted) {
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (ctx) => GachaAnimationDialog(
-            item: resultItem,
+            item: resultItem.first,
             onAnimationComplete: () {
               Navigator.pop(ctx);
-
-              // ✅ 修正: 共通の結果画面へ遷移 (リストにして渡す)
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => GachaResultScreen(results: [resultItem])),
+                MaterialPageRoute(builder: (_) => GachaResultScreen(results: resultItem)),
               );
             },
           ),
@@ -153,6 +45,7 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
       }
     } catch (e) {
       if (mounted) {
+        // エラーメッセージの整形
         final errorMsg = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(
           context,
@@ -165,7 +58,7 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
   void _pullGacha10() async {
     try {
       // 1. ガチャ実行
-      final resultItems = await ref.read(gachaControllerProvider.notifier).pullGacha10();
+      final resultItems = await ref.read(gachaControllerProvider.notifier).drawGacha(10);
 
       if (resultItems.isNotEmpty && mounted) {
         // 2. 演出用の「代表キャラ（最高レア）」を決定
@@ -179,7 +72,6 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
         }
 
         // 3. 魔法陣アニメーションを表示
-        // (単発と同じダイアログを使い、最高レアの色で演出する)
         showDialog(
           context: context,
           barrierDismissible: false, // アニメ中は閉じられないようにする
@@ -348,9 +240,14 @@ class _GachaScreenState extends ConsumerState<GachaScreen> {
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
-                  onPressed: gachaState.isLoading ? null : _pickAndSaveImage,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ImagePoolScreen()),
+                    );
+                  },
                   icon: const Icon(Icons.add_photo_alternate),
-                  label: const Text('ガチャの種（画像）を追加する'),
+                  label: const Text('ガチャの種（画像）を管理する'),
                   style: TextButton.styleFrom(foregroundColor: Colors.grey),
                 ),
               ),

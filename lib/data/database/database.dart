@@ -68,12 +68,19 @@ enum SeriesType {
   final int value;
 }
 
+// ✅ 新規追加: キャラのタイプ
 enum GachaItemType {
-  character(0),
-  frame(1);
+  userImage, // 0: ユーザー登録画像
+  tightsMan, // 1: 全身タイツ君
+}
 
-  const GachaItemType(this.value);
-  final int value;
+// ✅ 新規追加: タイツ君の色
+enum TightsColor {
+  gray, // N
+  blue, // R
+  purple,  // SR
+  gold, // SSR
+  none, // ユーザー画像の場合はnone
 }
 
 // エフェクトの種類
@@ -90,6 +97,11 @@ class Players extends Table {
   IntColumn get cha => integer().withDefault(const Constant(0))();
   IntColumn get vit => integer().withDefault(const Constant(0))();
   IntColumn get willGems => integer().withDefault(const Constant(500))();
+  IntColumn get tempStrExp => integer().withDefault(const Constant(0))();
+  IntColumn get tempVitExp => integer().withDefault(const Constant(0))();
+  IntColumn get tempIntExp => integer().withDefault(const Constant(0))();
+  IntColumn get tempLukExp => integer().withDefault(const Constant(0))();
+  IntColumn get tempChaExp => integer().withDefault(const Constant(0))();
   TextColumn get currentDebuff => text().nullable()();
   DateTimeColumn get debuffExpiresAt => dateTime().nullable()();
   DateTimeColumn get lastLoginAt => dateTime().withDefault(currentDateAndTime)();
@@ -100,13 +112,22 @@ class Players extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// ガチャの排出候補となる画像のパスを管理するテーブル
+class CharacterImages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get imagePath => text()(); // 画像のパス
+  TextColumn get name => text().withDefault(const Constant('名もなき推し'))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
 class GachaItems extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get imagePath => text()();
-  TextColumn get title => text()();
-  IntColumn get effectType => intEnum<EffectType>()();
+  TextColumn get imagePath => text().nullable()();
   IntColumn get type => intEnum<GachaItemType>().withDefault(const Constant(0))();
-  IntColumn get rarity => intEnum<Rarity>().withDefault(Constant(Rarity.n.value))();
+  IntColumn get tightsColor => intEnum<TightsColor>().withDefault(const Constant(0))();
+  TextColumn get title => text()();
+  IntColumn get rarity => intEnum<Rarity>()();
+  IntColumn get effectType => intEnum<EffectType>()();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
   IntColumn get intBonus => integer().withDefault(const Constant(0))();
@@ -125,6 +146,8 @@ class GachaItems extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get unlockedAt => dateTime().nullable()();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
+  IntColumn get intimacyLevel => integer().withDefault(const Constant(1))();
+  IntColumn get intimacyExp => integer().withDefault(const Constant(0))();
 }
 
 class Habits extends Table {
@@ -219,13 +242,14 @@ class RewardItems extends Table {
     UserSettings,
     BossResults,
     RewardItems,
+    CharacterImages,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {

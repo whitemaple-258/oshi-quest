@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:oshi_quest/data/database/database_helper.dart';
 import '../../data/database/database.dart'; // GachaItem型のため
 import '../../data/providers.dart';
 import '../../logic/settings_controller.dart'; // 設定（表示ON/OFF）のため
@@ -189,8 +190,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                   ),
                 );
               }
-              return Image.file(
-                File(partner.imagePath),
+              return Image(
+                image: partner.displayImageProvider,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image)),
               );

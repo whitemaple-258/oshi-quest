@@ -107,6 +107,66 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     requiredDuringInsert: false,
     defaultValue: const Constant(500),
   );
+  static const VerificationMeta _tempStrExpMeta = const VerificationMeta(
+    'tempStrExp',
+  );
+  @override
+  late final GeneratedColumn<int> tempStrExp = GeneratedColumn<int>(
+    'temp_str_exp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tempVitExpMeta = const VerificationMeta(
+    'tempVitExp',
+  );
+  @override
+  late final GeneratedColumn<int> tempVitExp = GeneratedColumn<int>(
+    'temp_vit_exp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tempIntExpMeta = const VerificationMeta(
+    'tempIntExp',
+  );
+  @override
+  late final GeneratedColumn<int> tempIntExp = GeneratedColumn<int>(
+    'temp_int_exp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tempLukExpMeta = const VerificationMeta(
+    'tempLukExp',
+  );
+  @override
+  late final GeneratedColumn<int> tempLukExp = GeneratedColumn<int>(
+    'temp_luk_exp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _tempChaExpMeta = const VerificationMeta(
+    'tempChaExp',
+  );
+  @override
+  late final GeneratedColumn<int> tempChaExp = GeneratedColumn<int>(
+    'temp_cha_exp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _currentDebuffMeta = const VerificationMeta(
     'currentDebuff',
   );
@@ -209,6 +269,11 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     cha,
     vit,
     willGems,
+    tempStrExp,
+    tempVitExp,
+    tempIntExp,
+    tempLukExp,
+    tempChaExp,
     currentDebuff,
     debuffExpiresAt,
     lastLoginAt,
@@ -279,6 +344,51 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
       context.handle(
         _willGemsMeta,
         willGems.isAcceptableOrUnknown(data['will_gems']!, _willGemsMeta),
+      );
+    }
+    if (data.containsKey('temp_str_exp')) {
+      context.handle(
+        _tempStrExpMeta,
+        tempStrExp.isAcceptableOrUnknown(
+          data['temp_str_exp']!,
+          _tempStrExpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('temp_vit_exp')) {
+      context.handle(
+        _tempVitExpMeta,
+        tempVitExp.isAcceptableOrUnknown(
+          data['temp_vit_exp']!,
+          _tempVitExpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('temp_int_exp')) {
+      context.handle(
+        _tempIntExpMeta,
+        tempIntExp.isAcceptableOrUnknown(
+          data['temp_int_exp']!,
+          _tempIntExpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('temp_luk_exp')) {
+      context.handle(
+        _tempLukExpMeta,
+        tempLukExp.isAcceptableOrUnknown(
+          data['temp_luk_exp']!,
+          _tempLukExpMeta,
+        ),
+      );
+    }
+    if (data.containsKey('temp_cha_exp')) {
+      context.handle(
+        _tempChaExpMeta,
+        tempChaExp.isAcceptableOrUnknown(
+          data['temp_cha_exp']!,
+          _tempChaExpMeta,
+        ),
       );
     }
     if (data.containsKey('current_debuff')) {
@@ -383,6 +493,26 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.int,
         data['${effectivePrefix}will_gems'],
       )!,
+      tempStrExp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}temp_str_exp'],
+      )!,
+      tempVitExp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}temp_vit_exp'],
+      )!,
+      tempIntExp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}temp_int_exp'],
+      )!,
+      tempLukExp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}temp_luk_exp'],
+      )!,
+      tempChaExp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}temp_cha_exp'],
+      )!,
       currentDebuff: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}current_debuff'],
@@ -441,6 +571,11 @@ class Player extends DataClass implements Insertable<Player> {
   final int cha;
   final int vit;
   final int willGems;
+  final int tempStrExp;
+  final int tempVitExp;
+  final int tempIntExp;
+  final int tempLukExp;
+  final int tempChaExp;
   final String? currentDebuff;
   final DateTime? debuffExpiresAt;
   final DateTime lastLoginAt;
@@ -459,6 +594,11 @@ class Player extends DataClass implements Insertable<Player> {
     required this.cha,
     required this.vit,
     required this.willGems,
+    required this.tempStrExp,
+    required this.tempVitExp,
+    required this.tempIntExp,
+    required this.tempLukExp,
+    required this.tempChaExp,
     this.currentDebuff,
     this.debuffExpiresAt,
     required this.lastLoginAt,
@@ -480,6 +620,11 @@ class Player extends DataClass implements Insertable<Player> {
     map['cha'] = Variable<int>(cha);
     map['vit'] = Variable<int>(vit);
     map['will_gems'] = Variable<int>(willGems);
+    map['temp_str_exp'] = Variable<int>(tempStrExp);
+    map['temp_vit_exp'] = Variable<int>(tempVitExp);
+    map['temp_int_exp'] = Variable<int>(tempIntExp);
+    map['temp_luk_exp'] = Variable<int>(tempLukExp);
+    map['temp_cha_exp'] = Variable<int>(tempChaExp);
     if (!nullToAbsent || currentDebuff != null) {
       map['current_debuff'] = Variable<String>(currentDebuff);
     }
@@ -514,6 +659,11 @@ class Player extends DataClass implements Insertable<Player> {
       cha: Value(cha),
       vit: Value(vit),
       willGems: Value(willGems),
+      tempStrExp: Value(tempStrExp),
+      tempVitExp: Value(tempVitExp),
+      tempIntExp: Value(tempIntExp),
+      tempLukExp: Value(tempLukExp),
+      tempChaExp: Value(tempChaExp),
       currentDebuff: currentDebuff == null && nullToAbsent
           ? const Value.absent()
           : Value(currentDebuff),
@@ -550,6 +700,11 @@ class Player extends DataClass implements Insertable<Player> {
       cha: serializer.fromJson<int>(json['cha']),
       vit: serializer.fromJson<int>(json['vit']),
       willGems: serializer.fromJson<int>(json['willGems']),
+      tempStrExp: serializer.fromJson<int>(json['tempStrExp']),
+      tempVitExp: serializer.fromJson<int>(json['tempVitExp']),
+      tempIntExp: serializer.fromJson<int>(json['tempIntExp']),
+      tempLukExp: serializer.fromJson<int>(json['tempLukExp']),
+      tempChaExp: serializer.fromJson<int>(json['tempChaExp']),
       currentDebuff: serializer.fromJson<String?>(json['currentDebuff']),
       debuffExpiresAt: serializer.fromJson<DateTime?>(json['debuffExpiresAt']),
       lastLoginAt: serializer.fromJson<DateTime>(json['lastLoginAt']),
@@ -575,6 +730,11 @@ class Player extends DataClass implements Insertable<Player> {
       'cha': serializer.toJson<int>(cha),
       'vit': serializer.toJson<int>(vit),
       'willGems': serializer.toJson<int>(willGems),
+      'tempStrExp': serializer.toJson<int>(tempStrExp),
+      'tempVitExp': serializer.toJson<int>(tempVitExp),
+      'tempIntExp': serializer.toJson<int>(tempIntExp),
+      'tempLukExp': serializer.toJson<int>(tempLukExp),
+      'tempChaExp': serializer.toJson<int>(tempChaExp),
       'currentDebuff': serializer.toJson<String?>(currentDebuff),
       'debuffExpiresAt': serializer.toJson<DateTime?>(debuffExpiresAt),
       'lastLoginAt': serializer.toJson<DateTime>(lastLoginAt),
@@ -598,6 +758,11 @@ class Player extends DataClass implements Insertable<Player> {
     int? cha,
     int? vit,
     int? willGems,
+    int? tempStrExp,
+    int? tempVitExp,
+    int? tempIntExp,
+    int? tempLukExp,
+    int? tempChaExp,
     Value<String?> currentDebuff = const Value.absent(),
     Value<DateTime?> debuffExpiresAt = const Value.absent(),
     DateTime? lastLoginAt,
@@ -616,6 +781,11 @@ class Player extends DataClass implements Insertable<Player> {
     cha: cha ?? this.cha,
     vit: vit ?? this.vit,
     willGems: willGems ?? this.willGems,
+    tempStrExp: tempStrExp ?? this.tempStrExp,
+    tempVitExp: tempVitExp ?? this.tempVitExp,
+    tempIntExp: tempIntExp ?? this.tempIntExp,
+    tempLukExp: tempLukExp ?? this.tempLukExp,
+    tempChaExp: tempChaExp ?? this.tempChaExp,
     currentDebuff: currentDebuff.present
         ? currentDebuff.value
         : this.currentDebuff,
@@ -648,6 +818,21 @@ class Player extends DataClass implements Insertable<Player> {
       cha: data.cha.present ? data.cha.value : this.cha,
       vit: data.vit.present ? data.vit.value : this.vit,
       willGems: data.willGems.present ? data.willGems.value : this.willGems,
+      tempStrExp: data.tempStrExp.present
+          ? data.tempStrExp.value
+          : this.tempStrExp,
+      tempVitExp: data.tempVitExp.present
+          ? data.tempVitExp.value
+          : this.tempVitExp,
+      tempIntExp: data.tempIntExp.present
+          ? data.tempIntExp.value
+          : this.tempIntExp,
+      tempLukExp: data.tempLukExp.present
+          ? data.tempLukExp.value
+          : this.tempLukExp,
+      tempChaExp: data.tempChaExp.present
+          ? data.tempChaExp.value
+          : this.tempChaExp,
       currentDebuff: data.currentDebuff.present
           ? data.currentDebuff.value
           : this.currentDebuff,
@@ -683,6 +868,11 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('cha: $cha, ')
           ..write('vit: $vit, ')
           ..write('willGems: $willGems, ')
+          ..write('tempStrExp: $tempStrExp, ')
+          ..write('tempVitExp: $tempVitExp, ')
+          ..write('tempIntExp: $tempIntExp, ')
+          ..write('tempLukExp: $tempLukExp, ')
+          ..write('tempChaExp: $tempChaExp, ')
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
           ..write('lastLoginAt: $lastLoginAt, ')
@@ -696,7 +886,7 @@ class Player extends DataClass implements Insertable<Player> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     level,
     experience,
@@ -706,6 +896,11 @@ class Player extends DataClass implements Insertable<Player> {
     cha,
     vit,
     willGems,
+    tempStrExp,
+    tempVitExp,
+    tempIntExp,
+    tempLukExp,
+    tempChaExp,
     currentDebuff,
     debuffExpiresAt,
     lastLoginAt,
@@ -714,7 +909,7 @@ class Player extends DataClass implements Insertable<Player> {
     skillExpiresAt,
     createdAt,
     updatedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -728,6 +923,11 @@ class Player extends DataClass implements Insertable<Player> {
           other.cha == this.cha &&
           other.vit == this.vit &&
           other.willGems == this.willGems &&
+          other.tempStrExp == this.tempStrExp &&
+          other.tempVitExp == this.tempVitExp &&
+          other.tempIntExp == this.tempIntExp &&
+          other.tempLukExp == this.tempLukExp &&
+          other.tempChaExp == this.tempChaExp &&
           other.currentDebuff == this.currentDebuff &&
           other.debuffExpiresAt == this.debuffExpiresAt &&
           other.lastLoginAt == this.lastLoginAt &&
@@ -748,6 +948,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<int> cha;
   final Value<int> vit;
   final Value<int> willGems;
+  final Value<int> tempStrExp;
+  final Value<int> tempVitExp;
+  final Value<int> tempIntExp;
+  final Value<int> tempLukExp;
+  final Value<int> tempChaExp;
   final Value<String?> currentDebuff;
   final Value<DateTime?> debuffExpiresAt;
   final Value<DateTime> lastLoginAt;
@@ -766,6 +971,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.cha = const Value.absent(),
     this.vit = const Value.absent(),
     this.willGems = const Value.absent(),
+    this.tempStrExp = const Value.absent(),
+    this.tempVitExp = const Value.absent(),
+    this.tempIntExp = const Value.absent(),
+    this.tempLukExp = const Value.absent(),
+    this.tempChaExp = const Value.absent(),
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
     this.lastLoginAt = const Value.absent(),
@@ -785,6 +995,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.cha = const Value.absent(),
     this.vit = const Value.absent(),
     this.willGems = const Value.absent(),
+    this.tempStrExp = const Value.absent(),
+    this.tempVitExp = const Value.absent(),
+    this.tempIntExp = const Value.absent(),
+    this.tempLukExp = const Value.absent(),
+    this.tempChaExp = const Value.absent(),
     this.currentDebuff = const Value.absent(),
     this.debuffExpiresAt = const Value.absent(),
     this.lastLoginAt = const Value.absent(),
@@ -804,6 +1019,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<int>? cha,
     Expression<int>? vit,
     Expression<int>? willGems,
+    Expression<int>? tempStrExp,
+    Expression<int>? tempVitExp,
+    Expression<int>? tempIntExp,
+    Expression<int>? tempLukExp,
+    Expression<int>? tempChaExp,
     Expression<String>? currentDebuff,
     Expression<DateTime>? debuffExpiresAt,
     Expression<DateTime>? lastLoginAt,
@@ -823,6 +1043,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (cha != null) 'cha': cha,
       if (vit != null) 'vit': vit,
       if (willGems != null) 'will_gems': willGems,
+      if (tempStrExp != null) 'temp_str_exp': tempStrExp,
+      if (tempVitExp != null) 'temp_vit_exp': tempVitExp,
+      if (tempIntExp != null) 'temp_int_exp': tempIntExp,
+      if (tempLukExp != null) 'temp_luk_exp': tempLukExp,
+      if (tempChaExp != null) 'temp_cha_exp': tempChaExp,
       if (currentDebuff != null) 'current_debuff': currentDebuff,
       if (debuffExpiresAt != null) 'debuff_expires_at': debuffExpiresAt,
       if (lastLoginAt != null) 'last_login_at': lastLoginAt,
@@ -844,6 +1069,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<int>? cha,
     Value<int>? vit,
     Value<int>? willGems,
+    Value<int>? tempStrExp,
+    Value<int>? tempVitExp,
+    Value<int>? tempIntExp,
+    Value<int>? tempLukExp,
+    Value<int>? tempChaExp,
     Value<String?>? currentDebuff,
     Value<DateTime?>? debuffExpiresAt,
     Value<DateTime>? lastLoginAt,
@@ -863,6 +1093,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       cha: cha ?? this.cha,
       vit: vit ?? this.vit,
       willGems: willGems ?? this.willGems,
+      tempStrExp: tempStrExp ?? this.tempStrExp,
+      tempVitExp: tempVitExp ?? this.tempVitExp,
+      tempIntExp: tempIntExp ?? this.tempIntExp,
+      tempLukExp: tempLukExp ?? this.tempLukExp,
+      tempChaExp: tempChaExp ?? this.tempChaExp,
       currentDebuff: currentDebuff ?? this.currentDebuff,
       debuffExpiresAt: debuffExpiresAt ?? this.debuffExpiresAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
@@ -903,6 +1138,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     }
     if (willGems.present) {
       map['will_gems'] = Variable<int>(willGems.value);
+    }
+    if (tempStrExp.present) {
+      map['temp_str_exp'] = Variable<int>(tempStrExp.value);
+    }
+    if (tempVitExp.present) {
+      map['temp_vit_exp'] = Variable<int>(tempVitExp.value);
+    }
+    if (tempIntExp.present) {
+      map['temp_int_exp'] = Variable<int>(tempIntExp.value);
+    }
+    if (tempLukExp.present) {
+      map['temp_luk_exp'] = Variable<int>(tempLukExp.value);
+    }
+    if (tempChaExp.present) {
+      map['temp_cha_exp'] = Variable<int>(tempChaExp.value);
     }
     if (currentDebuff.present) {
       map['current_debuff'] = Variable<String>(currentDebuff.value);
@@ -945,6 +1195,11 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('cha: $cha, ')
           ..write('vit: $vit, ')
           ..write('willGems: $willGems, ')
+          ..write('tempStrExp: $tempStrExp, ')
+          ..write('tempVitExp: $tempVitExp, ')
+          ..write('tempIntExp: $tempIntExp, ')
+          ..write('tempLukExp: $tempLukExp, ')
+          ..write('tempChaExp: $tempChaExp, ')
           ..write('currentDebuff: $currentDebuff, ')
           ..write('debuffExpiresAt: $debuffExpiresAt, ')
           ..write('lastLoginAt: $lastLoginAt, ')
@@ -984,28 +1239,10 @@ class $GachaItemsTable extends GachaItems
   late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
     'image_path',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
-  static const VerificationMeta _titleMeta = const VerificationMeta('title');
-  @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-    'title',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<EffectType, int> effectType =
-      GeneratedColumn<int>(
-        'effect_type',
-        aliasedName,
-        false,
-        type: DriftSqlType.int,
-        requiredDuringInsert: true,
-      ).withConverter<EffectType>($GachaItemsTable.$convertereffectType);
   @override
   late final GeneratedColumnWithTypeConverter<GachaItemType, int> type =
       GeneratedColumn<int>(
@@ -1017,15 +1254,42 @@ class $GachaItemsTable extends GachaItems
         defaultValue: const Constant(0),
       ).withConverter<GachaItemType>($GachaItemsTable.$convertertype);
   @override
+  late final GeneratedColumnWithTypeConverter<TightsColor, int> tightsColor =
+      GeneratedColumn<int>(
+        'tights_color',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<TightsColor>($GachaItemsTable.$convertertightsColor);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
   late final GeneratedColumnWithTypeConverter<Rarity, int> rarity =
       GeneratedColumn<int>(
         'rarity',
         aliasedName,
         false,
         type: DriftSqlType.int,
-        requiredDuringInsert: false,
-        defaultValue: Constant(Rarity.n.value),
+        requiredDuringInsert: true,
       ).withConverter<Rarity>($GachaItemsTable.$converterrarity);
+  @override
+  late final GeneratedColumnWithTypeConverter<EffectType, int> effectType =
+      GeneratedColumn<int>(
+        'effect_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<EffectType>($GachaItemsTable.$convertereffectType);
   static const VerificationMeta _isUnlockedMeta = const VerificationMeta(
     'isUnlocked',
   );
@@ -1245,14 +1509,39 @@ class $GachaItemsTable extends GachaItems
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _intimacyLevelMeta = const VerificationMeta(
+    'intimacyLevel',
+  );
+  @override
+  late final GeneratedColumn<int> intimacyLevel = GeneratedColumn<int>(
+    'intimacy_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _intimacyExpMeta = const VerificationMeta(
+    'intimacyExp',
+  );
+  @override
+  late final GeneratedColumn<int> intimacyExp = GeneratedColumn<int>(
+    'intimacy_exp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     imagePath,
-    title,
-    effectType,
     type,
+    tightsColor,
+    title,
     rarity,
+    effectType,
     isUnlocked,
     strBonus,
     intBonus,
@@ -1271,6 +1560,8 @@ class $GachaItemsTable extends GachaItems
     createdAt,
     unlockedAt,
     isFavorite,
+    intimacyLevel,
+    intimacyExp,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1292,8 +1583,6 @@ class $GachaItemsTable extends GachaItems
         _imagePathMeta,
         imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
       );
-    } else if (isInserting) {
-      context.missing(_imagePathMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -1408,6 +1697,24 @@ class $GachaItemsTable extends GachaItems
         isFavorite.isAcceptableOrUnknown(data['is_favorite']!, _isFavoriteMeta),
       );
     }
+    if (data.containsKey('intimacy_level')) {
+      context.handle(
+        _intimacyLevelMeta,
+        intimacyLevel.isAcceptableOrUnknown(
+          data['intimacy_level']!,
+          _intimacyLevelMeta,
+        ),
+      );
+    }
+    if (data.containsKey('intimacy_exp')) {
+      context.handle(
+        _intimacyExpMeta,
+        intimacyExp.isAcceptableOrUnknown(
+          data['intimacy_exp']!,
+          _intimacyExpMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1424,16 +1731,6 @@ class $GachaItemsTable extends GachaItems
       imagePath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}image_path'],
-      )!,
-      title: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}title'],
-      )!,
-      effectType: $GachaItemsTable.$convertereffectType.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.int,
-          data['${effectivePrefix}effect_type'],
-        )!,
       ),
       type: $GachaItemsTable.$convertertype.fromSql(
         attachedDatabase.typeMapping.read(
@@ -1441,10 +1738,26 @@ class $GachaItemsTable extends GachaItems
           data['${effectivePrefix}type'],
         )!,
       ),
+      tightsColor: $GachaItemsTable.$convertertightsColor.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}tights_color'],
+        )!,
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
       rarity: $GachaItemsTable.$converterrarity.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
           data['${effectivePrefix}rarity'],
+        )!,
+      ),
+      effectType: $GachaItemsTable.$convertereffectType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}effect_type'],
         )!,
       ),
       isUnlocked: attachedDatabase.typeMapping.read(
@@ -1523,6 +1836,14 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.bool,
         data['${effectivePrefix}is_favorite'],
       )!,
+      intimacyLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}intimacy_level'],
+      )!,
+      intimacyExp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}intimacy_exp'],
+      )!,
     );
   }
 
@@ -1531,12 +1852,14 @@ class $GachaItemsTable extends GachaItems
     return $GachaItemsTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<EffectType, int, int> $convertereffectType =
-      const EnumIndexConverter<EffectType>(EffectType.values);
   static JsonTypeConverter2<GachaItemType, int, int> $convertertype =
       const EnumIndexConverter<GachaItemType>(GachaItemType.values);
+  static JsonTypeConverter2<TightsColor, int, int> $convertertightsColor =
+      const EnumIndexConverter<TightsColor>(TightsColor.values);
   static JsonTypeConverter2<Rarity, int, int> $converterrarity =
       const EnumIndexConverter<Rarity>(Rarity.values);
+  static JsonTypeConverter2<EffectType, int, int> $convertereffectType =
+      const EnumIndexConverter<EffectType>(EffectType.values);
   static JsonTypeConverter2<SkillType, int, int> $converterskillType =
       const EnumIndexConverter<SkillType>(SkillType.values);
   static JsonTypeConverter2<SeriesType, int, int> $converterseriesId =
@@ -1545,11 +1868,12 @@ class $GachaItemsTable extends GachaItems
 
 class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int id;
-  final String imagePath;
-  final String title;
-  final EffectType effectType;
+  final String? imagePath;
   final GachaItemType type;
+  final TightsColor tightsColor;
+  final String title;
   final Rarity rarity;
+  final EffectType effectType;
   final bool isUnlocked;
   final int strBonus;
   final int intBonus;
@@ -1568,13 +1892,16 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final DateTime createdAt;
   final DateTime? unlockedAt;
   final bool isFavorite;
+  final int intimacyLevel;
+  final int intimacyExp;
   const GachaItem({
     required this.id,
-    required this.imagePath,
-    required this.title,
-    required this.effectType,
+    this.imagePath,
     required this.type,
+    required this.tightsColor,
+    required this.title,
     required this.rarity,
+    required this.effectType,
     required this.isUnlocked,
     required this.strBonus,
     required this.intBonus,
@@ -1593,24 +1920,33 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.createdAt,
     this.unlockedAt,
     required this.isFavorite,
+    required this.intimacyLevel,
+    required this.intimacyExp,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['image_path'] = Variable<String>(imagePath);
-    map['title'] = Variable<String>(title);
-    {
-      map['effect_type'] = Variable<int>(
-        $GachaItemsTable.$convertereffectType.toSql(effectType),
-      );
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
     }
     {
       map['type'] = Variable<int>($GachaItemsTable.$convertertype.toSql(type));
     }
     {
+      map['tights_color'] = Variable<int>(
+        $GachaItemsTable.$convertertightsColor.toSql(tightsColor),
+      );
+    }
+    map['title'] = Variable<String>(title);
+    {
       map['rarity'] = Variable<int>(
         $GachaItemsTable.$converterrarity.toSql(rarity),
+      );
+    }
+    {
+      map['effect_type'] = Variable<int>(
+        $GachaItemsTable.$convertereffectType.toSql(effectType),
       );
     }
     map['is_unlocked'] = Variable<bool>(isUnlocked);
@@ -1645,17 +1981,22 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       map['unlocked_at'] = Variable<DateTime>(unlockedAt);
     }
     map['is_favorite'] = Variable<bool>(isFavorite);
+    map['intimacy_level'] = Variable<int>(intimacyLevel);
+    map['intimacy_exp'] = Variable<int>(intimacyExp);
     return map;
   }
 
   GachaItemsCompanion toCompanion(bool nullToAbsent) {
     return GachaItemsCompanion(
       id: Value(id),
-      imagePath: Value(imagePath),
-      title: Value(title),
-      effectType: Value(effectType),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       type: Value(type),
+      tightsColor: Value(tightsColor),
+      title: Value(title),
       rarity: Value(rarity),
+      effectType: Value(effectType),
       isUnlocked: Value(isUnlocked),
       strBonus: Value(strBonus),
       intBonus: Value(intBonus),
@@ -1680,6 +2021,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ? const Value.absent()
           : Value(unlockedAt),
       isFavorite: Value(isFavorite),
+      intimacyLevel: Value(intimacyLevel),
+      intimacyExp: Value(intimacyExp),
     );
   }
 
@@ -1690,16 +2033,19 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GachaItem(
       id: serializer.fromJson<int>(json['id']),
-      imagePath: serializer.fromJson<String>(json['imagePath']),
-      title: serializer.fromJson<String>(json['title']),
-      effectType: $GachaItemsTable.$convertereffectType.fromJson(
-        serializer.fromJson<int>(json['effectType']),
-      ),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       type: $GachaItemsTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
       ),
+      tightsColor: $GachaItemsTable.$convertertightsColor.fromJson(
+        serializer.fromJson<int>(json['tightsColor']),
+      ),
+      title: serializer.fromJson<String>(json['title']),
       rarity: $GachaItemsTable.$converterrarity.fromJson(
         serializer.fromJson<int>(json['rarity']),
+      ),
+      effectType: $GachaItemsTable.$convertereffectType.fromJson(
+        serializer.fromJson<int>(json['effectType']),
       ),
       isUnlocked: serializer.fromJson<bool>(json['isUnlocked']),
       strBonus: serializer.fromJson<int>(json['strBonus']),
@@ -1723,6 +2069,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       unlockedAt: serializer.fromJson<DateTime?>(json['unlockedAt']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
+      intimacyLevel: serializer.fromJson<int>(json['intimacyLevel']),
+      intimacyExp: serializer.fromJson<int>(json['intimacyExp']),
     );
   }
   @override
@@ -1730,16 +2078,19 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'imagePath': serializer.toJson<String>(imagePath),
-      'title': serializer.toJson<String>(title),
-      'effectType': serializer.toJson<int>(
-        $GachaItemsTable.$convertereffectType.toJson(effectType),
-      ),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'type': serializer.toJson<int>(
         $GachaItemsTable.$convertertype.toJson(type),
       ),
+      'tightsColor': serializer.toJson<int>(
+        $GachaItemsTable.$convertertightsColor.toJson(tightsColor),
+      ),
+      'title': serializer.toJson<String>(title),
       'rarity': serializer.toJson<int>(
         $GachaItemsTable.$converterrarity.toJson(rarity),
+      ),
+      'effectType': serializer.toJson<int>(
+        $GachaItemsTable.$convertereffectType.toJson(effectType),
       ),
       'isUnlocked': serializer.toJson<bool>(isUnlocked),
       'strBonus': serializer.toJson<int>(strBonus),
@@ -1763,16 +2114,19 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'unlockedAt': serializer.toJson<DateTime?>(unlockedAt),
       'isFavorite': serializer.toJson<bool>(isFavorite),
+      'intimacyLevel': serializer.toJson<int>(intimacyLevel),
+      'intimacyExp': serializer.toJson<int>(intimacyExp),
     };
   }
 
   GachaItem copyWith({
     int? id,
-    String? imagePath,
-    String? title,
-    EffectType? effectType,
+    Value<String?> imagePath = const Value.absent(),
     GachaItemType? type,
+    TightsColor? tightsColor,
+    String? title,
     Rarity? rarity,
+    EffectType? effectType,
     bool? isUnlocked,
     int? strBonus,
     int? intBonus,
@@ -1791,13 +2145,16 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     DateTime? createdAt,
     Value<DateTime?> unlockedAt = const Value.absent(),
     bool? isFavorite,
+    int? intimacyLevel,
+    int? intimacyExp,
   }) => GachaItem(
     id: id ?? this.id,
-    imagePath: imagePath ?? this.imagePath,
-    title: title ?? this.title,
-    effectType: effectType ?? this.effectType,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     type: type ?? this.type,
+    tightsColor: tightsColor ?? this.tightsColor,
+    title: title ?? this.title,
     rarity: rarity ?? this.rarity,
+    effectType: effectType ?? this.effectType,
     isUnlocked: isUnlocked ?? this.isUnlocked,
     strBonus: strBonus ?? this.strBonus,
     intBonus: intBonus ?? this.intBonus,
@@ -1818,17 +2175,22 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     createdAt: createdAt ?? this.createdAt,
     unlockedAt: unlockedAt.present ? unlockedAt.value : this.unlockedAt,
     isFavorite: isFavorite ?? this.isFavorite,
+    intimacyLevel: intimacyLevel ?? this.intimacyLevel,
+    intimacyExp: intimacyExp ?? this.intimacyExp,
   );
   GachaItem copyWithCompanion(GachaItemsCompanion data) {
     return GachaItem(
       id: data.id.present ? data.id.value : this.id,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      type: data.type.present ? data.type.value : this.type,
+      tightsColor: data.tightsColor.present
+          ? data.tightsColor.value
+          : this.tightsColor,
       title: data.title.present ? data.title.value : this.title,
+      rarity: data.rarity.present ? data.rarity.value : this.rarity,
       effectType: data.effectType.present
           ? data.effectType.value
           : this.effectType,
-      type: data.type.present ? data.type.value : this.type,
-      rarity: data.rarity.present ? data.rarity.value : this.rarity,
       isUnlocked: data.isUnlocked.present
           ? data.isUnlocked.value
           : this.isUnlocked,
@@ -1861,6 +2223,12 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       isFavorite: data.isFavorite.present
           ? data.isFavorite.value
           : this.isFavorite,
+      intimacyLevel: data.intimacyLevel.present
+          ? data.intimacyLevel.value
+          : this.intimacyLevel,
+      intimacyExp: data.intimacyExp.present
+          ? data.intimacyExp.value
+          : this.intimacyExp,
     );
   }
 
@@ -1869,10 +2237,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     return (StringBuffer('GachaItem(')
           ..write('id: $id, ')
           ..write('imagePath: $imagePath, ')
-          ..write('title: $title, ')
-          ..write('effectType: $effectType, ')
           ..write('type: $type, ')
+          ..write('tightsColor: $tightsColor, ')
+          ..write('title: $title, ')
           ..write('rarity: $rarity, ')
+          ..write('effectType: $effectType, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
           ..write('intBonus: $intBonus, ')
@@ -1890,7 +2259,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('sourceId: $sourceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('unlockedAt: $unlockedAt, ')
-          ..write('isFavorite: $isFavorite')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('intimacyLevel: $intimacyLevel, ')
+          ..write('intimacyExp: $intimacyExp')
           ..write(')'))
         .toString();
   }
@@ -1899,10 +2270,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   int get hashCode => Object.hashAll([
     id,
     imagePath,
-    title,
-    effectType,
     type,
+    tightsColor,
+    title,
     rarity,
+    effectType,
     isUnlocked,
     strBonus,
     intBonus,
@@ -1921,6 +2293,8 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     createdAt,
     unlockedAt,
     isFavorite,
+    intimacyLevel,
+    intimacyExp,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1928,10 +2302,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       (other is GachaItem &&
           other.id == this.id &&
           other.imagePath == this.imagePath &&
-          other.title == this.title &&
-          other.effectType == this.effectType &&
           other.type == this.type &&
+          other.tightsColor == this.tightsColor &&
+          other.title == this.title &&
           other.rarity == this.rarity &&
+          other.effectType == this.effectType &&
           other.isUnlocked == this.isUnlocked &&
           other.strBonus == this.strBonus &&
           other.intBonus == this.intBonus &&
@@ -1949,16 +2324,19 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.sourceId == this.sourceId &&
           other.createdAt == this.createdAt &&
           other.unlockedAt == this.unlockedAt &&
-          other.isFavorite == this.isFavorite);
+          other.isFavorite == this.isFavorite &&
+          other.intimacyLevel == this.intimacyLevel &&
+          other.intimacyExp == this.intimacyExp);
 }
 
 class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int> id;
-  final Value<String> imagePath;
-  final Value<String> title;
-  final Value<EffectType> effectType;
+  final Value<String?> imagePath;
   final Value<GachaItemType> type;
+  final Value<TightsColor> tightsColor;
+  final Value<String> title;
   final Value<Rarity> rarity;
+  final Value<EffectType> effectType;
   final Value<bool> isUnlocked;
   final Value<int> strBonus;
   final Value<int> intBonus;
@@ -1977,13 +2355,16 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<DateTime> createdAt;
   final Value<DateTime?> unlockedAt;
   final Value<bool> isFavorite;
+  final Value<int> intimacyLevel;
+  final Value<int> intimacyExp;
   const GachaItemsCompanion({
     this.id = const Value.absent(),
     this.imagePath = const Value.absent(),
-    this.title = const Value.absent(),
-    this.effectType = const Value.absent(),
     this.type = const Value.absent(),
+    this.tightsColor = const Value.absent(),
+    this.title = const Value.absent(),
     this.rarity = const Value.absent(),
+    this.effectType = const Value.absent(),
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
     this.intBonus = const Value.absent(),
@@ -2002,14 +2383,17 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
     this.isFavorite = const Value.absent(),
+    this.intimacyLevel = const Value.absent(),
+    this.intimacyExp = const Value.absent(),
   });
   GachaItemsCompanion.insert({
     this.id = const Value.absent(),
-    required String imagePath,
-    required String title,
-    required EffectType effectType,
+    this.imagePath = const Value.absent(),
     this.type = const Value.absent(),
-    this.rarity = const Value.absent(),
+    this.tightsColor = const Value.absent(),
+    required String title,
+    required Rarity rarity,
+    required EffectType effectType,
     this.isUnlocked = const Value.absent(),
     this.strBonus = const Value.absent(),
     this.intBonus = const Value.absent(),
@@ -2028,16 +2412,19 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.createdAt = const Value.absent(),
     this.unlockedAt = const Value.absent(),
     this.isFavorite = const Value.absent(),
-  }) : imagePath = Value(imagePath),
-       title = Value(title),
+    this.intimacyLevel = const Value.absent(),
+    this.intimacyExp = const Value.absent(),
+  }) : title = Value(title),
+       rarity = Value(rarity),
        effectType = Value(effectType);
   static Insertable<GachaItem> custom({
     Expression<int>? id,
     Expression<String>? imagePath,
-    Expression<String>? title,
-    Expression<int>? effectType,
     Expression<int>? type,
+    Expression<int>? tightsColor,
+    Expression<String>? title,
     Expression<int>? rarity,
+    Expression<int>? effectType,
     Expression<bool>? isUnlocked,
     Expression<int>? strBonus,
     Expression<int>? intBonus,
@@ -2056,14 +2443,17 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? unlockedAt,
     Expression<bool>? isFavorite,
+    Expression<int>? intimacyLevel,
+    Expression<int>? intimacyExp,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (imagePath != null) 'image_path': imagePath,
-      if (title != null) 'title': title,
-      if (effectType != null) 'effect_type': effectType,
       if (type != null) 'type': type,
+      if (tightsColor != null) 'tights_color': tightsColor,
+      if (title != null) 'title': title,
       if (rarity != null) 'rarity': rarity,
+      if (effectType != null) 'effect_type': effectType,
       if (isUnlocked != null) 'is_unlocked': isUnlocked,
       if (strBonus != null) 'str_bonus': strBonus,
       if (intBonus != null) 'int_bonus': intBonus,
@@ -2082,16 +2472,19 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (createdAt != null) 'created_at': createdAt,
       if (unlockedAt != null) 'unlocked_at': unlockedAt,
       if (isFavorite != null) 'is_favorite': isFavorite,
+      if (intimacyLevel != null) 'intimacy_level': intimacyLevel,
+      if (intimacyExp != null) 'intimacy_exp': intimacyExp,
     });
   }
 
   GachaItemsCompanion copyWith({
     Value<int>? id,
-    Value<String>? imagePath,
-    Value<String>? title,
-    Value<EffectType>? effectType,
+    Value<String?>? imagePath,
     Value<GachaItemType>? type,
+    Value<TightsColor>? tightsColor,
+    Value<String>? title,
     Value<Rarity>? rarity,
+    Value<EffectType>? effectType,
     Value<bool>? isUnlocked,
     Value<int>? strBonus,
     Value<int>? intBonus,
@@ -2110,14 +2503,17 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<DateTime>? createdAt,
     Value<DateTime?>? unlockedAt,
     Value<bool>? isFavorite,
+    Value<int>? intimacyLevel,
+    Value<int>? intimacyExp,
   }) {
     return GachaItemsCompanion(
       id: id ?? this.id,
       imagePath: imagePath ?? this.imagePath,
-      title: title ?? this.title,
-      effectType: effectType ?? this.effectType,
       type: type ?? this.type,
+      tightsColor: tightsColor ?? this.tightsColor,
+      title: title ?? this.title,
       rarity: rarity ?? this.rarity,
+      effectType: effectType ?? this.effectType,
       isUnlocked: isUnlocked ?? this.isUnlocked,
       strBonus: strBonus ?? this.strBonus,
       intBonus: intBonus ?? this.intBonus,
@@ -2136,6 +2532,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       createdAt: createdAt ?? this.createdAt,
       unlockedAt: unlockedAt ?? this.unlockedAt,
       isFavorite: isFavorite ?? this.isFavorite,
+      intimacyLevel: intimacyLevel ?? this.intimacyLevel,
+      intimacyExp: intimacyExp ?? this.intimacyExp,
     );
   }
 
@@ -2148,22 +2546,27 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
     }
-    if (title.present) {
-      map['title'] = Variable<String>(title.value);
-    }
-    if (effectType.present) {
-      map['effect_type'] = Variable<int>(
-        $GachaItemsTable.$convertereffectType.toSql(effectType.value),
-      );
-    }
     if (type.present) {
       map['type'] = Variable<int>(
         $GachaItemsTable.$convertertype.toSql(type.value),
       );
     }
+    if (tightsColor.present) {
+      map['tights_color'] = Variable<int>(
+        $GachaItemsTable.$convertertightsColor.toSql(tightsColor.value),
+      );
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
     if (rarity.present) {
       map['rarity'] = Variable<int>(
         $GachaItemsTable.$converterrarity.toSql(rarity.value),
+      );
+    }
+    if (effectType.present) {
+      map['effect_type'] = Variable<int>(
+        $GachaItemsTable.$convertereffectType.toSql(effectType.value),
       );
     }
     if (isUnlocked.present) {
@@ -2224,6 +2627,12 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
     }
+    if (intimacyLevel.present) {
+      map['intimacy_level'] = Variable<int>(intimacyLevel.value);
+    }
+    if (intimacyExp.present) {
+      map['intimacy_exp'] = Variable<int>(intimacyExp.value);
+    }
     return map;
   }
 
@@ -2232,10 +2641,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     return (StringBuffer('GachaItemsCompanion(')
           ..write('id: $id, ')
           ..write('imagePath: $imagePath, ')
-          ..write('title: $title, ')
-          ..write('effectType: $effectType, ')
           ..write('type: $type, ')
+          ..write('tightsColor: $tightsColor, ')
+          ..write('title: $title, ')
           ..write('rarity: $rarity, ')
+          ..write('effectType: $effectType, ')
           ..write('isUnlocked: $isUnlocked, ')
           ..write('strBonus: $strBonus, ')
           ..write('intBonus: $intBonus, ')
@@ -2253,7 +2663,9 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('sourceId: $sourceId, ')
           ..write('createdAt: $createdAt, ')
           ..write('unlockedAt: $unlockedAt, ')
-          ..write('isFavorite: $isFavorite')
+          ..write('isFavorite: $isFavorite, ')
+          ..write('intimacyLevel: $intimacyLevel, ')
+          ..write('intimacyExp: $intimacyExp')
           ..write(')'))
         .toString();
   }
@@ -5681,6 +6093,300 @@ class RewardItemsCompanion extends UpdateCompanion<RewardItem> {
   }
 }
 
+class $CharacterImagesTable extends CharacterImages
+    with TableInfo<$CharacterImagesTable, CharacterImage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CharacterImagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('名もなき推し'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, imagePath, name, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'character_images';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CharacterImage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imagePathMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CharacterImage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CharacterImage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CharacterImagesTable createAlias(String alias) {
+    return $CharacterImagesTable(attachedDatabase, alias);
+  }
+}
+
+class CharacterImage extends DataClass implements Insertable<CharacterImage> {
+  final int id;
+  final String imagePath;
+  final String name;
+  final DateTime createdAt;
+  const CharacterImage({
+    required this.id,
+    required this.imagePath,
+    required this.name,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['image_path'] = Variable<String>(imagePath);
+    map['name'] = Variable<String>(name);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CharacterImagesCompanion toCompanion(bool nullToAbsent) {
+    return CharacterImagesCompanion(
+      id: Value(id),
+      imagePath: Value(imagePath),
+      name: Value(name),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CharacterImage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CharacterImage(
+      id: serializer.fromJson<int>(json['id']),
+      imagePath: serializer.fromJson<String>(json['imagePath']),
+      name: serializer.fromJson<String>(json['name']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'imagePath': serializer.toJson<String>(imagePath),
+      'name': serializer.toJson<String>(name),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CharacterImage copyWith({
+    int? id,
+    String? imagePath,
+    String? name,
+    DateTime? createdAt,
+  }) => CharacterImage(
+    id: id ?? this.id,
+    imagePath: imagePath ?? this.imagePath,
+    name: name ?? this.name,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CharacterImage copyWithCompanion(CharacterImagesCompanion data) {
+    return CharacterImage(
+      id: data.id.present ? data.id.value : this.id,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      name: data.name.present ? data.name.value : this.name,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CharacterImage(')
+          ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, imagePath, name, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CharacterImage &&
+          other.id == this.id &&
+          other.imagePath == this.imagePath &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt);
+}
+
+class CharacterImagesCompanion extends UpdateCompanion<CharacterImage> {
+  final Value<int> id;
+  final Value<String> imagePath;
+  final Value<String> name;
+  final Value<DateTime> createdAt;
+  const CharacterImagesCompanion({
+    this.id = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.name = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  CharacterImagesCompanion.insert({
+    this.id = const Value.absent(),
+    required String imagePath,
+    this.name = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : imagePath = Value(imagePath);
+  static Insertable<CharacterImage> custom({
+    Expression<int>? id,
+    Expression<String>? imagePath,
+    Expression<String>? name,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (imagePath != null) 'image_path': imagePath,
+      if (name != null) 'name': name,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  CharacterImagesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? imagePath,
+    Value<String>? name,
+    Value<DateTime>? createdAt,
+  }) {
+    return CharacterImagesCompanion(
+      id: id ?? this.id,
+      imagePath: imagePath ?? this.imagePath,
+      name: name ?? this.name,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CharacterImagesCompanion(')
+          ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5693,6 +6399,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
   late final $BossResultsTable bossResults = $BossResultsTable(this);
   late final $RewardItemsTable rewardItems = $RewardItemsTable(this);
+  late final $CharacterImagesTable characterImages = $CharacterImagesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5707,6 +6416,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     userSettings,
     bossResults,
     rewardItems,
+    characterImages,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5738,6 +6448,11 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<int> cha,
       Value<int> vit,
       Value<int> willGems,
+      Value<int> tempStrExp,
+      Value<int> tempVitExp,
+      Value<int> tempIntExp,
+      Value<int> tempLukExp,
+      Value<int> tempChaExp,
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
       Value<DateTime> lastLoginAt,
@@ -5758,6 +6473,11 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<int> cha,
       Value<int> vit,
       Value<int> willGems,
+      Value<int> tempStrExp,
+      Value<int> tempVitExp,
+      Value<int> tempIntExp,
+      Value<int> tempLukExp,
+      Value<int> tempChaExp,
       Value<String?> currentDebuff,
       Value<DateTime?> debuffExpiresAt,
       Value<DateTime> lastLoginAt,
@@ -5819,6 +6539,31 @@ class $$PlayersTableFilterComposer
 
   ColumnFilters<int> get willGems => $composableBuilder(
     column: $table.willGems,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tempStrExp => $composableBuilder(
+    column: $table.tempStrExp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tempVitExp => $composableBuilder(
+    column: $table.tempVitExp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tempIntExp => $composableBuilder(
+    column: $table.tempIntExp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tempLukExp => $composableBuilder(
+    column: $table.tempLukExp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get tempChaExp => $composableBuilder(
+    column: $table.tempChaExp,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5918,6 +6663,31 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get tempStrExp => $composableBuilder(
+    column: $table.tempStrExp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tempVitExp => $composableBuilder(
+    column: $table.tempVitExp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tempIntExp => $composableBuilder(
+    column: $table.tempIntExp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tempLukExp => $composableBuilder(
+    column: $table.tempLukExp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get tempChaExp => $composableBuilder(
+    column: $table.tempChaExp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get currentDebuff => $composableBuilder(
     column: $table.currentDebuff,
     builder: (column) => ColumnOrderings(column),
@@ -5997,6 +6767,31 @@ class $$PlayersTableAnnotationComposer
   GeneratedColumn<int> get willGems =>
       $composableBuilder(column: $table.willGems, builder: (column) => column);
 
+  GeneratedColumn<int> get tempStrExp => $composableBuilder(
+    column: $table.tempStrExp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get tempVitExp => $composableBuilder(
+    column: $table.tempVitExp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get tempIntExp => $composableBuilder(
+    column: $table.tempIntExp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get tempLukExp => $composableBuilder(
+    column: $table.tempLukExp,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get tempChaExp => $composableBuilder(
+    column: $table.tempChaExp,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get currentDebuff => $composableBuilder(
     column: $table.currentDebuff,
     builder: (column) => column,
@@ -6072,6 +6867,11 @@ class $$PlayersTableTableManager
                 Value<int> cha = const Value.absent(),
                 Value<int> vit = const Value.absent(),
                 Value<int> willGems = const Value.absent(),
+                Value<int> tempStrExp = const Value.absent(),
+                Value<int> tempVitExp = const Value.absent(),
+                Value<int> tempIntExp = const Value.absent(),
+                Value<int> tempLukExp = const Value.absent(),
+                Value<int> tempChaExp = const Value.absent(),
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
                 Value<DateTime> lastLoginAt = const Value.absent(),
@@ -6090,6 +6890,11 @@ class $$PlayersTableTableManager
                 cha: cha,
                 vit: vit,
                 willGems: willGems,
+                tempStrExp: tempStrExp,
+                tempVitExp: tempVitExp,
+                tempIntExp: tempIntExp,
+                tempLukExp: tempLukExp,
+                tempChaExp: tempChaExp,
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
                 lastLoginAt: lastLoginAt,
@@ -6110,6 +6915,11 @@ class $$PlayersTableTableManager
                 Value<int> cha = const Value.absent(),
                 Value<int> vit = const Value.absent(),
                 Value<int> willGems = const Value.absent(),
+                Value<int> tempStrExp = const Value.absent(),
+                Value<int> tempVitExp = const Value.absent(),
+                Value<int> tempIntExp = const Value.absent(),
+                Value<int> tempLukExp = const Value.absent(),
+                Value<int> tempChaExp = const Value.absent(),
                 Value<String?> currentDebuff = const Value.absent(),
                 Value<DateTime?> debuffExpiresAt = const Value.absent(),
                 Value<DateTime> lastLoginAt = const Value.absent(),
@@ -6128,6 +6938,11 @@ class $$PlayersTableTableManager
                 cha: cha,
                 vit: vit,
                 willGems: willGems,
+                tempStrExp: tempStrExp,
+                tempVitExp: tempVitExp,
+                tempIntExp: tempIntExp,
+                tempLukExp: tempLukExp,
+                tempChaExp: tempChaExp,
                 currentDebuff: currentDebuff,
                 debuffExpiresAt: debuffExpiresAt,
                 lastLoginAt: lastLoginAt,
@@ -6162,11 +6977,12 @@ typedef $$PlayersTableProcessedTableManager =
 typedef $$GachaItemsTableCreateCompanionBuilder =
     GachaItemsCompanion Function({
       Value<int> id,
-      required String imagePath,
-      required String title,
-      required EffectType effectType,
+      Value<String?> imagePath,
       Value<GachaItemType> type,
-      Value<Rarity> rarity,
+      Value<TightsColor> tightsColor,
+      required String title,
+      required Rarity rarity,
+      required EffectType effectType,
       Value<bool> isUnlocked,
       Value<int> strBonus,
       Value<int> intBonus,
@@ -6185,15 +7001,18 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
       Value<bool> isFavorite,
+      Value<int> intimacyLevel,
+      Value<int> intimacyExp,
     });
 typedef $$GachaItemsTableUpdateCompanionBuilder =
     GachaItemsCompanion Function({
       Value<int> id,
-      Value<String> imagePath,
-      Value<String> title,
-      Value<EffectType> effectType,
+      Value<String?> imagePath,
       Value<GachaItemType> type,
+      Value<TightsColor> tightsColor,
+      Value<String> title,
       Value<Rarity> rarity,
+      Value<EffectType> effectType,
       Value<bool> isUnlocked,
       Value<int> strBonus,
       Value<int> intBonus,
@@ -6212,6 +7031,8 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime?> unlockedAt,
       Value<bool> isFavorite,
+      Value<int> intimacyLevel,
+      Value<int> intimacyExp,
     });
 
 final class $$GachaItemsTableReferences
@@ -6280,26 +7101,32 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<EffectType, EffectType, int> get effectType =>
-      $composableBuilder(
-        column: $table.effectType,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
-
   ColumnWithTypeConverterFilters<GachaItemType, GachaItemType, int> get type =>
       $composableBuilder(
         column: $table.type,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
+  ColumnWithTypeConverterFilters<TightsColor, TightsColor, int>
+  get tightsColor => $composableBuilder(
+    column: $table.tightsColor,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnWithTypeConverterFilters<Rarity, Rarity, int> get rarity =>
       $composableBuilder(
         column: $table.rarity,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<EffectType, EffectType, int> get effectType =>
+      $composableBuilder(
+        column: $table.effectType,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
@@ -6395,6 +7222,16 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get intimacyLevel => $composableBuilder(
+    column: $table.intimacyLevel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get intimacyExp => $composableBuilder(
+    column: $table.intimacyExp,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> partyDecksRefs(
     Expression<bool> Function($$PartyDecksTableFilterComposer f) f,
   ) {
@@ -6465,23 +7302,28 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get title => $composableBuilder(
-    column: $table.title,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get effectType => $composableBuilder(
-    column: $table.effectType,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get tightsColor => $composableBuilder(
+    column: $table.tightsColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get rarity => $composableBuilder(
     column: $table.rarity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get effectType => $composableBuilder(
+    column: $table.effectType,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6574,6 +7416,16 @@ class $$GachaItemsTableOrderingComposer
     column: $table.isFavorite,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get intimacyLevel => $composableBuilder(
+    column: $table.intimacyLevel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get intimacyExp => $composableBuilder(
+    column: $table.intimacyExp,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$GachaItemsTableAnnotationComposer
@@ -6591,20 +7443,26 @@ class $$GachaItemsTableAnnotationComposer
   GeneratedColumn<String> get imagePath =>
       $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TightsColor, int> get tightsColor =>
+      $composableBuilder(
+        column: $table.tightsColor,
+        builder: (column) => column,
+      );
+
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Rarity, int> get rarity =>
+      $composableBuilder(column: $table.rarity, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<EffectType, int> get effectType =>
       $composableBuilder(
         column: $table.effectType,
         builder: (column) => column,
       );
-
-  GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
-      $composableBuilder(column: $table.type, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<Rarity, int> get rarity =>
-      $composableBuilder(column: $table.rarity, builder: (column) => column);
 
   GeneratedColumn<bool> get isUnlocked => $composableBuilder(
     column: $table.isUnlocked,
@@ -6671,6 +7529,16 @@ class $$GachaItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get intimacyLevel => $composableBuilder(
+    column: $table.intimacyLevel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get intimacyExp => $composableBuilder(
+    column: $table.intimacyExp,
     builder: (column) => column,
   );
 
@@ -6754,11 +7622,12 @@ class $$GachaItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> imagePath = const Value.absent(),
-                Value<String> title = const Value.absent(),
-                Value<EffectType> effectType = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<GachaItemType> type = const Value.absent(),
+                Value<TightsColor> tightsColor = const Value.absent(),
+                Value<String> title = const Value.absent(),
                 Value<Rarity> rarity = const Value.absent(),
+                Value<EffectType> effectType = const Value.absent(),
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
                 Value<int> intBonus = const Value.absent(),
@@ -6777,13 +7646,16 @@ class $$GachaItemsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
+                Value<int> intimacyLevel = const Value.absent(),
+                Value<int> intimacyExp = const Value.absent(),
               }) => GachaItemsCompanion(
                 id: id,
                 imagePath: imagePath,
-                title: title,
-                effectType: effectType,
                 type: type,
+                tightsColor: tightsColor,
+                title: title,
                 rarity: rarity,
+                effectType: effectType,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
                 intBonus: intBonus,
@@ -6802,15 +7674,18 @@ class $$GachaItemsTableTableManager
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
                 isFavorite: isFavorite,
+                intimacyLevel: intimacyLevel,
+                intimacyExp: intimacyExp,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String imagePath,
-                required String title,
-                required EffectType effectType,
+                Value<String?> imagePath = const Value.absent(),
                 Value<GachaItemType> type = const Value.absent(),
-                Value<Rarity> rarity = const Value.absent(),
+                Value<TightsColor> tightsColor = const Value.absent(),
+                required String title,
+                required Rarity rarity,
+                required EffectType effectType,
                 Value<bool> isUnlocked = const Value.absent(),
                 Value<int> strBonus = const Value.absent(),
                 Value<int> intBonus = const Value.absent(),
@@ -6829,13 +7704,16 @@ class $$GachaItemsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> unlockedAt = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
+                Value<int> intimacyLevel = const Value.absent(),
+                Value<int> intimacyExp = const Value.absent(),
               }) => GachaItemsCompanion.insert(
                 id: id,
                 imagePath: imagePath,
-                title: title,
-                effectType: effectType,
                 type: type,
+                tightsColor: tightsColor,
+                title: title,
                 rarity: rarity,
+                effectType: effectType,
                 isUnlocked: isUnlocked,
                 strBonus: strBonus,
                 intBonus: intBonus,
@@ -6854,6 +7732,8 @@ class $$GachaItemsTableTableManager
                 createdAt: createdAt,
                 unlockedAt: unlockedAt,
                 isFavorite: isFavorite,
+                intimacyLevel: intimacyLevel,
+                intimacyExp: intimacyExp,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -9082,6 +9962,187 @@ typedef $$RewardItemsTableProcessedTableManager =
       RewardItem,
       PrefetchHooks Function()
     >;
+typedef $$CharacterImagesTableCreateCompanionBuilder =
+    CharacterImagesCompanion Function({
+      Value<int> id,
+      required String imagePath,
+      Value<String> name,
+      Value<DateTime> createdAt,
+    });
+typedef $$CharacterImagesTableUpdateCompanionBuilder =
+    CharacterImagesCompanion Function({
+      Value<int> id,
+      Value<String> imagePath,
+      Value<String> name,
+      Value<DateTime> createdAt,
+    });
+
+class $$CharacterImagesTableFilterComposer
+    extends Composer<_$AppDatabase, $CharacterImagesTable> {
+  $$CharacterImagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CharacterImagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CharacterImagesTable> {
+  $$CharacterImagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CharacterImagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CharacterImagesTable> {
+  $$CharacterImagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$CharacterImagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CharacterImagesTable,
+          CharacterImage,
+          $$CharacterImagesTableFilterComposer,
+          $$CharacterImagesTableOrderingComposer,
+          $$CharacterImagesTableAnnotationComposer,
+          $$CharacterImagesTableCreateCompanionBuilder,
+          $$CharacterImagesTableUpdateCompanionBuilder,
+          (
+            CharacterImage,
+            BaseReferences<
+              _$AppDatabase,
+              $CharacterImagesTable,
+              CharacterImage
+            >,
+          ),
+          CharacterImage,
+          PrefetchHooks Function()
+        > {
+  $$CharacterImagesTableTableManager(
+    _$AppDatabase db,
+    $CharacterImagesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CharacterImagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CharacterImagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CharacterImagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> imagePath = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CharacterImagesCompanion(
+                id: id,
+                imagePath: imagePath,
+                name: name,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String imagePath,
+                Value<String> name = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CharacterImagesCompanion.insert(
+                id: id,
+                imagePath: imagePath,
+                name: name,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CharacterImagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CharacterImagesTable,
+      CharacterImage,
+      $$CharacterImagesTableFilterComposer,
+      $$CharacterImagesTableOrderingComposer,
+      $$CharacterImagesTableAnnotationComposer,
+      $$CharacterImagesTableCreateCompanionBuilder,
+      $$CharacterImagesTableUpdateCompanionBuilder,
+      (
+        CharacterImage,
+        BaseReferences<_$AppDatabase, $CharacterImagesTable, CharacterImage>,
+      ),
+      CharacterImage,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9104,4 +10165,6 @@ class $AppDatabaseManager {
       $$BossResultsTableTableManager(_db, _db.bossResults);
   $$RewardItemsTableTableManager get rewardItems =>
       $$RewardItemsTableTableManager(_db, _db.rewardItems);
+  $$CharacterImagesTableTableManager get characterImages =>
+      $$CharacterImagesTableTableManager(_db, _db.characterImages);
 }

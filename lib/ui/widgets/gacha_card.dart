@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:oshi_quest/data/database/database_helper.dart';
 import '../../data/database/database.dart';
 
 class GachaCard extends StatelessWidget {
@@ -144,20 +145,20 @@ class GachaCard extends StatelessWidget {
   }
 
   Widget _buildImage(GachaItem item) {
-    final file = File(item.imagePath);
+    final file = File(item.imagePath ??'');
     final isLocalFile = file.existsSync();
 
     // ロック中はColorFilteredを使わず、上のレイヤーで黒塗りコンテナを重ねる方式に変更したので
     // ここでは純粋な画像ウィジェットのみを返します
     if (isLocalFile) {
-      return Image.file(
-        file,
+      return Image(
+        image: item.displayImageProvider,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => _buildErrorPlaceholder(),
       );
     } else {
       return Image.network(
-        item.imagePath,
+        item.imagePath ??'',
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;

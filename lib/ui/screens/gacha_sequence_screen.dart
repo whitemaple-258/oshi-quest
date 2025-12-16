@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/database/database.dart';
 import '../widgets/sparkle_effect_overlay.dart';
 import 'gacha_result_screen.dart';
+import '../../data/extensions/gacha_item_extension.dart';
 
 class GachaSequenceScreen extends StatefulWidget {
   final List<GachaItem> items;
@@ -155,7 +156,7 @@ class _GachaSequenceScreenState extends State<GachaSequenceScreen> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.file(File(item.imagePath), fit: BoxFit.cover),
+                      Image(image: item.displayImageProvider, fit: BoxFit.cover),
                       if (item.effectType != EffectType.none)
                         SparkleEffectOverlay(effectType: item.effectType),
                     ],
