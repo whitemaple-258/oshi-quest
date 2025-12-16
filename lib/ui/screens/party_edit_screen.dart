@@ -661,8 +661,8 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _buildStatText('STR', str, Colors.redAccent),
+        _buildStatText('VIT', vit, Colors.orangeAccent),
         _buildStatText('INT', intl, Colors.blueAccent),
-        _buildStatText('VIT', vit, Colors.green),
         _buildStatText('LUK', luck, Colors.purpleAccent),
         _buildStatText('CHA', cha, Colors.pinkAccent),
       ],

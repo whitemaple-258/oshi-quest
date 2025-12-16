@@ -143,19 +143,19 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
 
   // --- 完了処理 ---
   Future<void> _completeHabit(Habit habit) async {
-    final rewards = await ref.read(habitControllerProvider.notifier).completeHabit(habit);
+    final result = await ref.read(habitRepositoryProvider).completeHabit(habit);
 
-    if (mounted && rewards != null) {
-      final gems = rewards['gems'] as int;
-      final xp = rewards['xp'] as int;
-      final strUp = rewards['strUp']! > 0 ? 'STR+1 ' : '';
-      final intUp = rewards['intUp']! > 0 ? 'INT+1 ' : '';
-      final luckUp = rewards['luckUp']! > 0 ? 'LUK+1 ' : '';
-      final chaUp = rewards['chaUp']! > 0 ? 'CHA+1 ' : '';
-      final vitUp = rewards['vitUp']! > 0 ? 'VIT+1 ' : '';
-      final isLevelUp = rewards['levelUp'] == 1;
+    if (mounted && result != null) {
+      final gems = result['gems'] as int;
+      final xp = result['xp'] as int;
+      final strUp = result['strUp']! > 0 ? 'STR+1 ' : '';
+      final intUp = result['intUp']! > 0 ? 'INT+1 ' : '';
+      final luckUp = result['luckUp']! > 0 ? 'LUK+1 ' : '';
+      final chaUp = result['chaUp']! > 0 ? 'CHA+1 ' : '';
+      final vitUp = result['vitUp']! > 0 ? 'VIT+1 ' : '';
+      final isLevelUp = result['levelUp'] == 1;
 
-      final newTitles = rewards['newTitles'] as List<String>? ?? [];
+      final newTitles = result['newTitles'] as List<String>? ?? [];
 
       if (newTitles.isNotEmpty) {
         final titleText = newTitles.join(', ');
@@ -181,13 +181,17 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         ref.read(audioControllerProvider.notifier).playLevelUpSE();
 
         await Future.delayed(const Duration(milliseconds: 500));
-        final player = await ref.read(playerProvider.future);
+        final db = ref.read(databaseProvider);
+        final player = await (db.select(db.players)..where((p) => p.id.equals(1))).getSingle();
 
         if (mounted) {
           showDialog(
             context: context,
-            barrierDismissible: false,
-            builder: (context) => LevelUpDialog(newLevel: player.level, onClosed: () {}),
+        barrierDismissible: false,
+        builder: (context) => LevelUpDialog(
+          player: player,  // ✅ newLevel ではなく player を渡す
+          result: result,  // ✅ 上昇値データ (Map) を渡す
+          onClosed: () {},),
           );
         }
       } else {
@@ -413,14 +417,15 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     switch (type) {
       case TaskType.strength:
         return Colors.red;
+      case TaskType.vitality:
+        return Colors.orange;
       case TaskType.intelligence:
         return Colors.blue;
       case TaskType.luck:
         return Colors.purple;
       case TaskType.charm:
         return Colors.pink;
-      case TaskType.vitality:
-        return Colors.orange;
+      
     }
   }
 }

@@ -12,6 +12,8 @@ import 'party_edit_screen.dart';
 import 'title_list_screen.dart';
 import 'settings_screen.dart';
 import 'shop_screen.dart';
+import '../widgets/growth_forecast_chart.dart';
+import '../../utils/game_logic/exp_calculator.dart';
 
 // currentPartnerProvider
 final currentPartnerProvider = StreamProvider<GachaItem?>((ref) {
@@ -89,6 +91,9 @@ class HomeTab extends ConsumerStatefulWidget {
 }
 
 class _HomeTabState extends ConsumerState<HomeTab> {
+  // 成長予報の開閉状態を管理
+  bool _isChartExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     final playerAsync = ref.watch(playerProvider);
@@ -122,7 +127,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         actions: [
           IconButton(
             icon: const Icon(Icons.emoji_events),
-            tooltip: '称号コレクション',
+            tooltip: '称号',
             style: IconButton.styleFrom(
               backgroundColor: Colors.black45,
               foregroundColor: Colors.amber,
@@ -135,7 +140,6 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             },
           ),
           const SizedBox(width: 8),
-
           playerAsync.when(
             data: (player) => Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -163,29 +167,17 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 1. パートナー画像 (一番下)
+          // 1. パートナー画像 (背景)
           partnerAsync.when(
             data: (partner) {
               if (partner == null) {
                 return Container(
                   color: const Color(0xFF1A1A2E),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person_add_alt_1, size: 80, color: Colors.grey[700]),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'パートナーがいません',
-                          style: TextStyle(color: Colors.grey, fontSize: 18),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Partyタブから推しを編成するか、\nGachaタブで召喚してください',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
+                  child: const Center(
+                    child: Text(
+                      'パートナーがいません\nガチャで召喚しましょう',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
                 );
@@ -197,28 +189,26 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const Center(child: Text('エラーが発生しました')),
+            error: (_, __) => const Center(child: Text('エラー')),
           ),
 
-          // 2. エフェクト表示 (パートナーの上に重ねる)
+          // 2. エフェクト
           if (showEffect)
             partnerAsync.when(
-              data: (partner) {
-                if (partner == null || partner.effectType == EffectType.none) {
-                  return const SizedBox.shrink();
-                }
-                return SparkleEffectOverlay(effectType: partner.effectType);
-              },
+              data: (partner) => (partner != null && partner.effectType != EffectType.none)
+                  ? SparkleEffectOverlay(effectType: partner.effectType)
+                  : const SizedBox.shrink(),
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
 
-          // 3. ステータス表示 (一番上)
+          // 3. ステータス表示エリア
           Positioned(
-            top: 100,
-            left: 16,
+            top: 110,
+            left: 12,
             child: playerAsync.when(
               data: (player) {
+                // --- ここで変数を定義するので、このブロック内なら player が使えます ---
                 final partner = partnerAsync.value;
                 final bonusStr = partner?.strBonus ?? 0;
                 final bonusInt = partner?.intBonus ?? 0;
@@ -226,96 +216,141 @@ class _HomeTabState extends ConsumerState<HomeTab> {
                 final bonusCha = partner?.chaBonus ?? 0;
                 final bonusVit = partner?.vitBonus ?? 0;
 
-                // final nextLevelExp = player.level * 100;
-                final currentLevelStartExp = (player.level - 1) * 100;
-                final currentProgressExp = player.experience - currentLevelStartExp;
-                final requiredExpForNext = 100;
-                final progress = (currentProgressExp / requiredExpForNext).clamp(0.0, 1.0);
+                // EXP計算 (ExpCalculatorを使用)
+                final bool isMax = ExpCalculator.isMaxLevel(player.level);
+                final int nextLevelExp = ExpCalculator.requiredExpForNextLevel(player.level);
+
+                double progress;
+                String expText;
+
+                if (isMax) {
+                  progress = 1.0;
+                  expText = "MAX";
+                } else {
+                  final denominator = nextLevelExp > 0 ? nextLevelExp : 100;
+                  progress = player.experience / denominator;
+                  if (progress > 1.0) progress = 1.0;
+                  expText = "${player.experience}/$nextLevelExp";
+                }
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Lvバッジ & EXPバー
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Lv.${player.level}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              shadows: [Shadow(color: Colors.black, blurRadius: 4)],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          SizedBox(
-                            width: 100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    // 開閉式ステータスボックス
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isChartExpanded = !_isChartExpanded;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 160,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white24, width: 0.5),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 名前とLv
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                LinearProgressIndicator(
-                                  value: progress,
-                                  backgroundColor: Colors.white24,
-                                  color: Colors.amber,
-                                  minHeight: 6,
-                                  borderRadius: BorderRadius.circular(3),
+                                Expanded(
+                                  child: Text(
+                                    'Lv.${player.level} ${player.name}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      shadows: [Shadow(color: Colors.black, blurRadius: 2)],
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'EXP: $currentProgressExp / $requiredExpForNext',
-                                  style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                Icon(
+                                  _isChartExpanded ? Icons.expand_less : Icons.expand_more,
+                                  color: Colors.white70,
+                                  size: 16,
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+
+                            const SizedBox(height: 4),
+
+                            // EXPバー
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                backgroundColor: Colors.white12,
+                                color: isMax ? Colors.amberAccent : Colors.cyanAccent,
+                                minHeight: 3,
+                              ),
+                            ),
+
+                            // 数値 (開いている時のみ)
+                            if (_isChartExpanded)
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    expText,
+                                    style: TextStyle(
+                                      color: isMax ? Colors.amber : Colors.white54,
+                                      fontSize: 9,
+                                      fontWeight: isMax ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            // 成長予報チャート
+                            if (_isChartExpanded) ...[
+                              const Divider(color: Colors.white24, height: 12),
+                              const GrowthForecastChart(),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
 
                     // デバフ表示
                     if (player.currentDebuff == 'sloth')
                       Container(
-                        margin: const EdgeInsets.only(top: 8, bottom: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.purple.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.purpleAccent),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.sick, color: Colors.white, size: 16),
+                            Icon(Icons.sick, color: Colors.white, size: 12),
                             SizedBox(width: 4),
-                            Text(
-                              '怠惰の呪い',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
+                            Text('怠惰の呪い', style: TextStyle(color: Colors.white, fontSize: 10)),
                           ],
                         ),
                       ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+
+                    // ステータス一覧
                     _buildStatRow('STR', player.str, bonusStr, Colors.redAccent),
-                    const SizedBox(height: 4),
-                    _buildStatRow('VIT', player.vit, bonusVit, Colors.orange),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
+                    _buildStatRow('VIT', player.vit, bonusVit, Colors.orangeAccent),
+                    const SizedBox(height: 2),
                     _buildStatRow('INT', player.intellect, bonusInt, Colors.blueAccent),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     _buildStatRow('LUCK', player.luck, bonusLuck, Colors.purpleAccent),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     _buildStatRow('CHA', player.cha, bonusCha, Colors.pinkAccent),
                   ],
                 );
@@ -329,53 +364,36 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     );
   }
 
-  /// エフェクト描画用Widgetを構築するメソッド（最新版）
-  ///
-  /// [mainPartner] 現在設定されているメインパートナーのデータ（いない場合はnull）
-  /// [showEffect] 設定画面でのエフェクト表示設定（trueなら表示）
-  Widget _buildEffectOverlay(GachaItem? mainPartner, bool showEffect) {
-    // 1. 表示条件のチェック
-    // 設定がOFF、キャラが未設定、またはエフェクトタイプが「none」の場合は何も表示しない
-    if (!showEffect || mainPartner == null || mainPartner.effectType == EffectType.none) {
-      return const SizedBox.shrink();
-    }
-
-    // 2. エフェクトWidgetを配置
-    // EffectType Enumを渡すだけで、内部でマスターデータを参照して適切な描画が行われます。
-    // Stackの上に重ねて表示されるため、キャラクター画像の前面にエフェクトが出現します。
-    return SparkleEffectOverlay(
-      effectType: mainPartner.effectType,
-    );
-  }
-
+  // ステータス行のヘルパー
   Widget _buildStatRow(String label, int base, int bonus, Color color) {
     final total = base + bonus;
     final hasBonus = bonus > 0;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.black54,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: RichText(
-        text: TextSpan(
+    return IntrinsicWidth(
+      // 中身に合わせて幅を調整するWidget
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // 横幅を最小限にする
           children: [
-            TextSpan(
-              text: '$label $total ',
+            Text(
+              "$label $total",
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 12,
                 shadows: const [Shadow(color: Colors.black, blurRadius: 2)],
               ),
             ),
-            if (hasBonus)
-              TextSpan(
-                text: '(+$bonus)',
-                style: const TextStyle(color: Colors.white70, fontSize: 10),
-              ),
+            if (hasBonus) ...[
+              const SizedBox(width: 4), // 数値とボーナスの間隔
+              Text("(+$bonus)", style: const TextStyle(color: Colors.greenAccent, fontSize: 10)),
+            ],
           ],
         ),
       ),

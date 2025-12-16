@@ -43,6 +43,16 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('勇者'),
+  );
   static const VerificationMeta _strMeta = const VerificationMeta('str');
   @override
   late final GeneratedColumn<int> str = GeneratedColumn<int>(
@@ -263,6 +273,7 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     id,
     level,
     experience,
+    name,
     str,
     intellect,
     luck,
@@ -308,6 +319,12 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
       context.handle(
         _experienceMeta,
         experience.isAcceptableOrUnknown(data['experience']!, _experienceMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
       );
     }
     if (data.containsKey('str')) {
@@ -469,6 +486,10 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.int,
         data['${effectivePrefix}experience'],
       )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
       str: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}str'],
@@ -565,6 +586,7 @@ class Player extends DataClass implements Insertable<Player> {
   final int id;
   final int level;
   final int experience;
+  final String name;
   final int str;
   final int intellect;
   final int luck;
@@ -588,6 +610,7 @@ class Player extends DataClass implements Insertable<Player> {
     required this.id,
     required this.level,
     required this.experience,
+    required this.name,
     required this.str,
     required this.intellect,
     required this.luck,
@@ -614,6 +637,7 @@ class Player extends DataClass implements Insertable<Player> {
     map['id'] = Variable<int>(id);
     map['level'] = Variable<int>(level);
     map['experience'] = Variable<int>(experience);
+    map['name'] = Variable<String>(name);
     map['str'] = Variable<int>(str);
     map['intellect'] = Variable<int>(intellect);
     map['luck'] = Variable<int>(luck);
@@ -653,6 +677,7 @@ class Player extends DataClass implements Insertable<Player> {
       id: Value(id),
       level: Value(level),
       experience: Value(experience),
+      name: Value(name),
       str: Value(str),
       intellect: Value(intellect),
       luck: Value(luck),
@@ -694,6 +719,7 @@ class Player extends DataClass implements Insertable<Player> {
       id: serializer.fromJson<int>(json['id']),
       level: serializer.fromJson<int>(json['level']),
       experience: serializer.fromJson<int>(json['experience']),
+      name: serializer.fromJson<String>(json['name']),
       str: serializer.fromJson<int>(json['str']),
       intellect: serializer.fromJson<int>(json['intellect']),
       luck: serializer.fromJson<int>(json['luck']),
@@ -724,6 +750,7 @@ class Player extends DataClass implements Insertable<Player> {
       'id': serializer.toJson<int>(id),
       'level': serializer.toJson<int>(level),
       'experience': serializer.toJson<int>(experience),
+      'name': serializer.toJson<String>(name),
       'str': serializer.toJson<int>(str),
       'intellect': serializer.toJson<int>(intellect),
       'luck': serializer.toJson<int>(luck),
@@ -752,6 +779,7 @@ class Player extends DataClass implements Insertable<Player> {
     int? id,
     int? level,
     int? experience,
+    String? name,
     int? str,
     int? intellect,
     int? luck,
@@ -775,6 +803,7 @@ class Player extends DataClass implements Insertable<Player> {
     id: id ?? this.id,
     level: level ?? this.level,
     experience: experience ?? this.experience,
+    name: name ?? this.name,
     str: str ?? this.str,
     intellect: intellect ?? this.intellect,
     luck: luck ?? this.luck,
@@ -812,6 +841,7 @@ class Player extends DataClass implements Insertable<Player> {
       experience: data.experience.present
           ? data.experience.value
           : this.experience,
+      name: data.name.present ? data.name.value : this.name,
       str: data.str.present ? data.str.value : this.str,
       intellect: data.intellect.present ? data.intellect.value : this.intellect,
       luck: data.luck.present ? data.luck.value : this.luck,
@@ -862,6 +892,7 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('id: $id, ')
           ..write('level: $level, ')
           ..write('experience: $experience, ')
+          ..write('name: $name, ')
           ..write('str: $str, ')
           ..write('intellect: $intellect, ')
           ..write('luck: $luck, ')
@@ -890,6 +921,7 @@ class Player extends DataClass implements Insertable<Player> {
     id,
     level,
     experience,
+    name,
     str,
     intellect,
     luck,
@@ -917,6 +949,7 @@ class Player extends DataClass implements Insertable<Player> {
           other.id == this.id &&
           other.level == this.level &&
           other.experience == this.experience &&
+          other.name == this.name &&
           other.str == this.str &&
           other.intellect == this.intellect &&
           other.luck == this.luck &&
@@ -942,6 +975,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<int> id;
   final Value<int> level;
   final Value<int> experience;
+  final Value<String> name;
   final Value<int> str;
   final Value<int> intellect;
   final Value<int> luck;
@@ -965,6 +999,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.id = const Value.absent(),
     this.level = const Value.absent(),
     this.experience = const Value.absent(),
+    this.name = const Value.absent(),
     this.str = const Value.absent(),
     this.intellect = const Value.absent(),
     this.luck = const Value.absent(),
@@ -989,6 +1024,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.id = const Value.absent(),
     this.level = const Value.absent(),
     this.experience = const Value.absent(),
+    this.name = const Value.absent(),
     this.str = const Value.absent(),
     this.intellect = const Value.absent(),
     this.luck = const Value.absent(),
@@ -1013,6 +1049,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<int>? id,
     Expression<int>? level,
     Expression<int>? experience,
+    Expression<String>? name,
     Expression<int>? str,
     Expression<int>? intellect,
     Expression<int>? luck,
@@ -1037,6 +1074,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (id != null) 'id': id,
       if (level != null) 'level': level,
       if (experience != null) 'experience': experience,
+      if (name != null) 'name': name,
       if (str != null) 'str': str,
       if (intellect != null) 'intellect': intellect,
       if (luck != null) 'luck': luck,
@@ -1063,6 +1101,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<int>? id,
     Value<int>? level,
     Value<int>? experience,
+    Value<String>? name,
     Value<int>? str,
     Value<int>? intellect,
     Value<int>? luck,
@@ -1087,6 +1126,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       id: id ?? this.id,
       level: level ?? this.level,
       experience: experience ?? this.experience,
+      name: name ?? this.name,
       str: str ?? this.str,
       intellect: intellect ?? this.intellect,
       luck: luck ?? this.luck,
@@ -1120,6 +1160,9 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     }
     if (experience.present) {
       map['experience'] = Variable<int>(experience.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
     }
     if (str.present) {
       map['str'] = Variable<int>(str.value);
@@ -1189,6 +1232,7 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('id: $id, ')
           ..write('level: $level, ')
           ..write('experience: $experience, ')
+          ..write('name: $name, ')
           ..write('str: $str, ')
           ..write('intellect: $intellect, ')
           ..write('luck: $luck, ')
@@ -6442,6 +6486,7 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<int> id,
       Value<int> level,
       Value<int> experience,
+      Value<String> name,
       Value<int> str,
       Value<int> intellect,
       Value<int> luck,
@@ -6467,6 +6512,7 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> level,
       Value<int> experience,
+      Value<String> name,
       Value<int> str,
       Value<int> intellect,
       Value<int> luck,
@@ -6509,6 +6555,11 @@ class $$PlayersTableFilterComposer
 
   ColumnFilters<int> get experience => $composableBuilder(
     column: $table.experience,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6633,6 +6684,11 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get str => $composableBuilder(
     column: $table.str,
     builder: (column) => ColumnOrderings(column),
@@ -6749,6 +6805,9 @@ class $$PlayersTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
   GeneratedColumn<int> get str =>
       $composableBuilder(column: $table.str, builder: (column) => column);
 
@@ -6861,6 +6920,7 @@ class $$PlayersTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> level = const Value.absent(),
                 Value<int> experience = const Value.absent(),
+                Value<String> name = const Value.absent(),
                 Value<int> str = const Value.absent(),
                 Value<int> intellect = const Value.absent(),
                 Value<int> luck = const Value.absent(),
@@ -6884,6 +6944,7 @@ class $$PlayersTableTableManager
                 id: id,
                 level: level,
                 experience: experience,
+                name: name,
                 str: str,
                 intellect: intellect,
                 luck: luck,
@@ -6909,6 +6970,7 @@ class $$PlayersTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> level = const Value.absent(),
                 Value<int> experience = const Value.absent(),
+                Value<String> name = const Value.absent(),
                 Value<int> str = const Value.absent(),
                 Value<int> intellect = const Value.absent(),
                 Value<int> luck = const Value.absent(),
@@ -6932,6 +6994,7 @@ class $$PlayersTableTableManager
                 id: id,
                 level: level,
                 experience: experience,
+                name: name,
                 str: str,
                 intellect: intellect,
                 luck: luck,

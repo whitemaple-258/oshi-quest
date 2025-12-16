@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:drift/drift.dart';
 import '../database/database.dart';
+import '../../utils/game_logic/exp_calculator.dart';
 
 /// タスク（習慣）の管理とRPG報酬計算を行うリポジトリクラス
 /// Spec Version: 2.0.0 (Parameter & Intimacy Logic)
@@ -144,25 +145,49 @@ class HabitRepository {
     return messages;
   }
 
-  // --- ✅ タスク完了処理 (動的成長システム実装版) ---
-
+  // --- ✅ タスク完了処理 (修正済み完全版) ---
   Future<Map<String, int>> completeHabit(Habit habit) async {
     return await _db.transaction(() async {
       final player = await (_db.select(_db.players)..where((p) => p.id.equals(1))).getSingle();
 
-      // 1. デバフ解除判定 (変更なし)
+      // ======================================================================
+      // 1. デバフ解除判定
+      // ======================================================================
       if (player.currentDebuff == 'sloth' && habit.name == '【禊】女神の許しを請う') {
-        await (_db.update(_db.players)..where((p) => p.id.equals(1)))
-            .write(const PlayersCompanion(currentDebuff: Value(null)));
+        await (_db.update(
+          _db.players,
+        )..where((p) => p.id.equals(1))).write(const PlayersCompanion(currentDebuff: Value(null)));
         await deleteHabit(habit.id);
-        return { 'gems': 0, 'xp': 0, 'levelUp': 0, 'clearedDebuff': 1 };
+        return {
+          'gems': 0,
+          'xp': 0,
+          'strUp': 0,
+          'intUp': 0,
+          'luckUp': 0,
+          'chaUp': 0,
+          'vitUp': 0,
+          'levelUp': 0,
+          'clearedDebuff': 1,
+        };
       }
 
-      // 2. 装備ボーナス & パートナー特定 (変更なし)
-      int bonusStr = 0, bonusInt = 0, bonusVit = 0, bonusLuck = 0, bonusCha = 0;
-      int mainPartnerId = -1;
+      // ======================================================================
+      // 2. 装備ボーナス取得 & パートナー特定
+      // ======================================================================
 
-      final activeDeck = await (_db.select(_db.partyDecks)..where((t) => t.isActive.equals(true))).getSingleOrNull();
+      // 変数をここで1回だけ初期化
+      int bonusStr = 0;
+      int bonusInt = 0;
+      int bonusVit = 0;
+      int bonusLuck = 0;
+      int bonusCha = 0;
+      int mainPartnerId = -1; // 親密度UP対象
+
+      // アクティブなデッキを取得
+      final activeDeck = await (_db.select(
+        _db.partyDecks,
+      )..where((t) => t.isActive.equals(true))).getSingleOrNull();
+
       if (activeDeck != null) {
         final query = _db.select(_db.partyMembers).join([
           innerJoin(_db.gachaItems, _db.gachaItems.id.equalsExp(_db.partyMembers.gachaItemId)),
@@ -173,11 +198,13 @@ class HabitRepository {
         for (final row in results) {
           final item = row.readTable(_db.gachaItems);
           final member = row.readTable(_db.partyMembers);
+
           bonusStr += item.strBonus;
           bonusInt += item.intBonus;
           bonusVit += item.vitBonus;
           bonusLuck += item.luckBonus;
           bonusCha += item.chaBonus;
+
           if (member.slotPosition == 0) mainPartnerId = item.id;
         }
       }
@@ -187,8 +214,11 @@ class HabitRepository {
       final totalInt = min(player.intellect + bonusInt, kMaxStat);
       final totalLuck = min(player.luck + bonusLuck, kMaxStat);
       final totalCha = min(player.cha + bonusCha, kMaxStat);
+      // VITはここでは計算のみ
 
-      // 3. 報酬計算 (v2.0 Logic)
+      // ======================================================================
+      // 3. 報酬計算
+      // ======================================================================
       final baseGems = habit.rewardGems;
       final baseXp = habit.rewardXp;
 
@@ -199,7 +229,7 @@ class HabitRepository {
       bool isGreatSuccess = false;
       if (Random().nextDouble() * 100 < (1.0 + totalLuck * 0.05)) {
         isGreatSuccess = true;
-        gemMultiplier *= (3 + Random().nextInt(3)); 
+        gemMultiplier *= (3 + Random().nextInt(3)); // 3~5倍
         xpMultiplier *= (3 + Random().nextInt(3));
       }
 
@@ -211,56 +241,142 @@ class HabitRepository {
       final calculatedGems = (baseGems * gemMultiplier).round();
       final calculatedXp = (baseXp * xpMultiplier).round();
 
-      // 親密度加算 (変更なし)
+      // 親密度加算
       if (mainPartnerId != -1) {
         final double intimacyMultiplier = 1.0 + (totalCha * 0.01);
         final int intimacyGain = (10 * intimacyMultiplier).floor();
-        final currentItem = await (_db.select(_db.gachaItems)..where((t) => t.id.equals(mainPartnerId))).getSingle();
+
+        final currentItem = await (_db.select(
+          _db.gachaItems,
+        )..where((t) => t.id.equals(mainPartnerId))).getSingle();
         await (_db.update(_db.gachaItems)..where((t) => t.id.equals(mainPartnerId))).write(
           GachaItemsCompanion(bondLevel: Value(currentItem.bondLevel + intimacyGain)),
         );
       }
 
       // ======================================================================
-      // 4. 動的成長システム (Growth Logic)
+      // 4. ハイブリッド成長システム (Hybrid Growth Logic)
       // ======================================================================
-      
-      // A. 今回獲得した経験値を、タスク属性に応じて蓄積
+
+      // 更新用変数の初期化
+      int newStr = player.str;
+      int newInt = player.intellect;
+      int newLuk = player.luck;
+      int newCha = player.cha;
+      int newVit = player.vit;
+
+      // UI返却用（今回上がった値）
+      int gainedStr = 0, gainedInt = 0, gainedLuk = 0, gainedCha = 0, gainedVit = 0;
+
+      // ----------------------------------------------------------------------
+      // A. 【即時成長】タスク完了によるステータス上昇 (+1)
+      // ----------------------------------------------------------------------
+      switch (habit.taskType) {
+        case TaskType.strength:
+          if (newStr < kMaxStat) {
+            newStr++;
+            gainedStr++;
+          }
+          break;
+        case TaskType.intelligence:
+          if (newInt < kMaxStat) {
+            newInt++;
+            gainedInt++;
+          }
+          break;
+        case TaskType.luck:
+          if (newLuk < kMaxStat) {
+            newLuk++;
+            gainedLuk++;
+          }
+          break;
+        case TaskType.charm:
+          if (newCha < kMaxStat) {
+            newCha++;
+            gainedCha++;
+          }
+          break;
+        case TaskType.vitality:
+          if (newVit < kMaxStat) {
+            newVit++;
+            gainedVit++;
+          }
+          break;
+      }
+
+      // ----------------------------------------------------------------------
+      // B. 【傾向蓄積】経験値を対応するTempExpに蓄積
+      // ----------------------------------------------------------------------
       int currentTempStr = player.tempStrExp;
       int currentTempInt = player.tempIntExp;
       int currentTempLuk = player.tempLukExp;
       int currentTempCha = player.tempChaExp;
       int currentTempVit = player.tempVitExp;
 
-      // タスクタイプに応じて加算
       switch (habit.taskType) {
-        case TaskType.strength: currentTempStr += calculatedXp; break;
-        case TaskType.intelligence: currentTempInt += calculatedXp; break;
-        case TaskType.luck: currentTempLuk += calculatedXp; break;
-        case TaskType.charm: currentTempCha += calculatedXp; break;
-        case TaskType.vitality: currentTempVit += calculatedXp; break;
+        case TaskType.strength:
+          currentTempStr += calculatedXp;
+          break;
+        case TaskType.intelligence:
+          currentTempInt += calculatedXp;
+          break;
+        case TaskType.luck:
+          currentTempLuk += calculatedXp;
+          break;
+        case TaskType.charm:
+          currentTempCha += calculatedXp;
+          break;
+        case TaskType.vitality:
+          currentTempVit += calculatedXp;
+          break;
       }
 
-      // B. レベルアップ判定
+      // ----------------------------------------------------------------------
+      // C. 【レベルアップボーナス】傾向に応じた追加分配 (修正版)
+      // ----------------------------------------------------------------------
       int newExperience = player.experience + calculatedXp;
-      // 必要経験値計算 (簡易式: Lv * 100)
-      int nextLevelThreshold = player.level * 100; 
-      
       int newLevel = player.level;
-      
-      // 上昇値の初期化
-      int addStr = 0, addInt = 0, addLuk = 0, addCha = 0, addVit = 0;
       bool isLevelUp = false;
+      int levelsGained = 0; // 今回上がったレベル数
 
-      // レベルアップ処理
-      if (newExperience >= nextLevelThreshold) {
-        isLevelUp = true;
-        newLevel += 1;
-        newExperience -= nextLevelThreshold; // 経験値を持ち越し (リセット型の場合は0にする)
+      // 1. レベルアップ計算ループ (ここではレベルとEXPの計算のみ行う)
+      while (true) {
+        // 上限チェック
+        if (newLevel >= ExpCalculator.kMaxLevel) {
+          break;
+        }
 
-        // --- ステータス分配計算 ---
-        final totalTempExp = currentTempStr + currentTempInt + currentTempLuk + currentTempCha + currentTempVit;
-        
+        final int requiredExp = ExpCalculator.requiredExpForNextLevel(newLevel);
+
+        if (newExperience >= requiredExp) {
+          isLevelUp = true;
+          newLevel += 1;
+          newExperience -= requiredExp; // 消費してリセット
+          levelsGained += 1;            // 上がった回数をカウント
+        } else {
+          break;
+        }
+      }
+
+      // カンスト時の経験値処理
+      if (newLevel >= ExpCalculator.kMaxLevel) {
+        // ExpCalculatorクラスに定数が定義されている前提
+        newExperience = ExpCalculator.requiredExpForNextLevel(ExpCalculator.kMaxLevel);
+      }
+
+      // 2. ボーナス分配計算 (ループの外でまとめて行う)
+      // UI用変数 (gained...) は即時上昇分(+1)が既に入っている前提なので、そこに加算する
+      
+      if (levelsGained > 0) {
+        final totalTempExp =
+            currentTempStr + currentTempInt + currentTempLuk + currentTempCha + currentTempVit;
+
+        // 今回付与する総ポイント = レベルごとのポイント × 上がったレベル数
+        // (例: 2レベル上がったら 20ポイント)
+        final int totalBonusPoints = kStatPointsPerLevel * levelsGained;
+
+        int bonusStr = 0, bonusInt = 0, bonusLuk = 0, bonusCha = 0, bonusVit = 0;
+
         if (totalTempExp > 0) {
           // 比率計算
           double ratioStr = currentTempStr / totalTempExp;
@@ -269,19 +385,18 @@ class HabitRepository {
           double ratioCha = currentTempCha / totalTempExp;
           double ratioVit = currentTempVit / totalTempExp;
 
-          // 固定値(10pt)を分配 (端数切り捨て)
-          addStr = (kStatPointsPerLevel * ratioStr).floor();
-          addInt = (kStatPointsPerLevel * ratioInt).floor();
-          addLuk = (kStatPointsPerLevel * ratioLuk).floor();
-          addCha = (kStatPointsPerLevel * ratioCha).floor();
-          addVit = (kStatPointsPerLevel * ratioVit).floor();
+          // 総ポイントを分配
+          bonusStr = (totalBonusPoints * ratioStr).floor();
+          bonusInt = (totalBonusPoints * ratioInt).floor();
+          bonusLuk = (totalBonusPoints * ratioLuk).floor();
+          bonusCha = (totalBonusPoints * ratioCha).floor();
+          bonusVit = (totalBonusPoints * ratioVit).floor();
 
-          // 端数調整 (合計が10になるように、一番稼いだステータスに残りを足す)
-          final sumAssigned = addStr + addInt + addLuk + addCha + addVit;
-          final remainder = kStatPointsPerLevel - sumAssigned;
-
+          // 端数調整
+          final sumAssigned = bonusStr + bonusInt + bonusLuk + bonusCha + bonusVit;
+          final remainder = totalBonusPoints - sumAssigned;
+          
           if (remainder > 0) {
-            // 最大のTempExpを持つステータスを探す
             final statsMap = {
               'str': currentTempStr,
               'int': currentTempInt,
@@ -289,23 +404,36 @@ class HabitRepository {
               'cha': currentTempCha,
               'vit': currentTempVit,
             };
-            // 値でソートして最大のキーを取得
+            // 一番稼いだステータスに端数を全部乗せる
             final maxStatKey = statsMap.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-
             switch (maxStatKey) {
-              case 'str': addStr += remainder; break;
-              case 'int': addInt += remainder; break;
-              case 'luk': addLuk += remainder; break;
-              case 'cha': addCha += remainder; break;
-              case 'vit': addVit += remainder; break;
+              case 'str': bonusStr += remainder; break;
+              case 'int': bonusInt += remainder; break;
+              case 'luk': bonusLuk += remainder; break;
+              case 'cha': bonusCha += remainder; break;
+              case 'vit': bonusVit += remainder; break;
             }
           }
         } else {
-          // 例外: TempExpが0の場合 (ありえないが念のため)、ランダムかSTRに振る
-          addStr = kStatPointsPerLevel; 
+          // 万が一TempExpが0の場合(ありえないが)、全部STRなどのデフォルトに振る
+          bonusStr = totalBonusPoints;
         }
 
-        // 蓄積値をリセット
+        // --- ステータス加算 & UI反映 ---
+        newStr = min(newStr + bonusStr, kMaxStat);
+        newInt = min(newInt + bonusInt, kMaxStat);
+        newLuk = min(newLuk + bonusLuk, kMaxStat);
+        newCha = min(newCha + bonusCha, kMaxStat);
+        newVit = min(newVit + bonusVit, kMaxStat);
+
+        // UI用変数にも加算
+        gainedStr += bonusStr;
+        gainedInt += bonusInt;
+        gainedLuk += bonusLuk;
+        gainedCha += bonusCha;
+        gainedVit += bonusVit;
+
+        // 蓄積リセット (最後に1回だけやる)
         currentTempStr = 0;
         currentTempInt = 0;
         currentTempLuk = 0;
@@ -313,29 +441,23 @@ class HabitRepository {
         currentTempVit = 0;
       }
 
-      // C. 最終的なステータス値 (上限1000キャップ適用)
-      final newStrStat = min(player.str + addStr, kMaxStat);
-      final newIntStat = min(player.intellect + addInt, kMaxStat);
-      final newLukStat = min(player.luck + addLuk, kMaxStat);
-      final newChaStat = min(player.cha + addCha, kMaxStat);
-      final newVitStat = min(player.vit + addVit, kMaxStat);
-
       // DB更新処理
-      await (_db.update(_db.habits)..where((h) => h.id.equals(habit.id)))
-          .write(HabitsCompanion(isCompleted: const Value(true), completedAt: Value(DateTime.now())));
+      await (_db.update(_db.habits)..where((h) => h.id.equals(habit.id))).write(
+        HabitsCompanion(isCompleted: const Value(true), completedAt: Value(DateTime.now())),
+      );
 
       await (_db.update(_db.players)..where((p) => p.id.equals(1))).write(
         PlayersCompanion(
           willGems: Value(player.willGems + calculatedGems),
           experience: Value(newExperience),
           level: Value(newLevel),
-          // ステータス更新
-          str: Value(newStrStat),
-          intellect: Value(newIntStat),
-          luck: Value(newLukStat),
-          cha: Value(newChaStat),
-          vit: Value(newVitStat),
-          // 蓄積Exp更新 (リセット or 加算後)
+          // ステータス
+          str: Value(newStr),
+          intellect: Value(newInt),
+          luck: Value(newLuk),
+          cha: Value(newCha),
+          vit: Value(newVit),
+          // 蓄積Exp
           tempStrExp: Value(currentTempStr),
           tempIntExp: Value(currentTempInt),
           tempLukExp: Value(currentTempLuk),
@@ -345,17 +467,17 @@ class HabitRepository {
         ),
       );
 
-      // 結果返却
       return {
         'gems': calculatedGems,
         'xp': calculatedXp,
-        'strUp': addStr,
-        'intUp': addInt,
-        'luckUp': addLuk,
-        'chaUp': addCha,
-        'vitUp': addVit,
+        'strUp': gainedStr,
+        'intUp': gainedInt,
+        'luckUp': gainedLuk,
+        'chaUp': gainedCha,
+        'vitUp': gainedVit,
         'levelUp': isLevelUp ? 1 : 0,
         'isCritical': isGreatSuccess ? 1 : 0,
+        'clearedDebuff': 0,
       };
     });
   }

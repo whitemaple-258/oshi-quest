@@ -91,6 +91,7 @@ class Players extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get level => integer().withDefault(const Constant(1))();
   IntColumn get experience => integer().withDefault(const Constant(0))();
+  TextColumn get name => text().withDefault(const Constant('勇者'))();
   IntColumn get str => integer().withDefault(const Constant(0))();
   IntColumn get intellect => integer().withDefault(const Constant(0))();
   IntColumn get luck => integer().withDefault(const Constant(0))();
