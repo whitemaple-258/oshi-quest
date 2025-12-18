@@ -6,6 +6,9 @@ import '../../data/providers.dart';
 import '../../logic/habit_controller.dart';
 import '../../logic/audio_controller.dart';
 import '../widgets/level_up_dialog.dart';
+// ▼▼▼ 追加: 計算ロジック ▼▼▼
+import '../../utils/game_logic/exp_calculator.dart';
+import '../widgets/task_completion_dialog.dart';
 
 class HabitScreen extends ConsumerStatefulWidget {
   const HabitScreen({super.key});
@@ -17,7 +20,7 @@ class HabitScreen extends ConsumerStatefulWidget {
 class _HabitScreenState extends ConsumerState<HabitScreen> {
   final TextEditingController _titleController = TextEditingController();
   TaskType _selectedType = TaskType.strength;
-  TaskDifficulty _selectedDifficulty = TaskDifficulty.normal;
+  TaskDifficulty _selectedDifficulty = TaskDifficulty.low; // 初期値はLowが無難
 
   @override
   void dispose() {
@@ -25,13 +28,35 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     super.dispose();
   }
 
-  // --- ダイアログ表示 ---
+  // --- ダイアログ表示 (レベル制限対応版) ---
   Future<void> _showEditHabitDialog({Habit? habit}) async {
-    _titleController.text = habit?.name ?? '';
-    _selectedType = habit?.taskType ?? TaskType.strength;
-    _selectedDifficulty = habit?.difficulty ?? TaskDifficulty.normal;
-
     final isEditing = habit != null;
+
+    // 1. プレイヤーレベルと解放状況の取得
+    final player = ref.read(playerProvider).value;
+    final int currentLevel = player?.level ?? 1;
+
+    final bool isNormalUnlocked = currentLevel >= ExpCalculator.unlockLevelMedium;
+    final bool isHardUnlocked = currentLevel >= ExpCalculator.unlockLevelHigh;
+
+    // 2. 初期値の設定
+    if (isEditing) {
+      _titleController.text = habit.name;
+      _selectedType = habit.taskType;
+      _selectedDifficulty = habit.difficulty;
+    } else {
+      _titleController.text = '';
+      _selectedType = TaskType.strength;
+      // 新規作成時、ロックされている難易度が選択されていたらLowに戻す
+      if (_selectedDifficulty == TaskDifficulty.normal && !isNormalUnlocked) {
+        _selectedDifficulty = TaskDifficulty.low;
+      } else if (_selectedDifficulty == TaskDifficulty.high && !isHardUnlocked) {
+        _selectedDifficulty = TaskDifficulty.low;
+      } else {
+        // 前回選択した値を維持しつつ、デフォルトはLow
+        _selectedDifficulty = TaskDifficulty.low;
+      }
+    }
 
     final result = await showDialog<bool>(
       context: context,
@@ -56,8 +81,9 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                 const Text('タイプ', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<TaskType>(
-                  initialValue: _selectedType,
+                  initialValue: _selectedType, // initialValueではなくvalueを使用
                   decoration: const InputDecoration(border: OutlineInputBorder()),
+                  dropdownColor: Colors.grey[850], // ドロップダウン背景色
                   items: TaskType.values.map((type) {
                     return DropdownMenuItem(
                       value: type,
@@ -75,19 +101,80 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                const Text('難易度', style: TextStyle(fontWeight: FontWeight.bold)),
+                
+                // 難易度セクション
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('難易度', style: TextStyle(fontWeight: FontWeight.bold)),
+                    // レベル表示（デバッグ・確認用）
+                    Text('Lv.$currentLevel', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
                 const SizedBox(height: 8),
+                
                 SegmentedButton<TaskDifficulty>(
-                  segments: const [
-                    ButtonSegment(value: TaskDifficulty.low, label: Text('低')),
-                    ButtonSegment(value: TaskDifficulty.normal, label: Text('中')),
-                    ButtonSegment(value: TaskDifficulty.high, label: Text('高')),
+                  segments: [
+                    // Low (常に解放)
+                    const ButtonSegment(
+                      value: TaskDifficulty.low, 
+                      label: Text('低'),
+                    ),
+                    
+                    // Normal (Lv10解放)
+                    ButtonSegment(
+                      value: TaskDifficulty.normal, 
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('中'),
+                          if (!isNormalUnlocked) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.lock, size: 12),
+                          ]
+                        ],
+                      ),
+                      enabled: isNormalUnlocked, // ロック制御
+                    ),
+                    
+                    // High (Lv20解放)
+                    ButtonSegment(
+                      value: TaskDifficulty.high, 
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('高'),
+                          if (!isHardUnlocked) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.lock, size: 12),
+                          ]
+                        ],
+                      ),
+                      enabled: isHardUnlocked, // ロック制御
+                    ),
                   ],
                   selected: {_selectedDifficulty},
                   onSelectionChanged: (Set<TaskDifficulty> newSelection) {
                     setDialogState(() => _selectedDifficulty = newSelection.first);
                   },
+                  style: ButtonStyle(
+                    // ロック時の色調整などがしたければここで設定
+                  ),
                 ),
+                
+                // 解放条件のヒントテキスト
+                if (!isHardUnlocked) ...[
+                  const SizedBox(height: 6),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      !isNormalUnlocked 
+                          ? "※ Lv.${ExpCalculator.unlockLevelMedium}で「中」解放"
+                          : "※ Lv.${ExpCalculator.unlockLevelHigh}で「高」解放",
+                      style: const TextStyle(color: Colors.grey, fontSize: 10),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -141,23 +228,24 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     }
   }
 
-  // --- 完了処理 ---
+  // --- 完了処理 (アニメーションダイアログ版) ---
   Future<void> _completeHabit(Habit habit) async {
+    // 1. リポジトリで完了処理を実行
     final result = await ref.read(habitRepositoryProvider).completeHabit(habit);
 
-    if (mounted && result != null) {
-      final gems = result['gems'] as int;
-      final xp = result['xp'] as int;
-      final strUp = result['strUp']! > 0 ? 'STR+1 ' : '';
-      final intUp = result['intUp']! > 0 ? 'INT+1 ' : '';
-      final luckUp = result['luckUp']! > 0 ? 'LUK+1 ' : '';
-      final chaUp = result['chaUp']! > 0 ? 'CHA+1 ' : '';
-      final vitUp = result['vitUp']! > 0 ? 'VIT+1 ' : '';
-      final isLevelUp = result['levelUp'] == 1;
+    if (mounted) {
+      // 2. SE再生
+      ref.read(audioControllerProvider.notifier).playCompleteSE();
 
+      // 3. 最新のプレイヤーデータを取得 (チャート表示用)
+      // completeHabit内でDBは更新されているので、再取得する
+      final db = ref.read(databaseProvider);
+      final player = await (db.select(db.players)..where((p) => p.id.equals(1))).getSingle();
+
+      // 4. 称号獲得チェック
       final newTitles = result['newTitles'] as List<String>? ?? [];
-
       if (newTitles.isNotEmpty) {
+        // 称号は別途スナックバーで通知 (ダイアログと被らないように)
         final titleText = newTitles.join(', ');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -169,40 +257,45 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
               ],
             ),
             backgroundColor: Colors.amber[800],
-            duration: const Duration(seconds: 4),
           ),
         );
         ref.read(audioControllerProvider.notifier).playLevelUpSE();
-        await Future.delayed(const Duration(seconds: 2));
       }
 
+      // 5. レベルアップチェック
+      final isLevelUp = result['levelUp'] == 1;
       if (isLevelUp) {
+        // レベルアップ時は、既存のレベルアップダイアログを優先表示
         HapticFeedback.heavyImpact();
         ref.read(audioControllerProvider.notifier).playLevelUpSE();
-
-        await Future.delayed(const Duration(milliseconds: 500));
-        final db = ref.read(databaseProvider);
-        final player = await (db.select(db.players)..where((p) => p.id.equals(1))).getSingle();
-
         if (mounted) {
-          showDialog(
+          await showDialog( // awaitで閉じるまで待つ
             context: context,
-        barrierDismissible: false,
-        builder: (context) => LevelUpDialog(
-          player: player,  // ✅ newLevel ではなく player を渡す
-          result: result,  // ✅ 上昇値データ (Map) を渡す
-          onClosed: () {},),
+            barrierDismissible: false,
+            builder: (context) => LevelUpDialog(
+              player: player,  
+              result: result,  
+              onClosed: () {},
+            ),
           );
         }
-      } else {
-        HapticFeedback.mediumImpact();
-        ref.read(audioControllerProvider.notifier).playCompleteSE();
+        // レベルアップダイアログ後に、さらにタスク完了ダイアログを出すかは選択の余地あり。
+        // 今回は「レベルアップのインパクトを優先」し、ここではタスク完了ダイアログは出さない方針とします。
+        // もし両方出したい場合は、ここでの return を外してください。
+        return; 
+      }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('達成！ +$gems Gems, +$xp XP  $strUp$intUp$vitUp$luckUp$chaUp'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
+      // 6. 通常のタスク完了ダイアログを表示
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        showDialog(
+          context: context,
+          // 背景タップで閉じられないようにする（アニメーションをしっかり見せるため）
+          barrierDismissible: false, 
+          builder: (context) => TaskCompletionDialog(
+            habit: habit,
+            player: player,
+            result: result,
           ),
         );
       }
@@ -268,8 +361,7 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
   Widget build(BuildContext context) {
     final habitsAsync = ref.watch(habitsProvider);
     final habitState = ref.watch(habitControllerProvider);
-
-    // ✅ テーマカラーの取得
+    
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = colorScheme.primary;
     final onPrimaryColor = colorScheme.onPrimary;
@@ -277,10 +369,6 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('クエスト'),
-        actions: [
-          // パートナーのGem数を表示したい場合はここにConsumerで取得するコードを追加
-          // (今回はシンプルに省略、MainScreenのAppBarにあるため)
-        ],
       ),
       body: habitsAsync.when(
         data: (habits) {
@@ -334,8 +422,8 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
         onPressed: habitState.isLoading ? null : () => _showEditHabitDialog(),
         icon: const Icon(Icons.add_task),
         label: const Text('クエスト追加'),
-        backgroundColor: primaryColor, // ✅ テーマカラー
-        foregroundColor: onPrimaryColor, // ✅ 自動調整された文字色
+        backgroundColor: primaryColor,
+        foregroundColor: onPrimaryColor,
       ),
     );
   }
@@ -385,47 +473,31 @@ class _HabitScreenState extends ConsumerState<HabitScreen> {
 
   IconData _getTaskTypeIcon(TaskType type) {
     switch (type) {
-      case TaskType.strength:
-        return Icons.fitness_center;
-      case TaskType.intelligence:
-        return Icons.school;
-      case TaskType.luck:
-        return Icons.casino;
-      case TaskType.charm:
-        return Icons.favorite;
-      case TaskType.vitality:
-        return Icons.directions_run;
+      case TaskType.strength: return Icons.fitness_center;
+      case TaskType.intelligence: return Icons.school;
+      case TaskType.luck: return Icons.casino;
+      case TaskType.charm: return Icons.favorite;
+      case TaskType.vitality: return Icons.directions_run;
     }
   }
 
   String _getTaskTypeLabel(TaskType type) {
     switch (type) {
-      case TaskType.strength:
-        return 'STR';
-      case TaskType.intelligence:
-        return 'INT';
-      case TaskType.luck:
-        return 'LUK';
-      case TaskType.charm:
-        return 'CHA';
-      case TaskType.vitality:
-        return 'VIT';
+      case TaskType.strength: return 'STR';
+      case TaskType.intelligence: return 'INT';
+      case TaskType.luck: return 'LUK';
+      case TaskType.charm: return 'CHA';
+      case TaskType.vitality: return 'VIT';
     }
   }
 
   Color _getTaskTypeColor(TaskType type) {
     switch (type) {
-      case TaskType.strength:
-        return Colors.red;
-      case TaskType.vitality:
-        return Colors.orange;
-      case TaskType.intelligence:
-        return Colors.blue;
-      case TaskType.luck:
-        return Colors.purple;
-      case TaskType.charm:
-        return Colors.pink;
-      
+      case TaskType.strength: return Colors.red;
+      case TaskType.vitality: return Colors.orange;
+      case TaskType.intelligence: return Colors.blue;
+      case TaskType.luck: return Colors.purple;
+      case TaskType.charm: return Colors.pink;
     }
   }
 }

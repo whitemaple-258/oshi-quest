@@ -7,26 +7,6 @@ import 'package:path/path.dart' as p;
 part 'database.g.dart';
 
 // --- Enums ---
-enum TaskType {
-  strength(0),
-  intelligence(1),
-  luck(2),
-  charm(3),
-  vitality(4);
-
-  const TaskType(this.value);
-  final int value;
-}
-
-enum Rarity {
-  n(0),
-  r(1),
-  sr(2),
-  ssr(3);
-
-  const Rarity(this.value);
-  final int value;
-}
 
 enum TaskDifficulty {
   low(0),
@@ -37,34 +17,25 @@ enum TaskDifficulty {
   final int value;
 }
 
+// HabitScreenやタスク設定に使用されるEnum
+enum TaskType { strength, intelligence, vitality, luck, charm }
+
+// ガチャアイテムのレアリティ
+enum Rarity { n, r, sr, ssr }
+
+// ガチャアイテムのスキルタイプ
+// Note: Boost系は戦闘力 (str, int, vit, luck)、Gem/XpBoostは報酬倍率
+enum SkillType { none, gemBoost, xpBoost, strBoost, intBoost, vitBoost, luckBoost, chaBoost }
+
+// ガチャアイテムのシリーズ（セット効果用）
+enum SeriesType { none, crimson, azure, golden, phantom }
+
 enum BossType {
   weekly(0),
   monthly(1),
   yearly(2);
 
   const BossType(this.value);
-  final int value;
-}
-
-enum SkillType {
-  none(0),
-  gemBoost(1),
-  xpBoost(2),
-  strBoost(3),
-  luckBoost(4);
-
-  const SkillType(this.value);
-  final int value;
-}
-
-enum SeriesType {
-  none(0),
-  crimson(1),
-  azure(2),
-  golden(3),
-  phantom(4);
-
-  const SeriesType(this.value);
   final int value;
 }
 
@@ -78,7 +49,7 @@ enum GachaItemType {
 enum TightsColor {
   gray, // N
   blue, // R
-  purple,  // SR
+  purple, // SR
   gold, // SSR
   none, // ユーザー画像の場合はnone
 }
@@ -123,23 +94,28 @@ class CharacterImages extends Table {
 
 class GachaItems extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get imagePath => text().nullable()();
   IntColumn get type => intEnum<GachaItemType>().withDefault(const Constant(0))();
   IntColumn get tightsColor => intEnum<TightsColor>().withDefault(const Constant(0))();
   TextColumn get title => text()();
   IntColumn get rarity => intEnum<Rarity>()();
   IntColumn get effectType => intEnum<EffectType>()();
   BoolColumn get isUnlocked => boolean().withDefault(const Constant(false))();
+  // 基礎パラメータボーナス（固定値）
   IntColumn get strBonus => integer().withDefault(const Constant(0))();
   IntColumn get intBonus => integer().withDefault(const Constant(0))();
   IntColumn get luckBonus => integer().withDefault(const Constant(0))();
   IntColumn get chaBonus => integer().withDefault(const Constant(0))();
   IntColumn get vitBonus => integer().withDefault(const Constant(0))();
-  IntColumn get bondLevel => integer().withDefault(const Constant(0))();
+  // 特化パラメータ
+  IntColumn get parameterType => intEnum<TaskType>()();
+  // スキル
   IntColumn get skillType => intEnum<SkillType>().withDefault(const Constant(0))();
   IntColumn get skillValue => integer().withDefault(const Constant(0))();
   IntColumn get skillDuration => integer().withDefault(const Constant(0))();
   IntColumn get skillCooldown => integer().withDefault(const Constant(0))();
+  // シリーズ
+  IntColumn get seriesType =>
+      intEnum<SeriesType>().withDefault(const Constant(0))(); // SeriesType.none=0
   DateTimeColumn get lastSkillUsedAt => dateTime().nullable()();
   IntColumn get seriesId => intEnum<SeriesType>().withDefault(const Constant(0))();
   BoolColumn get isSource => boolean().withDefault(const Constant(false))();
@@ -147,16 +123,20 @@ class GachaItems extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get unlockedAt => dateTime().nullable()();
   BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
+  // 親密度
   IntColumn get intimacyLevel => integer().withDefault(const Constant(1))();
   IntColumn get intimacyExp => integer().withDefault(const Constant(0))();
+  // その他
+  BoolColumn get isEquipped => boolean().withDefault(const Constant(false))();
+  BoolColumn get isLocked => boolean().withDefault(const Constant(false))();
+  TextColumn get imagePath => text().nullable()();
 }
 
 class Habits extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   IntColumn get taskType => intEnum<TaskType>()();
-  IntColumn get difficulty =>
-      intEnum<TaskDifficulty>().withDefault(Constant(TaskDifficulty.normal.value))();
+  IntColumn get difficulty => intEnum<TaskDifficulty>().withDefault(const Constant(0))();
   IntColumn get rewardGems => integer().withDefault(const Constant(100))();
   IntColumn get rewardXp => integer().withDefault(const Constant(10))();
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
@@ -210,6 +190,30 @@ class UserSettings extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+// ボスのステータスを管理するテーブル
+// ⚠️ 追加: このアノテーションでクラス名を強制します
+@DataClassName('Boss') 
+class Bosses extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  
+  // 前回 int に変更した場合はそのままでOK、intEnumに戻してもOKですが、
+  // 安全のため今回は integer() (数値) のままで行きましょう。
+  IntColumn get bossType => integer()(); 
+  
+  IntColumn get maxHp => integer().withDefault(const Constant(1000))();
+  IntColumn get attack => integer().withDefault(const Constant(100))();
+  IntColumn get defense => integer().withDefault(const Constant(50))();
+
+  TextColumn get specialAbility => text().nullable()();
+  IntColumn get rewardGems => integer().withDefault(const Constant(500))();
+
+  DateTimeColumn get resetAt => dateTime()(); 
+  
+  @override
+  List<String> get customConstraints => ['UNIQUE(boss_type, reset_at)'];
+}
+
 class BossResults extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get bossType => intEnum<BossType>()();
@@ -244,6 +248,7 @@ class RewardItems extends Table {
     BossResults,
     RewardItems,
     CharacterImages,
+    Bosses,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -267,8 +272,16 @@ class AppDatabase extends _$AppDatabase {
         );
       },
       onUpgrade: (Migrator m, int from, int to) async {
+        // バージョン9未満からのアップデート（RewardItems追加）
         if (from < 9) {
           await m.createTable(rewardItems);
+        }
+
+        // ✅ 修正: バージョン10未満からのアップデート（Bosses追加）
+        if (from < 10) {
+          await m.createTable(bosses);
+          // 既存のBossResultsテーブルにカラム変更などがあればここで行いますが、
+          // 今回は新規テーブル追加のみなので createTable だけでOKです。
         }
       },
     );

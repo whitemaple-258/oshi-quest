@@ -1,29 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'boss_controller.dart';
+part of 'boss_battle_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$bossControllerHash() => r'22b92f75a207c98b5bb513b9ba35ca0ac37b5b74';
+String _$bossBattleControllerHash() =>
+    r'40bacfdfac4571cb1402939d9c09e9171f13e046';
 
-/// See also [BossController].
-@ProviderFor(BossController)
-final bossControllerProvider =
-    AutoDisposeAsyncNotifierProvider<
-      BossController,
-      Map<BossType, BossStatus>
-    >.internal(
-      BossController.new,
-      name: r'bossControllerProvider',
+/// See also [BossBattleController].
+@ProviderFor(BossBattleController)
+final bossBattleControllerProvider =
+    AutoDisposeNotifierProvider<BossBattleController, BattleState?>.internal(
+      BossBattleController.new,
+      name: r'bossBattleControllerProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$bossControllerHash,
+          : _$bossBattleControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$BossController = AutoDisposeAsyncNotifier<Map<BossType, BossStatus>>;
+typedef _$BossBattleController = AutoDisposeNotifier<BattleState?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

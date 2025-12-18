@@ -9,6 +9,7 @@ import '../widgets/sparkle_effect_overlay.dart';
 import 'bulk_sell_screen.dart';
 import 'image_pool_screen.dart'; // 整形・転生用
 import '../../data/extensions/gacha_item_extension.dart';
+import '../../utils/game_logic/intimacy_calculator.dart';
 
 class CharacterDetailScreen extends ConsumerStatefulWidget {
   final GachaItem? singleItem;
@@ -230,6 +231,96 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
     );
   }
 
+  Widget _buildIntimacySection(GachaItem item) {
+    // DBのカラムを使用 (bondLevelではなくintimacyLevel/Exp推奨)
+    final int level = item.intimacyLevel;
+    final int exp = item.intimacyExp;
+    
+    // 次のレベルまでの必要経験値を計算
+    final int nextExp = IntimacyCalculator.requiredExpForNextLevel(level);
+    final bool isMax = level >= IntimacyCalculator.kMaxLevel;
+    
+    // 進捗率 (0.0 ~ 1.0)
+    final double progress = isMax ? 1.0 : (nextExp > 0 ? exp / nextExp : 0.0).clamp(0.0, 1.0);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.pink.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.pinkAccent.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.pinkAccent.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.favorite, color: Colors.pinkAccent, size: 24),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "親密度 (Intimacy)",
+                    style: TextStyle(
+                      color: Colors.pinkAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                "Lv.$level",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  shadows: [Shadow(color: Colors.pink, blurRadius: 8)],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // プログレスバー
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.black45,
+                  color: Colors.pinkAccent,
+                  minHeight: 16,
+                ),
+              ),
+              // バーの中央に % 表示などを入れても良いが、今回は下部に数値を表示
+            ],
+          ),
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              isMax ? "MAX" : "$exp / $nextExp EXP",
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontFamily: "monospace", // 数字の幅を揃えるため
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   GachaItem? _getCurrentItem(List<GachaItem> allItems) {
     int targetId;
     if (widget.singleItem != null) {
@@ -370,10 +461,12 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
 
                 const SizedBox(height: 32),
 
+                _buildIntimacySection(item),
+
                 // 基本情報
                 _buildInfoCard('基本情報', [
-                  _buildRow('Bond Level', '${item.bondLevel}'),
                   _buildRow('エフェクト', _getEffectName(item.effectType)),
+                  _buildRow('入手日', item.createdAt.toString().split(' ')[0]),
                 ], Colors.blueGrey),
                 const SizedBox(height: 12),
 
@@ -440,7 +533,7 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
                         icon: Icons.face,
                         label: '整形',
                         color: Colors.cyanAccent,
-                        subLabel: '(${reskinCost} 💎)',
+                        subLabel: '($reskinCost 💎)',
                         onTap: () => _startModification(item, ModificationType.reskin),
                       ),
                       
@@ -451,7 +544,7 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
                         icon: Icons.autorenew,
                         label: '転生',
                         color: Colors.orangeAccent,
-                        subLabel: '(${reincarnateCost} 💎)',
+                        subLabel: '($reincarnateCost 💎)',
                         onTap: () => _startModification(item, ModificationType.reincarnation),
                       ),
                       
@@ -472,7 +565,7 @@ class _CharacterDetailScreenState extends ConsumerState<CharacterDetailScreen> {
                         icon: Icons.monetization_on,
                         label: '売却',
                         color: isEquipped ? Colors.white54 : Colors.amberAccent,
-                        subLabel: '(${sellPrice} 💎)',
+                        subLabel: '($sellPrice 💎)',
                         onTap: isEquipped 
                           ? null 
                           : () => BulkSellScreen.showSingleSellDialog(context, ref, item),

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:oshi_quest/data/database/database_helper.dart';
@@ -14,6 +13,7 @@ import 'settings_screen.dart';
 import 'shop_screen.dart';
 import '../widgets/growth_forecast_chart.dart';
 import '../../utils/game_logic/exp_calculator.dart';
+import 'boss_battle_screen.dart';
 
 // currentPartnerProvider
 final currentPartnerProvider = StreamProvider<GachaItem?>((ref) {
@@ -139,6 +139,24 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               );
             },
           ),
+          const SizedBox(width: 8),
+          // 2. ✅ 追加: ボスバトルボタン
+          // 称号の隣に配置し、赤色で「バトル」感を演出
+          IconButton(
+            icon: const Icon(Icons.whatshot), // 炎アイコン
+            tooltip: 'ボスバトル',
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black45,
+              foregroundColor: Colors.redAccent, // アイコン色を赤に
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BossBattleScreen()),
+              );
+            },
+          ),
+
           const SizedBox(width: 8),
           playerAsync.when(
             data: (player) => Padding(
