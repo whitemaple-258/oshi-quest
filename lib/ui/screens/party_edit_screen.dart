@@ -149,22 +149,6 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
                 ],
               ),
               actions: [
-                // リストを空(.clear)にし、スイッチをfalseにします
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _selectedRarities.clear();
-                      _selectedSeries.clear();
-                      _selectedEffects.clear();
-                      _showFavoritesOnly = false;
-                      _showWithSkillOnly = false;
-                    });
-                    this.setState(() {});
-                  },
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: const Text('全解除'),
-                ),
-                //　リセットボタン
                 TextButton(
                   onPressed: () {
                     setState(() {
@@ -249,16 +233,11 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
 
     final displayItems = allItems.where((item) {
       if (_showFavoritesOnly && !item.isFavorite) return false;
-      // レアリティフィルター
-      if (_selectedRarities.isNotEmpty && !_selectedRarities.contains(item.rarity)) return false;
-      
-      // エフェクトフィルター
-      if (_selectedEffects.isNotEmpty && !_selectedEffects.contains(item.effectType)) return false;
-      
+      if (!_selectedRarities.contains(item.rarity)) return false;
+      if (!_selectedEffects.contains(item.effectType)) return false;
       if (_showWithSkillOnly && item.skillType == SkillType.none) return false;
-      
-      // シリーズフィルター
-      if (_selectedSeries.isNotEmpty && !_selectedSeries.contains(item.seriesId)) return false;
+      // ✅ 変更: シリーズフィルター
+      if (!_selectedSeries.contains(item.seriesId)) return false;
 
       return true;
     }).toList();
@@ -517,11 +496,10 @@ class _PartyEditScreenState extends ConsumerState<PartyEditScreen> {
         HapticFeedback.selectionClick();
         setState(() {
           if (_selectedSlotIndex == slotId) {
-            if (item != null) {
+            if (item != null)
               partyController.unequipItem(slotId);
-            } else {
+            else
               _selectedSlotIndex = null;
-            }
           } else {
             _selectedSlotIndex = slotId;
           }

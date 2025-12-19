@@ -81,6 +81,12 @@ final activePartyProvider = StreamProvider<Map<int, GachaItem>>((ref) {
   });
 });
 
+// 装備中のフレーム
+final equippedFrameProvider = StreamProvider<GachaItem?>((ref) {
+  final repository = ref.watch(partyRepositoryProvider);
+  return repository.watchEquippedFrame();
+});
+
 // ============================================================================
 // Other Features (習慣・ボス・称号・ショップ・設定)
 // ============================================================================

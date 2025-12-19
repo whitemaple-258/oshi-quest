@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/database.dart';
 import '../../data/providers.dart';
 import '../../data/master_data/gacha_logic_master.dart';
+import '../../data/extensions/gacha_item_extension.dart';
 import 'full_screen_image_viewer.dart';
 
 class GachaLineupScreen extends ConsumerWidget {
@@ -78,7 +79,7 @@ class GachaLineupScreen extends ConsumerWidget {
                         style: TextStyle(fontSize: 11, color: Colors.white54),
                       ),
                       const SizedBox(height: 4),
-                      ...GachaLogicMaster.skillDefinitions.map(
+                      ...skillDefinitions.map(
                         (def) => _buildRateRow(
                           _getSkillName(def.type),
                           '${(def.probability * 100).toStringAsFixed(0)}%',

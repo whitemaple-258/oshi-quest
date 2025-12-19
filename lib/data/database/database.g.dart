@@ -1276,6 +1276,17 @@ class $GachaItemsTable extends GachaItems
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<GachaItemType, int> type =
       GeneratedColumn<int>(
@@ -1398,15 +1409,18 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _bondLevelMeta = const VerificationMeta(
+    'bondLevel',
+  );
   @override
-  late final GeneratedColumnWithTypeConverter<TaskType, int> parameterType =
-      GeneratedColumn<int>(
-        'parameter_type',
-        aliasedName,
-        false,
-        type: DriftSqlType.int,
-        requiredDuringInsert: true,
-      ).withConverter<TaskType>($GachaItemsTable.$converterparameterType);
+  late final GeneratedColumn<int> bondLevel = GeneratedColumn<int>(
+    'bond_level',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   late final GeneratedColumnWithTypeConverter<SkillType, int> skillType =
       GeneratedColumn<int>(
@@ -1453,16 +1467,6 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  @override
-  late final GeneratedColumnWithTypeConverter<SeriesType, int> seriesType =
-      GeneratedColumn<int>(
-        'series_type',
-        aliasedName,
-        false,
-        type: DriftSqlType.int,
-        requiredDuringInsert: false,
-        defaultValue: const Constant(0),
-      ).withConverter<SeriesType>($GachaItemsTable.$converterseriesType);
   static const VerificationMeta _lastSkillUsedAtMeta = const VerificationMeta(
     'lastSkillUsedAt',
   );
@@ -1573,50 +1577,10 @@ class $GachaItemsTable extends GachaItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _isEquippedMeta = const VerificationMeta(
-    'isEquipped',
-  );
-  @override
-  late final GeneratedColumn<bool> isEquipped = GeneratedColumn<bool>(
-    'is_equipped',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_equipped" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _isLockedMeta = const VerificationMeta(
-    'isLocked',
-  );
-  @override
-  late final GeneratedColumn<bool> isLocked = GeneratedColumn<bool>(
-    'is_locked',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_locked" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _imagePathMeta = const VerificationMeta(
-    'imagePath',
-  );
-  @override
-  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
-    'image_path',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    imagePath,
     type,
     tightsColor,
     title,
@@ -1628,12 +1592,11 @@ class $GachaItemsTable extends GachaItems
     luckBonus,
     chaBonus,
     vitBonus,
-    parameterType,
+    bondLevel,
     skillType,
     skillValue,
     skillDuration,
     skillCooldown,
-    seriesType,
     lastSkillUsedAt,
     seriesId,
     isSource,
@@ -1643,9 +1606,6 @@ class $GachaItemsTable extends GachaItems
     isFavorite,
     intimacyLevel,
     intimacyExp,
-    isEquipped,
-    isLocked,
-    imagePath,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1661,6 +1621,12 @@ class $GachaItemsTable extends GachaItems
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -1704,6 +1670,12 @@ class $GachaItemsTable extends GachaItems
       context.handle(
         _vitBonusMeta,
         vitBonus.isAcceptableOrUnknown(data['vit_bonus']!, _vitBonusMeta),
+      );
+    }
+    if (data.containsKey('bond_level')) {
+      context.handle(
+        _bondLevelMeta,
+        bondLevel.isAcceptableOrUnknown(data['bond_level']!, _bondLevelMeta),
       );
     }
     if (data.containsKey('skill_value')) {
@@ -1787,24 +1759,6 @@ class $GachaItemsTable extends GachaItems
         ),
       );
     }
-    if (data.containsKey('is_equipped')) {
-      context.handle(
-        _isEquippedMeta,
-        isEquipped.isAcceptableOrUnknown(data['is_equipped']!, _isEquippedMeta),
-      );
-    }
-    if (data.containsKey('is_locked')) {
-      context.handle(
-        _isLockedMeta,
-        isLocked.isAcceptableOrUnknown(data['is_locked']!, _isLockedMeta),
-      );
-    }
-    if (data.containsKey('image_path')) {
-      context.handle(
-        _imagePathMeta,
-        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
-      );
-    }
     return context;
   }
 
@@ -1818,6 +1772,10 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
       type: $GachaItemsTable.$convertertype.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -1870,12 +1828,10 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}vit_bonus'],
       )!,
-      parameterType: $GachaItemsTable.$converterparameterType.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.int,
-          data['${effectivePrefix}parameter_type'],
-        )!,
-      ),
+      bondLevel: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}bond_level'],
+      )!,
       skillType: $GachaItemsTable.$converterskillType.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -1894,12 +1850,6 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}skill_cooldown'],
       )!,
-      seriesType: $GachaItemsTable.$converterseriesType.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.int,
-          data['${effectivePrefix}series_type'],
-        )!,
-      ),
       lastSkillUsedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_skill_used_at'],
@@ -1938,18 +1888,6 @@ class $GachaItemsTable extends GachaItems
         DriftSqlType.int,
         data['${effectivePrefix}intimacy_exp'],
       )!,
-      isEquipped: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_equipped'],
-      )!,
-      isLocked: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_locked'],
-      )!,
-      imagePath: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}image_path'],
-      ),
     );
   }
 
@@ -1966,18 +1904,15 @@ class $GachaItemsTable extends GachaItems
       const EnumIndexConverter<Rarity>(Rarity.values);
   static JsonTypeConverter2<EffectType, int, int> $convertereffectType =
       const EnumIndexConverter<EffectType>(EffectType.values);
-  static JsonTypeConverter2<TaskType, int, int> $converterparameterType =
-      const EnumIndexConverter<TaskType>(TaskType.values);
   static JsonTypeConverter2<SkillType, int, int> $converterskillType =
       const EnumIndexConverter<SkillType>(SkillType.values);
-  static JsonTypeConverter2<SeriesType, int, int> $converterseriesType =
-      const EnumIndexConverter<SeriesType>(SeriesType.values);
   static JsonTypeConverter2<SeriesType, int, int> $converterseriesId =
       const EnumIndexConverter<SeriesType>(SeriesType.values);
 }
 
 class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int id;
+  final String? imagePath;
   final GachaItemType type;
   final TightsColor tightsColor;
   final String title;
@@ -1989,12 +1924,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final int luckBonus;
   final int chaBonus;
   final int vitBonus;
-  final TaskType parameterType;
+  final int bondLevel;
   final SkillType skillType;
   final int skillValue;
   final int skillDuration;
   final int skillCooldown;
-  final SeriesType seriesType;
   final DateTime? lastSkillUsedAt;
   final SeriesType seriesId;
   final bool isSource;
@@ -2004,11 +1938,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   final bool isFavorite;
   final int intimacyLevel;
   final int intimacyExp;
-  final bool isEquipped;
-  final bool isLocked;
-  final String? imagePath;
   const GachaItem({
     required this.id,
+    this.imagePath,
     required this.type,
     required this.tightsColor,
     required this.title,
@@ -2020,12 +1952,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.luckBonus,
     required this.chaBonus,
     required this.vitBonus,
-    required this.parameterType,
+    required this.bondLevel,
     required this.skillType,
     required this.skillValue,
     required this.skillDuration,
     required this.skillCooldown,
-    required this.seriesType,
     this.lastSkillUsedAt,
     required this.seriesId,
     required this.isSource,
@@ -2035,14 +1966,14 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     required this.isFavorite,
     required this.intimacyLevel,
     required this.intimacyExp,
-    required this.isEquipped,
-    required this.isLocked,
-    this.imagePath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
     {
       map['type'] = Variable<int>($GachaItemsTable.$convertertype.toSql(type));
     }
@@ -2068,11 +1999,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['luck_bonus'] = Variable<int>(luckBonus);
     map['cha_bonus'] = Variable<int>(chaBonus);
     map['vit_bonus'] = Variable<int>(vitBonus);
-    {
-      map['parameter_type'] = Variable<int>(
-        $GachaItemsTable.$converterparameterType.toSql(parameterType),
-      );
-    }
+    map['bond_level'] = Variable<int>(bondLevel);
     {
       map['skill_type'] = Variable<int>(
         $GachaItemsTable.$converterskillType.toSql(skillType),
@@ -2081,11 +2008,6 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['skill_value'] = Variable<int>(skillValue);
     map['skill_duration'] = Variable<int>(skillDuration);
     map['skill_cooldown'] = Variable<int>(skillCooldown);
-    {
-      map['series_type'] = Variable<int>(
-        $GachaItemsTable.$converterseriesType.toSql(seriesType),
-      );
-    }
     if (!nullToAbsent || lastSkillUsedAt != null) {
       map['last_skill_used_at'] = Variable<DateTime>(lastSkillUsedAt);
     }
@@ -2105,17 +2027,15 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     map['is_favorite'] = Variable<bool>(isFavorite);
     map['intimacy_level'] = Variable<int>(intimacyLevel);
     map['intimacy_exp'] = Variable<int>(intimacyExp);
-    map['is_equipped'] = Variable<bool>(isEquipped);
-    map['is_locked'] = Variable<bool>(isLocked);
-    if (!nullToAbsent || imagePath != null) {
-      map['image_path'] = Variable<String>(imagePath);
-    }
     return map;
   }
 
   GachaItemsCompanion toCompanion(bool nullToAbsent) {
     return GachaItemsCompanion(
       id: Value(id),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
       type: Value(type),
       tightsColor: Value(tightsColor),
       title: Value(title),
@@ -2127,12 +2047,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       luckBonus: Value(luckBonus),
       chaBonus: Value(chaBonus),
       vitBonus: Value(vitBonus),
-      parameterType: Value(parameterType),
+      bondLevel: Value(bondLevel),
       skillType: Value(skillType),
       skillValue: Value(skillValue),
       skillDuration: Value(skillDuration),
       skillCooldown: Value(skillCooldown),
-      seriesType: Value(seriesType),
       lastSkillUsedAt: lastSkillUsedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastSkillUsedAt),
@@ -2148,11 +2067,6 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       isFavorite: Value(isFavorite),
       intimacyLevel: Value(intimacyLevel),
       intimacyExp: Value(intimacyExp),
-      isEquipped: Value(isEquipped),
-      isLocked: Value(isLocked),
-      imagePath: imagePath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(imagePath),
     );
   }
 
@@ -2163,6 +2077,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return GachaItem(
       id: serializer.fromJson<int>(json['id']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
       type: $GachaItemsTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
       ),
@@ -2182,18 +2097,13 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       luckBonus: serializer.fromJson<int>(json['luckBonus']),
       chaBonus: serializer.fromJson<int>(json['chaBonus']),
       vitBonus: serializer.fromJson<int>(json['vitBonus']),
-      parameterType: $GachaItemsTable.$converterparameterType.fromJson(
-        serializer.fromJson<int>(json['parameterType']),
-      ),
+      bondLevel: serializer.fromJson<int>(json['bondLevel']),
       skillType: $GachaItemsTable.$converterskillType.fromJson(
         serializer.fromJson<int>(json['skillType']),
       ),
       skillValue: serializer.fromJson<int>(json['skillValue']),
       skillDuration: serializer.fromJson<int>(json['skillDuration']),
       skillCooldown: serializer.fromJson<int>(json['skillCooldown']),
-      seriesType: $GachaItemsTable.$converterseriesType.fromJson(
-        serializer.fromJson<int>(json['seriesType']),
-      ),
       lastSkillUsedAt: serializer.fromJson<DateTime?>(json['lastSkillUsedAt']),
       seriesId: $GachaItemsTable.$converterseriesId.fromJson(
         serializer.fromJson<int>(json['seriesId']),
@@ -2205,9 +2115,6 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       intimacyLevel: serializer.fromJson<int>(json['intimacyLevel']),
       intimacyExp: serializer.fromJson<int>(json['intimacyExp']),
-      isEquipped: serializer.fromJson<bool>(json['isEquipped']),
-      isLocked: serializer.fromJson<bool>(json['isLocked']),
-      imagePath: serializer.fromJson<String?>(json['imagePath']),
     );
   }
   @override
@@ -2215,6 +2122,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'imagePath': serializer.toJson<String?>(imagePath),
       'type': serializer.toJson<int>(
         $GachaItemsTable.$convertertype.toJson(type),
       ),
@@ -2234,18 +2142,13 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'luckBonus': serializer.toJson<int>(luckBonus),
       'chaBonus': serializer.toJson<int>(chaBonus),
       'vitBonus': serializer.toJson<int>(vitBonus),
-      'parameterType': serializer.toJson<int>(
-        $GachaItemsTable.$converterparameterType.toJson(parameterType),
-      ),
+      'bondLevel': serializer.toJson<int>(bondLevel),
       'skillType': serializer.toJson<int>(
         $GachaItemsTable.$converterskillType.toJson(skillType),
       ),
       'skillValue': serializer.toJson<int>(skillValue),
       'skillDuration': serializer.toJson<int>(skillDuration),
       'skillCooldown': serializer.toJson<int>(skillCooldown),
-      'seriesType': serializer.toJson<int>(
-        $GachaItemsTable.$converterseriesType.toJson(seriesType),
-      ),
       'lastSkillUsedAt': serializer.toJson<DateTime?>(lastSkillUsedAt),
       'seriesId': serializer.toJson<int>(
         $GachaItemsTable.$converterseriesId.toJson(seriesId),
@@ -2257,14 +2160,12 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'intimacyLevel': serializer.toJson<int>(intimacyLevel),
       'intimacyExp': serializer.toJson<int>(intimacyExp),
-      'isEquipped': serializer.toJson<bool>(isEquipped),
-      'isLocked': serializer.toJson<bool>(isLocked),
-      'imagePath': serializer.toJson<String?>(imagePath),
     };
   }
 
   GachaItem copyWith({
     int? id,
+    Value<String?> imagePath = const Value.absent(),
     GachaItemType? type,
     TightsColor? tightsColor,
     String? title,
@@ -2276,12 +2177,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     int? luckBonus,
     int? chaBonus,
     int? vitBonus,
-    TaskType? parameterType,
+    int? bondLevel,
     SkillType? skillType,
     int? skillValue,
     int? skillDuration,
     int? skillCooldown,
-    SeriesType? seriesType,
     Value<DateTime?> lastSkillUsedAt = const Value.absent(),
     SeriesType? seriesId,
     bool? isSource,
@@ -2291,11 +2191,9 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     bool? isFavorite,
     int? intimacyLevel,
     int? intimacyExp,
-    bool? isEquipped,
-    bool? isLocked,
-    Value<String?> imagePath = const Value.absent(),
   }) => GachaItem(
     id: id ?? this.id,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
     type: type ?? this.type,
     tightsColor: tightsColor ?? this.tightsColor,
     title: title ?? this.title,
@@ -2307,12 +2205,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     luckBonus: luckBonus ?? this.luckBonus,
     chaBonus: chaBonus ?? this.chaBonus,
     vitBonus: vitBonus ?? this.vitBonus,
-    parameterType: parameterType ?? this.parameterType,
+    bondLevel: bondLevel ?? this.bondLevel,
     skillType: skillType ?? this.skillType,
     skillValue: skillValue ?? this.skillValue,
     skillDuration: skillDuration ?? this.skillDuration,
     skillCooldown: skillCooldown ?? this.skillCooldown,
-    seriesType: seriesType ?? this.seriesType,
     lastSkillUsedAt: lastSkillUsedAt.present
         ? lastSkillUsedAt.value
         : this.lastSkillUsedAt,
@@ -2324,13 +2221,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     isFavorite: isFavorite ?? this.isFavorite,
     intimacyLevel: intimacyLevel ?? this.intimacyLevel,
     intimacyExp: intimacyExp ?? this.intimacyExp,
-    isEquipped: isEquipped ?? this.isEquipped,
-    isLocked: isLocked ?? this.isLocked,
-    imagePath: imagePath.present ? imagePath.value : this.imagePath,
   );
   GachaItem copyWithCompanion(GachaItemsCompanion data) {
     return GachaItem(
       id: data.id.present ? data.id.value : this.id,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       type: data.type.present ? data.type.value : this.type,
       tightsColor: data.tightsColor.present
           ? data.tightsColor.value
@@ -2348,9 +2243,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       luckBonus: data.luckBonus.present ? data.luckBonus.value : this.luckBonus,
       chaBonus: data.chaBonus.present ? data.chaBonus.value : this.chaBonus,
       vitBonus: data.vitBonus.present ? data.vitBonus.value : this.vitBonus,
-      parameterType: data.parameterType.present
-          ? data.parameterType.value
-          : this.parameterType,
+      bondLevel: data.bondLevel.present ? data.bondLevel.value : this.bondLevel,
       skillType: data.skillType.present ? data.skillType.value : this.skillType,
       skillValue: data.skillValue.present
           ? data.skillValue.value
@@ -2361,9 +2254,6 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       skillCooldown: data.skillCooldown.present
           ? data.skillCooldown.value
           : this.skillCooldown,
-      seriesType: data.seriesType.present
-          ? data.seriesType.value
-          : this.seriesType,
       lastSkillUsedAt: data.lastSkillUsedAt.present
           ? data.lastSkillUsedAt.value
           : this.lastSkillUsedAt,
@@ -2383,11 +2273,6 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
       intimacyExp: data.intimacyExp.present
           ? data.intimacyExp.value
           : this.intimacyExp,
-      isEquipped: data.isEquipped.present
-          ? data.isEquipped.value
-          : this.isEquipped,
-      isLocked: data.isLocked.present ? data.isLocked.value : this.isLocked,
-      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
     );
   }
 
@@ -2395,6 +2280,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   String toString() {
     return (StringBuffer('GachaItem(')
           ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
           ..write('type: $type, ')
           ..write('tightsColor: $tightsColor, ')
           ..write('title: $title, ')
@@ -2406,12 +2292,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('luckBonus: $luckBonus, ')
           ..write('chaBonus: $chaBonus, ')
           ..write('vitBonus: $vitBonus, ')
-          ..write('parameterType: $parameterType, ')
+          ..write('bondLevel: $bondLevel, ')
           ..write('skillType: $skillType, ')
           ..write('skillValue: $skillValue, ')
           ..write('skillDuration: $skillDuration, ')
           ..write('skillCooldown: $skillCooldown, ')
-          ..write('seriesType: $seriesType, ')
           ..write('lastSkillUsedAt: $lastSkillUsedAt, ')
           ..write('seriesId: $seriesId, ')
           ..write('isSource: $isSource, ')
@@ -2420,10 +2305,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           ..write('unlockedAt: $unlockedAt, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('intimacyLevel: $intimacyLevel, ')
-          ..write('intimacyExp: $intimacyExp, ')
-          ..write('isEquipped: $isEquipped, ')
-          ..write('isLocked: $isLocked, ')
-          ..write('imagePath: $imagePath')
+          ..write('intimacyExp: $intimacyExp')
           ..write(')'))
         .toString();
   }
@@ -2431,6 +2313,7 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
   @override
   int get hashCode => Object.hashAll([
     id,
+    imagePath,
     type,
     tightsColor,
     title,
@@ -2442,12 +2325,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     luckBonus,
     chaBonus,
     vitBonus,
-    parameterType,
+    bondLevel,
     skillType,
     skillValue,
     skillDuration,
     skillCooldown,
-    seriesType,
     lastSkillUsedAt,
     seriesId,
     isSource,
@@ -2457,15 +2339,13 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
     isFavorite,
     intimacyLevel,
     intimacyExp,
-    isEquipped,
-    isLocked,
-    imagePath,
   ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is GachaItem &&
           other.id == this.id &&
+          other.imagePath == this.imagePath &&
           other.type == this.type &&
           other.tightsColor == this.tightsColor &&
           other.title == this.title &&
@@ -2477,12 +2357,11 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.luckBonus == this.luckBonus &&
           other.chaBonus == this.chaBonus &&
           other.vitBonus == this.vitBonus &&
-          other.parameterType == this.parameterType &&
+          other.bondLevel == this.bondLevel &&
           other.skillType == this.skillType &&
           other.skillValue == this.skillValue &&
           other.skillDuration == this.skillDuration &&
           other.skillCooldown == this.skillCooldown &&
-          other.seriesType == this.seriesType &&
           other.lastSkillUsedAt == this.lastSkillUsedAt &&
           other.seriesId == this.seriesId &&
           other.isSource == this.isSource &&
@@ -2491,14 +2370,12 @@ class GachaItem extends DataClass implements Insertable<GachaItem> {
           other.unlockedAt == this.unlockedAt &&
           other.isFavorite == this.isFavorite &&
           other.intimacyLevel == this.intimacyLevel &&
-          other.intimacyExp == this.intimacyExp &&
-          other.isEquipped == this.isEquipped &&
-          other.isLocked == this.isLocked &&
-          other.imagePath == this.imagePath);
+          other.intimacyExp == this.intimacyExp);
 }
 
 class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int> id;
+  final Value<String?> imagePath;
   final Value<GachaItemType> type;
   final Value<TightsColor> tightsColor;
   final Value<String> title;
@@ -2510,12 +2387,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<int> luckBonus;
   final Value<int> chaBonus;
   final Value<int> vitBonus;
-  final Value<TaskType> parameterType;
+  final Value<int> bondLevel;
   final Value<SkillType> skillType;
   final Value<int> skillValue;
   final Value<int> skillDuration;
   final Value<int> skillCooldown;
-  final Value<SeriesType> seriesType;
   final Value<DateTime?> lastSkillUsedAt;
   final Value<SeriesType> seriesId;
   final Value<bool> isSource;
@@ -2525,11 +2401,9 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   final Value<bool> isFavorite;
   final Value<int> intimacyLevel;
   final Value<int> intimacyExp;
-  final Value<bool> isEquipped;
-  final Value<bool> isLocked;
-  final Value<String?> imagePath;
   const GachaItemsCompanion({
     this.id = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.type = const Value.absent(),
     this.tightsColor = const Value.absent(),
     this.title = const Value.absent(),
@@ -2541,12 +2415,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.luckBonus = const Value.absent(),
     this.chaBonus = const Value.absent(),
     this.vitBonus = const Value.absent(),
-    this.parameterType = const Value.absent(),
+    this.bondLevel = const Value.absent(),
     this.skillType = const Value.absent(),
     this.skillValue = const Value.absent(),
     this.skillDuration = const Value.absent(),
     this.skillCooldown = const Value.absent(),
-    this.seriesType = const Value.absent(),
     this.lastSkillUsedAt = const Value.absent(),
     this.seriesId = const Value.absent(),
     this.isSource = const Value.absent(),
@@ -2556,12 +2429,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.isFavorite = const Value.absent(),
     this.intimacyLevel = const Value.absent(),
     this.intimacyExp = const Value.absent(),
-    this.isEquipped = const Value.absent(),
-    this.isLocked = const Value.absent(),
-    this.imagePath = const Value.absent(),
   });
   GachaItemsCompanion.insert({
     this.id = const Value.absent(),
+    this.imagePath = const Value.absent(),
     this.type = const Value.absent(),
     this.tightsColor = const Value.absent(),
     required String title,
@@ -2573,12 +2444,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.luckBonus = const Value.absent(),
     this.chaBonus = const Value.absent(),
     this.vitBonus = const Value.absent(),
-    required TaskType parameterType,
+    this.bondLevel = const Value.absent(),
     this.skillType = const Value.absent(),
     this.skillValue = const Value.absent(),
     this.skillDuration = const Value.absent(),
     this.skillCooldown = const Value.absent(),
-    this.seriesType = const Value.absent(),
     this.lastSkillUsedAt = const Value.absent(),
     this.seriesId = const Value.absent(),
     this.isSource = const Value.absent(),
@@ -2588,15 +2458,12 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     this.isFavorite = const Value.absent(),
     this.intimacyLevel = const Value.absent(),
     this.intimacyExp = const Value.absent(),
-    this.isEquipped = const Value.absent(),
-    this.isLocked = const Value.absent(),
-    this.imagePath = const Value.absent(),
   }) : title = Value(title),
        rarity = Value(rarity),
-       effectType = Value(effectType),
-       parameterType = Value(parameterType);
+       effectType = Value(effectType);
   static Insertable<GachaItem> custom({
     Expression<int>? id,
+    Expression<String>? imagePath,
     Expression<int>? type,
     Expression<int>? tightsColor,
     Expression<String>? title,
@@ -2608,12 +2475,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<int>? luckBonus,
     Expression<int>? chaBonus,
     Expression<int>? vitBonus,
-    Expression<int>? parameterType,
+    Expression<int>? bondLevel,
     Expression<int>? skillType,
     Expression<int>? skillValue,
     Expression<int>? skillDuration,
     Expression<int>? skillCooldown,
-    Expression<int>? seriesType,
     Expression<DateTime>? lastSkillUsedAt,
     Expression<int>? seriesId,
     Expression<bool>? isSource,
@@ -2623,12 +2489,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Expression<bool>? isFavorite,
     Expression<int>? intimacyLevel,
     Expression<int>? intimacyExp,
-    Expression<bool>? isEquipped,
-    Expression<bool>? isLocked,
-    Expression<String>? imagePath,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (imagePath != null) 'image_path': imagePath,
       if (type != null) 'type': type,
       if (tightsColor != null) 'tights_color': tightsColor,
       if (title != null) 'title': title,
@@ -2640,12 +2504,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (luckBonus != null) 'luck_bonus': luckBonus,
       if (chaBonus != null) 'cha_bonus': chaBonus,
       if (vitBonus != null) 'vit_bonus': vitBonus,
-      if (parameterType != null) 'parameter_type': parameterType,
+      if (bondLevel != null) 'bond_level': bondLevel,
       if (skillType != null) 'skill_type': skillType,
       if (skillValue != null) 'skill_value': skillValue,
       if (skillDuration != null) 'skill_duration': skillDuration,
       if (skillCooldown != null) 'skill_cooldown': skillCooldown,
-      if (seriesType != null) 'series_type': seriesType,
       if (lastSkillUsedAt != null) 'last_skill_used_at': lastSkillUsedAt,
       if (seriesId != null) 'series_id': seriesId,
       if (isSource != null) 'is_source': isSource,
@@ -2655,14 +2518,12 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (intimacyLevel != null) 'intimacy_level': intimacyLevel,
       if (intimacyExp != null) 'intimacy_exp': intimacyExp,
-      if (isEquipped != null) 'is_equipped': isEquipped,
-      if (isLocked != null) 'is_locked': isLocked,
-      if (imagePath != null) 'image_path': imagePath,
     });
   }
 
   GachaItemsCompanion copyWith({
     Value<int>? id,
+    Value<String?>? imagePath,
     Value<GachaItemType>? type,
     Value<TightsColor>? tightsColor,
     Value<String>? title,
@@ -2674,12 +2535,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<int>? luckBonus,
     Value<int>? chaBonus,
     Value<int>? vitBonus,
-    Value<TaskType>? parameterType,
+    Value<int>? bondLevel,
     Value<SkillType>? skillType,
     Value<int>? skillValue,
     Value<int>? skillDuration,
     Value<int>? skillCooldown,
-    Value<SeriesType>? seriesType,
     Value<DateTime?>? lastSkillUsedAt,
     Value<SeriesType>? seriesId,
     Value<bool>? isSource,
@@ -2689,12 +2549,10 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     Value<bool>? isFavorite,
     Value<int>? intimacyLevel,
     Value<int>? intimacyExp,
-    Value<bool>? isEquipped,
-    Value<bool>? isLocked,
-    Value<String?>? imagePath,
   }) {
     return GachaItemsCompanion(
       id: id ?? this.id,
+      imagePath: imagePath ?? this.imagePath,
       type: type ?? this.type,
       tightsColor: tightsColor ?? this.tightsColor,
       title: title ?? this.title,
@@ -2706,12 +2564,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       luckBonus: luckBonus ?? this.luckBonus,
       chaBonus: chaBonus ?? this.chaBonus,
       vitBonus: vitBonus ?? this.vitBonus,
-      parameterType: parameterType ?? this.parameterType,
+      bondLevel: bondLevel ?? this.bondLevel,
       skillType: skillType ?? this.skillType,
       skillValue: skillValue ?? this.skillValue,
       skillDuration: skillDuration ?? this.skillDuration,
       skillCooldown: skillCooldown ?? this.skillCooldown,
-      seriesType: seriesType ?? this.seriesType,
       lastSkillUsedAt: lastSkillUsedAt ?? this.lastSkillUsedAt,
       seriesId: seriesId ?? this.seriesId,
       isSource: isSource ?? this.isSource,
@@ -2721,9 +2578,6 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
       isFavorite: isFavorite ?? this.isFavorite,
       intimacyLevel: intimacyLevel ?? this.intimacyLevel,
       intimacyExp: intimacyExp ?? this.intimacyExp,
-      isEquipped: isEquipped ?? this.isEquipped,
-      isLocked: isLocked ?? this.isLocked,
-      imagePath: imagePath ?? this.imagePath,
     );
   }
 
@@ -2732,6 +2586,9 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
     }
     if (type.present) {
       map['type'] = Variable<int>(
@@ -2774,10 +2631,8 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (vitBonus.present) {
       map['vit_bonus'] = Variable<int>(vitBonus.value);
     }
-    if (parameterType.present) {
-      map['parameter_type'] = Variable<int>(
-        $GachaItemsTable.$converterparameterType.toSql(parameterType.value),
-      );
+    if (bondLevel.present) {
+      map['bond_level'] = Variable<int>(bondLevel.value);
     }
     if (skillType.present) {
       map['skill_type'] = Variable<int>(
@@ -2792,11 +2647,6 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     }
     if (skillCooldown.present) {
       map['skill_cooldown'] = Variable<int>(skillCooldown.value);
-    }
-    if (seriesType.present) {
-      map['series_type'] = Variable<int>(
-        $GachaItemsTable.$converterseriesType.toSql(seriesType.value),
-      );
     }
     if (lastSkillUsedAt.present) {
       map['last_skill_used_at'] = Variable<DateTime>(lastSkillUsedAt.value);
@@ -2827,15 +2677,6 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
     if (intimacyExp.present) {
       map['intimacy_exp'] = Variable<int>(intimacyExp.value);
     }
-    if (isEquipped.present) {
-      map['is_equipped'] = Variable<bool>(isEquipped.value);
-    }
-    if (isLocked.present) {
-      map['is_locked'] = Variable<bool>(isLocked.value);
-    }
-    if (imagePath.present) {
-      map['image_path'] = Variable<String>(imagePath.value);
-    }
     return map;
   }
 
@@ -2843,6 +2684,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
   String toString() {
     return (StringBuffer('GachaItemsCompanion(')
           ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
           ..write('type: $type, ')
           ..write('tightsColor: $tightsColor, ')
           ..write('title: $title, ')
@@ -2854,12 +2696,11 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('luckBonus: $luckBonus, ')
           ..write('chaBonus: $chaBonus, ')
           ..write('vitBonus: $vitBonus, ')
-          ..write('parameterType: $parameterType, ')
+          ..write('bondLevel: $bondLevel, ')
           ..write('skillType: $skillType, ')
           ..write('skillValue: $skillValue, ')
           ..write('skillDuration: $skillDuration, ')
           ..write('skillCooldown: $skillCooldown, ')
-          ..write('seriesType: $seriesType, ')
           ..write('lastSkillUsedAt: $lastSkillUsedAt, ')
           ..write('seriesId: $seriesId, ')
           ..write('isSource: $isSource, ')
@@ -2868,10 +2709,7 @@ class GachaItemsCompanion extends UpdateCompanion<GachaItem> {
           ..write('unlockedAt: $unlockedAt, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('intimacyLevel: $intimacyLevel, ')
-          ..write('intimacyExp: $intimacyExp, ')
-          ..write('isEquipped: $isEquipped, ')
-          ..write('isLocked: $isLocked, ')
-          ..write('imagePath: $imagePath')
+          ..write('intimacyExp: $intimacyExp')
           ..write(')'))
         .toString();
   }
@@ -2921,7 +2759,7 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, Habit> {
         false,
         type: DriftSqlType.int,
         requiredDuringInsert: false,
-        defaultValue: const Constant(0),
+        defaultValue: Constant(TaskDifficulty.normal.value),
       ).withConverter<TaskDifficulty>($HabitsTable.$converterdifficulty);
   static const VerificationMeta _rewardGemsMeta = const VerificationMeta(
     'rewardGems',
@@ -6593,551 +6431,6 @@ class CharacterImagesCompanion extends UpdateCompanion<CharacterImage> {
   }
 }
 
-class $BossesTable extends Bosses with TableInfo<$BossesTable, Boss> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $BossesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-    'name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _bossTypeMeta = const VerificationMeta(
-    'bossType',
-  );
-  @override
-  late final GeneratedColumn<int> bossType = GeneratedColumn<int>(
-    'boss_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _maxHpMeta = const VerificationMeta('maxHp');
-  @override
-  late final GeneratedColumn<int> maxHp = GeneratedColumn<int>(
-    'max_hp',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(1000),
-  );
-  static const VerificationMeta _attackMeta = const VerificationMeta('attack');
-  @override
-  late final GeneratedColumn<int> attack = GeneratedColumn<int>(
-    'attack',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(100),
-  );
-  static const VerificationMeta _defenseMeta = const VerificationMeta(
-    'defense',
-  );
-  @override
-  late final GeneratedColumn<int> defense = GeneratedColumn<int>(
-    'defense',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(50),
-  );
-  static const VerificationMeta _specialAbilityMeta = const VerificationMeta(
-    'specialAbility',
-  );
-  @override
-  late final GeneratedColumn<String> specialAbility = GeneratedColumn<String>(
-    'special_ability',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _rewardGemsMeta = const VerificationMeta(
-    'rewardGems',
-  );
-  @override
-  late final GeneratedColumn<int> rewardGems = GeneratedColumn<int>(
-    'reward_gems',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(500),
-  );
-  static const VerificationMeta _resetAtMeta = const VerificationMeta(
-    'resetAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> resetAt = GeneratedColumn<DateTime>(
-    'reset_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    name,
-    bossType,
-    maxHp,
-    attack,
-    defense,
-    specialAbility,
-    rewardGems,
-    resetAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'bosses';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<Boss> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-        _nameMeta,
-        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('boss_type')) {
-      context.handle(
-        _bossTypeMeta,
-        bossType.isAcceptableOrUnknown(data['boss_type']!, _bossTypeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_bossTypeMeta);
-    }
-    if (data.containsKey('max_hp')) {
-      context.handle(
-        _maxHpMeta,
-        maxHp.isAcceptableOrUnknown(data['max_hp']!, _maxHpMeta),
-      );
-    }
-    if (data.containsKey('attack')) {
-      context.handle(
-        _attackMeta,
-        attack.isAcceptableOrUnknown(data['attack']!, _attackMeta),
-      );
-    }
-    if (data.containsKey('defense')) {
-      context.handle(
-        _defenseMeta,
-        defense.isAcceptableOrUnknown(data['defense']!, _defenseMeta),
-      );
-    }
-    if (data.containsKey('special_ability')) {
-      context.handle(
-        _specialAbilityMeta,
-        specialAbility.isAcceptableOrUnknown(
-          data['special_ability']!,
-          _specialAbilityMeta,
-        ),
-      );
-    }
-    if (data.containsKey('reward_gems')) {
-      context.handle(
-        _rewardGemsMeta,
-        rewardGems.isAcceptableOrUnknown(data['reward_gems']!, _rewardGemsMeta),
-      );
-    }
-    if (data.containsKey('reset_at')) {
-      context.handle(
-        _resetAtMeta,
-        resetAt.isAcceptableOrUnknown(data['reset_at']!, _resetAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_resetAtMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Boss map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Boss(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      name: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}name'],
-      )!,
-      bossType: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}boss_type'],
-      )!,
-      maxHp: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}max_hp'],
-      )!,
-      attack: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}attack'],
-      )!,
-      defense: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}defense'],
-      )!,
-      specialAbility: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}special_ability'],
-      ),
-      rewardGems: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}reward_gems'],
-      )!,
-      resetAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}reset_at'],
-      )!,
-    );
-  }
-
-  @override
-  $BossesTable createAlias(String alias) {
-    return $BossesTable(attachedDatabase, alias);
-  }
-}
-
-class Boss extends DataClass implements Insertable<Boss> {
-  final int id;
-  final String name;
-  final int bossType;
-  final int maxHp;
-  final int attack;
-  final int defense;
-  final String? specialAbility;
-  final int rewardGems;
-  final DateTime resetAt;
-  const Boss({
-    required this.id,
-    required this.name,
-    required this.bossType,
-    required this.maxHp,
-    required this.attack,
-    required this.defense,
-    this.specialAbility,
-    required this.rewardGems,
-    required this.resetAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
-    map['boss_type'] = Variable<int>(bossType);
-    map['max_hp'] = Variable<int>(maxHp);
-    map['attack'] = Variable<int>(attack);
-    map['defense'] = Variable<int>(defense);
-    if (!nullToAbsent || specialAbility != null) {
-      map['special_ability'] = Variable<String>(specialAbility);
-    }
-    map['reward_gems'] = Variable<int>(rewardGems);
-    map['reset_at'] = Variable<DateTime>(resetAt);
-    return map;
-  }
-
-  BossesCompanion toCompanion(bool nullToAbsent) {
-    return BossesCompanion(
-      id: Value(id),
-      name: Value(name),
-      bossType: Value(bossType),
-      maxHp: Value(maxHp),
-      attack: Value(attack),
-      defense: Value(defense),
-      specialAbility: specialAbility == null && nullToAbsent
-          ? const Value.absent()
-          : Value(specialAbility),
-      rewardGems: Value(rewardGems),
-      resetAt: Value(resetAt),
-    );
-  }
-
-  factory Boss.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Boss(
-      id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      bossType: serializer.fromJson<int>(json['bossType']),
-      maxHp: serializer.fromJson<int>(json['maxHp']),
-      attack: serializer.fromJson<int>(json['attack']),
-      defense: serializer.fromJson<int>(json['defense']),
-      specialAbility: serializer.fromJson<String?>(json['specialAbility']),
-      rewardGems: serializer.fromJson<int>(json['rewardGems']),
-      resetAt: serializer.fromJson<DateTime>(json['resetAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
-      'bossType': serializer.toJson<int>(bossType),
-      'maxHp': serializer.toJson<int>(maxHp),
-      'attack': serializer.toJson<int>(attack),
-      'defense': serializer.toJson<int>(defense),
-      'specialAbility': serializer.toJson<String?>(specialAbility),
-      'rewardGems': serializer.toJson<int>(rewardGems),
-      'resetAt': serializer.toJson<DateTime>(resetAt),
-    };
-  }
-
-  Boss copyWith({
-    int? id,
-    String? name,
-    int? bossType,
-    int? maxHp,
-    int? attack,
-    int? defense,
-    Value<String?> specialAbility = const Value.absent(),
-    int? rewardGems,
-    DateTime? resetAt,
-  }) => Boss(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    bossType: bossType ?? this.bossType,
-    maxHp: maxHp ?? this.maxHp,
-    attack: attack ?? this.attack,
-    defense: defense ?? this.defense,
-    specialAbility: specialAbility.present
-        ? specialAbility.value
-        : this.specialAbility,
-    rewardGems: rewardGems ?? this.rewardGems,
-    resetAt: resetAt ?? this.resetAt,
-  );
-  Boss copyWithCompanion(BossesCompanion data) {
-    return Boss(
-      id: data.id.present ? data.id.value : this.id,
-      name: data.name.present ? data.name.value : this.name,
-      bossType: data.bossType.present ? data.bossType.value : this.bossType,
-      maxHp: data.maxHp.present ? data.maxHp.value : this.maxHp,
-      attack: data.attack.present ? data.attack.value : this.attack,
-      defense: data.defense.present ? data.defense.value : this.defense,
-      specialAbility: data.specialAbility.present
-          ? data.specialAbility.value
-          : this.specialAbility,
-      rewardGems: data.rewardGems.present
-          ? data.rewardGems.value
-          : this.rewardGems,
-      resetAt: data.resetAt.present ? data.resetAt.value : this.resetAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Boss(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('bossType: $bossType, ')
-          ..write('maxHp: $maxHp, ')
-          ..write('attack: $attack, ')
-          ..write('defense: $defense, ')
-          ..write('specialAbility: $specialAbility, ')
-          ..write('rewardGems: $rewardGems, ')
-          ..write('resetAt: $resetAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    name,
-    bossType,
-    maxHp,
-    attack,
-    defense,
-    specialAbility,
-    rewardGems,
-    resetAt,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Boss &&
-          other.id == this.id &&
-          other.name == this.name &&
-          other.bossType == this.bossType &&
-          other.maxHp == this.maxHp &&
-          other.attack == this.attack &&
-          other.defense == this.defense &&
-          other.specialAbility == this.specialAbility &&
-          other.rewardGems == this.rewardGems &&
-          other.resetAt == this.resetAt);
-}
-
-class BossesCompanion extends UpdateCompanion<Boss> {
-  final Value<int> id;
-  final Value<String> name;
-  final Value<int> bossType;
-  final Value<int> maxHp;
-  final Value<int> attack;
-  final Value<int> defense;
-  final Value<String?> specialAbility;
-  final Value<int> rewardGems;
-  final Value<DateTime> resetAt;
-  const BossesCompanion({
-    this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.bossType = const Value.absent(),
-    this.maxHp = const Value.absent(),
-    this.attack = const Value.absent(),
-    this.defense = const Value.absent(),
-    this.specialAbility = const Value.absent(),
-    this.rewardGems = const Value.absent(),
-    this.resetAt = const Value.absent(),
-  });
-  BossesCompanion.insert({
-    this.id = const Value.absent(),
-    required String name,
-    required int bossType,
-    this.maxHp = const Value.absent(),
-    this.attack = const Value.absent(),
-    this.defense = const Value.absent(),
-    this.specialAbility = const Value.absent(),
-    this.rewardGems = const Value.absent(),
-    required DateTime resetAt,
-  }) : name = Value(name),
-       bossType = Value(bossType),
-       resetAt = Value(resetAt);
-  static Insertable<Boss> custom({
-    Expression<int>? id,
-    Expression<String>? name,
-    Expression<int>? bossType,
-    Expression<int>? maxHp,
-    Expression<int>? attack,
-    Expression<int>? defense,
-    Expression<String>? specialAbility,
-    Expression<int>? rewardGems,
-    Expression<DateTime>? resetAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (bossType != null) 'boss_type': bossType,
-      if (maxHp != null) 'max_hp': maxHp,
-      if (attack != null) 'attack': attack,
-      if (defense != null) 'defense': defense,
-      if (specialAbility != null) 'special_ability': specialAbility,
-      if (rewardGems != null) 'reward_gems': rewardGems,
-      if (resetAt != null) 'reset_at': resetAt,
-    });
-  }
-
-  BossesCompanion copyWith({
-    Value<int>? id,
-    Value<String>? name,
-    Value<int>? bossType,
-    Value<int>? maxHp,
-    Value<int>? attack,
-    Value<int>? defense,
-    Value<String?>? specialAbility,
-    Value<int>? rewardGems,
-    Value<DateTime>? resetAt,
-  }) {
-    return BossesCompanion(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      bossType: bossType ?? this.bossType,
-      maxHp: maxHp ?? this.maxHp,
-      attack: attack ?? this.attack,
-      defense: defense ?? this.defense,
-      specialAbility: specialAbility ?? this.specialAbility,
-      rewardGems: rewardGems ?? this.rewardGems,
-      resetAt: resetAt ?? this.resetAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (bossType.present) {
-      map['boss_type'] = Variable<int>(bossType.value);
-    }
-    if (maxHp.present) {
-      map['max_hp'] = Variable<int>(maxHp.value);
-    }
-    if (attack.present) {
-      map['attack'] = Variable<int>(attack.value);
-    }
-    if (defense.present) {
-      map['defense'] = Variable<int>(defense.value);
-    }
-    if (specialAbility.present) {
-      map['special_ability'] = Variable<String>(specialAbility.value);
-    }
-    if (rewardGems.present) {
-      map['reward_gems'] = Variable<int>(rewardGems.value);
-    }
-    if (resetAt.present) {
-      map['reset_at'] = Variable<DateTime>(resetAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('BossesCompanion(')
-          ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('bossType: $bossType, ')
-          ..write('maxHp: $maxHp, ')
-          ..write('attack: $attack, ')
-          ..write('defense: $defense, ')
-          ..write('specialAbility: $specialAbility, ')
-          ..write('rewardGems: $rewardGems, ')
-          ..write('resetAt: $resetAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7153,7 +6446,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CharacterImagesTable characterImages = $CharacterImagesTable(
     this,
   );
-  late final $BossesTable bosses = $BossesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7169,7 +6461,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     bossResults,
     rewardItems,
     characterImages,
-    bosses,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -7749,6 +7040,7 @@ typedef $$PlayersTableProcessedTableManager =
 typedef $$GachaItemsTableCreateCompanionBuilder =
     GachaItemsCompanion Function({
       Value<int> id,
+      Value<String?> imagePath,
       Value<GachaItemType> type,
       Value<TightsColor> tightsColor,
       required String title,
@@ -7760,12 +7052,11 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<int> luckBonus,
       Value<int> chaBonus,
       Value<int> vitBonus,
-      required TaskType parameterType,
+      Value<int> bondLevel,
       Value<SkillType> skillType,
       Value<int> skillValue,
       Value<int> skillDuration,
       Value<int> skillCooldown,
-      Value<SeriesType> seriesType,
       Value<DateTime?> lastSkillUsedAt,
       Value<SeriesType> seriesId,
       Value<bool> isSource,
@@ -7775,13 +7066,11 @@ typedef $$GachaItemsTableCreateCompanionBuilder =
       Value<bool> isFavorite,
       Value<int> intimacyLevel,
       Value<int> intimacyExp,
-      Value<bool> isEquipped,
-      Value<bool> isLocked,
-      Value<String?> imagePath,
     });
 typedef $$GachaItemsTableUpdateCompanionBuilder =
     GachaItemsCompanion Function({
       Value<int> id,
+      Value<String?> imagePath,
       Value<GachaItemType> type,
       Value<TightsColor> tightsColor,
       Value<String> title,
@@ -7793,12 +7082,11 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<int> luckBonus,
       Value<int> chaBonus,
       Value<int> vitBonus,
-      Value<TaskType> parameterType,
+      Value<int> bondLevel,
       Value<SkillType> skillType,
       Value<int> skillValue,
       Value<int> skillDuration,
       Value<int> skillCooldown,
-      Value<SeriesType> seriesType,
       Value<DateTime?> lastSkillUsedAt,
       Value<SeriesType> seriesId,
       Value<bool> isSource,
@@ -7808,9 +7096,6 @@ typedef $$GachaItemsTableUpdateCompanionBuilder =
       Value<bool> isFavorite,
       Value<int> intimacyLevel,
       Value<int> intimacyExp,
-      Value<bool> isEquipped,
-      Value<bool> isLocked,
-      Value<String?> imagePath,
     });
 
 final class $$GachaItemsTableReferences
@@ -7874,6 +7159,11 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnWithTypeConverterFilters<GachaItemType, GachaItemType, int> get type =>
       $composableBuilder(
         column: $table.type,
@@ -7933,11 +7223,10 @@ class $$GachaItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<TaskType, TaskType, int> get parameterType =>
-      $composableBuilder(
-        column: $table.parameterType,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnFilters<int> get bondLevel => $composableBuilder(
+    column: $table.bondLevel,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<SkillType, SkillType, int> get skillType =>
       $composableBuilder(
@@ -7959,12 +7248,6 @@ class $$GachaItemsTableFilterComposer
     column: $table.skillCooldown,
     builder: (column) => ColumnFilters(column),
   );
-
-  ColumnWithTypeConverterFilters<SeriesType, SeriesType, int> get seriesType =>
-      $composableBuilder(
-        column: $table.seriesType,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
 
   ColumnFilters<DateTime> get lastSkillUsedAt => $composableBuilder(
     column: $table.lastSkillUsedAt,
@@ -8009,21 +7292,6 @@ class $$GachaItemsTableFilterComposer
 
   ColumnFilters<int> get intimacyExp => $composableBuilder(
     column: $table.intimacyExp,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isEquipped => $composableBuilder(
-    column: $table.isEquipped,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isLocked => $composableBuilder(
-    column: $table.isLocked,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get imagePath => $composableBuilder(
-    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8092,6 +7360,11 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get type => $composableBuilder(
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
@@ -8147,8 +7420,8 @@ class $$GachaItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get parameterType => $composableBuilder(
-    column: $table.parameterType,
+  ColumnOrderings<int> get bondLevel => $composableBuilder(
+    column: $table.bondLevel,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8169,11 +7442,6 @@ class $$GachaItemsTableOrderingComposer
 
   ColumnOrderings<int> get skillCooldown => $composableBuilder(
     column: $table.skillCooldown,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get seriesType => $composableBuilder(
-    column: $table.seriesType,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8221,21 +7489,6 @@ class $$GachaItemsTableOrderingComposer
     column: $table.intimacyExp,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<bool> get isEquipped => $composableBuilder(
-    column: $table.isEquipped,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get isLocked => $composableBuilder(
-    column: $table.isLocked,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get imagePath => $composableBuilder(
-    column: $table.imagePath,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
 class $$GachaItemsTableAnnotationComposer
@@ -8249,6 +7502,9 @@ class $$GachaItemsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<GachaItemType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -8291,11 +7547,8 @@ class $$GachaItemsTableAnnotationComposer
   GeneratedColumn<int> get vitBonus =>
       $composableBuilder(column: $table.vitBonus, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<TaskType, int> get parameterType =>
-      $composableBuilder(
-        column: $table.parameterType,
-        builder: (column) => column,
-      );
+  GeneratedColumn<int> get bondLevel =>
+      $composableBuilder(column: $table.bondLevel, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<SkillType, int> get skillType =>
       $composableBuilder(column: $table.skillType, builder: (column) => column);
@@ -8314,12 +7567,6 @@ class $$GachaItemsTableAnnotationComposer
     column: $table.skillCooldown,
     builder: (column) => column,
   );
-
-  GeneratedColumnWithTypeConverter<SeriesType, int> get seriesType =>
-      $composableBuilder(
-        column: $table.seriesType,
-        builder: (column) => column,
-      );
 
   GeneratedColumn<DateTime> get lastSkillUsedAt => $composableBuilder(
     column: $table.lastSkillUsedAt,
@@ -8357,17 +7604,6 @@ class $$GachaItemsTableAnnotationComposer
     column: $table.intimacyExp,
     builder: (column) => column,
   );
-
-  GeneratedColumn<bool> get isEquipped => $composableBuilder(
-    column: $table.isEquipped,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get isLocked =>
-      $composableBuilder(column: $table.isLocked, builder: (column) => column);
-
-  GeneratedColumn<String> get imagePath =>
-      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
   Expression<T> partyDecksRefs<T extends Object>(
     Expression<T> Function($$PartyDecksTableAnnotationComposer a) f,
@@ -8449,6 +7685,7 @@ class $$GachaItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<GachaItemType> type = const Value.absent(),
                 Value<TightsColor> tightsColor = const Value.absent(),
                 Value<String> title = const Value.absent(),
@@ -8460,12 +7697,11 @@ class $$GachaItemsTableTableManager
                 Value<int> luckBonus = const Value.absent(),
                 Value<int> chaBonus = const Value.absent(),
                 Value<int> vitBonus = const Value.absent(),
-                Value<TaskType> parameterType = const Value.absent(),
+                Value<int> bondLevel = const Value.absent(),
                 Value<SkillType> skillType = const Value.absent(),
                 Value<int> skillValue = const Value.absent(),
                 Value<int> skillDuration = const Value.absent(),
                 Value<int> skillCooldown = const Value.absent(),
-                Value<SeriesType> seriesType = const Value.absent(),
                 Value<DateTime?> lastSkillUsedAt = const Value.absent(),
                 Value<SeriesType> seriesId = const Value.absent(),
                 Value<bool> isSource = const Value.absent(),
@@ -8475,11 +7711,9 @@ class $$GachaItemsTableTableManager
                 Value<bool> isFavorite = const Value.absent(),
                 Value<int> intimacyLevel = const Value.absent(),
                 Value<int> intimacyExp = const Value.absent(),
-                Value<bool> isEquipped = const Value.absent(),
-                Value<bool> isLocked = const Value.absent(),
-                Value<String?> imagePath = const Value.absent(),
               }) => GachaItemsCompanion(
                 id: id,
+                imagePath: imagePath,
                 type: type,
                 tightsColor: tightsColor,
                 title: title,
@@ -8491,12 +7725,11 @@ class $$GachaItemsTableTableManager
                 luckBonus: luckBonus,
                 chaBonus: chaBonus,
                 vitBonus: vitBonus,
-                parameterType: parameterType,
+                bondLevel: bondLevel,
                 skillType: skillType,
                 skillValue: skillValue,
                 skillDuration: skillDuration,
                 skillCooldown: skillCooldown,
-                seriesType: seriesType,
                 lastSkillUsedAt: lastSkillUsedAt,
                 seriesId: seriesId,
                 isSource: isSource,
@@ -8506,13 +7739,11 @@ class $$GachaItemsTableTableManager
                 isFavorite: isFavorite,
                 intimacyLevel: intimacyLevel,
                 intimacyExp: intimacyExp,
-                isEquipped: isEquipped,
-                isLocked: isLocked,
-                imagePath: imagePath,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
                 Value<GachaItemType> type = const Value.absent(),
                 Value<TightsColor> tightsColor = const Value.absent(),
                 required String title,
@@ -8524,12 +7755,11 @@ class $$GachaItemsTableTableManager
                 Value<int> luckBonus = const Value.absent(),
                 Value<int> chaBonus = const Value.absent(),
                 Value<int> vitBonus = const Value.absent(),
-                required TaskType parameterType,
+                Value<int> bondLevel = const Value.absent(),
                 Value<SkillType> skillType = const Value.absent(),
                 Value<int> skillValue = const Value.absent(),
                 Value<int> skillDuration = const Value.absent(),
                 Value<int> skillCooldown = const Value.absent(),
-                Value<SeriesType> seriesType = const Value.absent(),
                 Value<DateTime?> lastSkillUsedAt = const Value.absent(),
                 Value<SeriesType> seriesId = const Value.absent(),
                 Value<bool> isSource = const Value.absent(),
@@ -8539,11 +7769,9 @@ class $$GachaItemsTableTableManager
                 Value<bool> isFavorite = const Value.absent(),
                 Value<int> intimacyLevel = const Value.absent(),
                 Value<int> intimacyExp = const Value.absent(),
-                Value<bool> isEquipped = const Value.absent(),
-                Value<bool> isLocked = const Value.absent(),
-                Value<String?> imagePath = const Value.absent(),
               }) => GachaItemsCompanion.insert(
                 id: id,
+                imagePath: imagePath,
                 type: type,
                 tightsColor: tightsColor,
                 title: title,
@@ -8555,12 +7783,11 @@ class $$GachaItemsTableTableManager
                 luckBonus: luckBonus,
                 chaBonus: chaBonus,
                 vitBonus: vitBonus,
-                parameterType: parameterType,
+                bondLevel: bondLevel,
                 skillType: skillType,
                 skillValue: skillValue,
                 skillDuration: skillDuration,
                 skillCooldown: skillCooldown,
-                seriesType: seriesType,
                 lastSkillUsedAt: lastSkillUsedAt,
                 seriesId: seriesId,
                 isSource: isSource,
@@ -8570,9 +7797,6 @@ class $$GachaItemsTableTableManager
                 isFavorite: isFavorite,
                 intimacyLevel: intimacyLevel,
                 intimacyExp: intimacyExp,
-                isEquipped: isEquipped,
-                isLocked: isLocked,
-                imagePath: imagePath,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -10982,274 +10206,6 @@ typedef $$CharacterImagesTableProcessedTableManager =
       CharacterImage,
       PrefetchHooks Function()
     >;
-typedef $$BossesTableCreateCompanionBuilder =
-    BossesCompanion Function({
-      Value<int> id,
-      required String name,
-      required int bossType,
-      Value<int> maxHp,
-      Value<int> attack,
-      Value<int> defense,
-      Value<String?> specialAbility,
-      Value<int> rewardGems,
-      required DateTime resetAt,
-    });
-typedef $$BossesTableUpdateCompanionBuilder =
-    BossesCompanion Function({
-      Value<int> id,
-      Value<String> name,
-      Value<int> bossType,
-      Value<int> maxHp,
-      Value<int> attack,
-      Value<int> defense,
-      Value<String?> specialAbility,
-      Value<int> rewardGems,
-      Value<DateTime> resetAt,
-    });
-
-class $$BossesTableFilterComposer
-    extends Composer<_$AppDatabase, $BossesTable> {
-  $$BossesTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get bossType => $composableBuilder(
-    column: $table.bossType,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get maxHp => $composableBuilder(
-    column: $table.maxHp,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get attack => $composableBuilder(
-    column: $table.attack,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get defense => $composableBuilder(
-    column: $table.defense,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get specialAbility => $composableBuilder(
-    column: $table.specialAbility,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get rewardGems => $composableBuilder(
-    column: $table.rewardGems,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get resetAt => $composableBuilder(
-    column: $table.resetAt,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$BossesTableOrderingComposer
-    extends Composer<_$AppDatabase, $BossesTable> {
-  $$BossesTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get name => $composableBuilder(
-    column: $table.name,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get bossType => $composableBuilder(
-    column: $table.bossType,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get maxHp => $composableBuilder(
-    column: $table.maxHp,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get attack => $composableBuilder(
-    column: $table.attack,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get defense => $composableBuilder(
-    column: $table.defense,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get specialAbility => $composableBuilder(
-    column: $table.specialAbility,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get rewardGems => $composableBuilder(
-    column: $table.rewardGems,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get resetAt => $composableBuilder(
-    column: $table.resetAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$BossesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $BossesTable> {
-  $$BossesTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => column);
-
-  GeneratedColumn<int> get bossType =>
-      $composableBuilder(column: $table.bossType, builder: (column) => column);
-
-  GeneratedColumn<int> get maxHp =>
-      $composableBuilder(column: $table.maxHp, builder: (column) => column);
-
-  GeneratedColumn<int> get attack =>
-      $composableBuilder(column: $table.attack, builder: (column) => column);
-
-  GeneratedColumn<int> get defense =>
-      $composableBuilder(column: $table.defense, builder: (column) => column);
-
-  GeneratedColumn<String> get specialAbility => $composableBuilder(
-    column: $table.specialAbility,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<int> get rewardGems => $composableBuilder(
-    column: $table.rewardGems,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<DateTime> get resetAt =>
-      $composableBuilder(column: $table.resetAt, builder: (column) => column);
-}
-
-class $$BossesTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $BossesTable,
-          Boss,
-          $$BossesTableFilterComposer,
-          $$BossesTableOrderingComposer,
-          $$BossesTableAnnotationComposer,
-          $$BossesTableCreateCompanionBuilder,
-          $$BossesTableUpdateCompanionBuilder,
-          (Boss, BaseReferences<_$AppDatabase, $BossesTable, Boss>),
-          Boss,
-          PrefetchHooks Function()
-        > {
-  $$BossesTableTableManager(_$AppDatabase db, $BossesTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$BossesTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$BossesTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$BossesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<int> bossType = const Value.absent(),
-                Value<int> maxHp = const Value.absent(),
-                Value<int> attack = const Value.absent(),
-                Value<int> defense = const Value.absent(),
-                Value<String?> specialAbility = const Value.absent(),
-                Value<int> rewardGems = const Value.absent(),
-                Value<DateTime> resetAt = const Value.absent(),
-              }) => BossesCompanion(
-                id: id,
-                name: name,
-                bossType: bossType,
-                maxHp: maxHp,
-                attack: attack,
-                defense: defense,
-                specialAbility: specialAbility,
-                rewardGems: rewardGems,
-                resetAt: resetAt,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String name,
-                required int bossType,
-                Value<int> maxHp = const Value.absent(),
-                Value<int> attack = const Value.absent(),
-                Value<int> defense = const Value.absent(),
-                Value<String?> specialAbility = const Value.absent(),
-                Value<int> rewardGems = const Value.absent(),
-                required DateTime resetAt,
-              }) => BossesCompanion.insert(
-                id: id,
-                name: name,
-                bossType: bossType,
-                maxHp: maxHp,
-                attack: attack,
-                defense: defense,
-                specialAbility: specialAbility,
-                rewardGems: rewardGems,
-                resetAt: resetAt,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$BossesTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $BossesTable,
-      Boss,
-      $$BossesTableFilterComposer,
-      $$BossesTableOrderingComposer,
-      $$BossesTableAnnotationComposer,
-      $$BossesTableCreateCompanionBuilder,
-      $$BossesTableUpdateCompanionBuilder,
-      (Boss, BaseReferences<_$AppDatabase, $BossesTable, Boss>),
-      Boss,
-      PrefetchHooks Function()
-    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11274,6 +10230,4 @@ class $AppDatabaseManager {
       $$RewardItemsTableTableManager(_db, _db.rewardItems);
   $$CharacterImagesTableTableManager get characterImages =>
       $$CharacterImagesTableTableManager(_db, _db.characterImages);
-  $$BossesTableTableManager get bosses =>
-      $$BossesTableTableManager(_db, _db.bosses);
 }

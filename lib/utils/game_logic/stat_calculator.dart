@@ -1,14 +1,14 @@
 import 'dart:math';
 
 /// OshiQuest Parameter Logic v2.0.0
-class StatsCalculator {
+class StatCalculator {
   // パラメータ上限 (想定)
-  static const int maxStat = 999;
+  static const int maxStat = 1000;
 
   // ==========================================================================
   // STR: 筋力 (Strength)
   // ==========================================================================
-
+  
   /// Battle: 基礎攻撃力への加算値 (直接加算)
   static int getAttackBonus(int str) => str;
 
@@ -34,7 +34,7 @@ class StatsCalculator {
     } else if (vit >= 50) {
       return 24; // 50以上で24時間延長
     } else {
-      return 0; // 保護なし
+      return 0;  // 保護なし
     }
   }
 

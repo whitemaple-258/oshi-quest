@@ -238,11 +238,8 @@ class _MagicCirclePainter extends CustomPainter {
         final a = i * math.pi / sides;
         final x = r * math.cos(a);
         final y = r * math.sin(a);
-        if (i == 0) {
-          path.moveTo(x, y);
-        } else {
-          path.lineTo(x, y);
-        }
+        if (i == 0) path.moveTo(x, y);
+        else path.lineTo(x, y);
       }
       path.close();
       canvas.drawPath(path, paint);

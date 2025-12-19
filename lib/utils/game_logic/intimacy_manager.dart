@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../../data/database/database.dart';
 
 /// OshiQuest Intimacy Logic v2.0.0
 class IntimacyManager {
